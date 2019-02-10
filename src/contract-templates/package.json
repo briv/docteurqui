@@ -1,0 +1,17 @@
+{
+    "name": "autocontract-contract-templates",
+    "description": "The contract templates for autocontract",
+    "version": "0.0.1",
+    "main": "index.js",
+    "scripts": {
+        "dev": "parcel index.html",
+        "build": "parcel build index.html --public-url ."
+    },
+    "license": "UNLICENSED",
+    "devDependencies": {
+        "autoprefixer": "^9.3.1",
+        "parcel-bundler": "^1.12.4",
+        "parcel-plugin-inliner": "^1.0.13",
+        "sass": "^1.15.2"
+    }
+}

@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang=fr>
+    <head>
+        <meta charset="utf-8">
+        <title>Contrat de remplacement en exercice libéral par un étudiant en médecine</title>
+        <link rel="stylesheet" type="text/css" href="rempla.scss">
+    </head>
+    <body>
+        <header>
+            <figure class="centered">
+                <img
+                    src="logo-conseil-ordre-medecins.svg"
+                    alt="Logo du Conseil National de l'Ordre des Médecins"
+                    class="header-img"
+                >
+                <figcaption class="color-order-of-doctors-logo text-smaller">
+                    <div class="small-caps"><span class="bold">O</span>rdre <span class="bold">N</span>ational des <span class="bold">M</span>édecins</div>
+                    <div>Conseil National de l'Ordre</div>
+                </figcaption>
+            </figure>
+
+            <section class="centered mt-2">
+                <h1>Contrat de remplacement<br>en exercice libéral</h1>
+                <div>
+                    (Articles <a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?cidTexte=LEGITEXT000006072665&idArticle=LEGIARTI000025843594#content">65</a> et <a href="https://www.legifrance.gouv.fr/affichCodeArticle.do?cidTexte=LEGITEXT000006072665&idArticle=LEGIARTI000006912970#content">91</a> du code de déontologie figurant dans le Code de la Santé publique
+                sous les numéros R.4127-65 et  R.4127-91)
+                </div>
+                <h1 class="w-70 mh-auto">Remplacement par {{.Substituting.OfficialCapacity}}</h1>
+            </section>
+        </header>
+
+        <main>
+            <section>
+                <div class="italicized mb-1">Entre</div>
+                <div class="left-indented-1 mb-1 flex-column">
+                    <div><span class="bold">{{ .Replaced.Designation }}</span>, médecin généraliste</div>
+                    <div>N° RPPS {{ .Replaced.NumberRPPS }}, N° ADELI {{ .Replaced.NumberADELI }}</div>
+                    <div>exerçant au: {{ .Replaced.Address }}</div>
+                </div>
+                <div class="right-aligned mb-1">d'une part</div>
+                <div class="italicized mb-1">Et</div>
+                <div class="left-indented-1 mb-1 flex-column">
+                    <div><span class="bold">{{ .Substituting.Designation }}</span>, {{ .Substituting.ShortOfficialCapacity }}</div>
+                    <div>N° RPPS {{ .Substituting.NumberRPPS }}</div>
+                    <div>{{ .Substituting.SubstitutingDescription }}</div>
+                    <div>Adresse: {{ .Substituting.Address }}</div>
+                </div>
+                <div class="right-aligned">d'autre part</div>
+            </section>
+
+            <section class="justified">
+                <h1 class="uppercased centered">Préambule</h1>
+                <p>Face à l'obligation déontologique qui est la sienne d'assurer la permanence des soins et conformément aux dispositions de l'article R.4127-65 du code de la santé publique (article 65 du Code de Déontologie), le {{ .Replaced.ShortDesignation }} a contacté {{ .Substituting.ShortDesignation }}, régulièrement autorisé en vertu de l'article L.4131-2 du code de la santé publique, pour prendre en charge, lors de la cessation temporaire de son activité professionnelle habituelle, les patients qui feraient appel à lui.</p>
+
+                <p>Pour permettre le bon déroulement de ce remplacement, le {{ .Replaced.ShortDesignation }} met à la disposition de {{ .Substituting.ShortDesignation }} son cabinet de consultations, {{ .Replaced.Address }} et son secrétariat.</p>
+
+                <p>{{ .Substituting.ShortDesignation }} assume de ce fait toutes les obligations inscrites dans le Code de Déontologie. Il ne peut aliéner son indépendance professionnelle sous quelque forme que ce soit.</p>
+
+                <div class="centered italicized">
+                    Il a été convenu ce qui suit
+                </div>
+
+                <section>
+                    <h2>Article 1er</h2>
+                    <p>Dans le souci de la permanence  des soins, le {{ .Replaced.ShortDesignation }} charge {{ .Substituting.ShortDesignation }}, qui accepte, de le remplacer temporairement auprès des patients qui feraient appel  à lui.</p>
+                    <p>Les patients devront être avertis, dès que possible, de la présence d'un remplaçant et notamment lors de toute demande de visite à domicile ou de rendez-vous au cabinet médical.</p>
+                    <p>{{ .Substituting.ShortDesignation }} devra consacrer à cette activité tout le temps nécessaire selon des modalités qu'il fixera librement <a href="#fn1" id="fnr1" class="footnote-link">(1)</a>.</p>
+                    <p>Il s'engage à donner, à tout malade faisant appel à lui, des soins consciencieux et attentifs dans le respect des dispositions du code de déontologie.</p>
+                    <p>Hors le cas d'urgence, il pourra, dans les conditions de l'article R.4127-47 du code de la santé publique (article 47 du code de déontologie), refuser ses soins pour des raisons professionnelles ou personnelles.</p>
+                </section>
+
+                <section>
+                    <h2>Article 2</h2>
+                    <p>Le présent contrat de remplacement est prévu <span class="bold">{{ .FormattedPeriods }}</span>, soit <span class="bold">{{ .FormattedDuration }}</span> au total.</p>
+                    <p>Son éventuel renouvellement est subordonné au respect des dispositions de l'article L.4131-2 du code de la santé publique.</p>
+                </section>
+
+                <section>
+                    <h2>Article 3</h2>
+                    <p>Pendant la durée du présent contrat de remplacement et pour les besoins de son exécution, {{ .Substituting.ShortDesignation }} aura l'usage des locaux professionnels, installations et appareils que le {{ .Replaced.ShortDesignation }} met à sa disposition. Il en fera usage raisonnablement.</p>
+                    <p>Compte tenu du caractère par nature provisoire de l'activité du remplaçant, celui-ci s'interdit toute modification des lieux ou de leur destination.</p>
+                </section>
+
+                <section>
+                    <h2>Article 4</h2>
+                    <p>{{ .Substituting.ShortDesignation }} exerçant son art en toute indépendance, sera seul responsable vis-à-vis des patients et des tiers des conséquences de son exercice professionnel et conservera seul la responsabilité de son activité professionnelle pour laquelle il s'assurera personnellement à ses frais à une compagnie notoirement solvable. Il devra apporter la preuve de cette assurance avant le début de son activité. <a href="#fn2" id="fnr2" class="footnote-link">(2)</a></p>
+                </section>
+
+                <section>
+                    <h2>Article 5</h2>
+                    <p>{{ .Substituting.ShortDesignation }} utilisera conformément à la Convention nationale les ordonnances ainsi que les feuilles de soins et imprimés pré-identifiés au nom du {{ .Replaced.ShortDesignation }} dans son activité relative aux seuls patients du {{ .Replaced.ShortDesignation }}.</p>
+                    <p>En outre, il devra faire mention de son identification personnelle sur les ordonnances, feuilles de soins et imprimés réglementaires qu'il sera amené à remplir.</p>
+                </section>
+
+                <section>
+                    <h2>Article 6</h2>
+                    <p>Les deux co-contractants auront des déclarations fiscales et sociales indépendantes et supporteront personnellement, chacun en ce qui les concerne, la totalité de leurs charges fiscales et sociales afférentes au dit remplacement.</p>
+                </section>
+
+                <section>
+                    <h2>Article 7</h2>
+                    <p>{{ .Substituting.ShortDesignation }} percevra l'ensemble des honoraires correspondant aux actes effectués sur les patients à qui il aura donné ses soins.</p>
+                    <p>Il devra remplir les obligations comptables normales et habituelles qui lui sont imposées réglementairement.</p>
+                    <p>En fin de remplacement, le {{ .Replaced.ShortDesignation }} reversera à {{ .Substituting.ShortDesignation }} <span class="bold">{{ .Financials.HonorairesPercentage }}% du total des honoraires perçus et à percevoir correspondant au remplacement</span>{{ if ( .Financials.Gardes.Differs) }}, et <span class="bold">{{ .Financials.Gardes.HonorairesPercentage }}% des honoraires pour les gardes</span>.{{ else }}.{{ end }}</p>
+                    <p>Conformément aux dispositions de l'article R.4127-66 du code de la santé publique (article 66 du code de déontologie), le remplacement terminé, {{ .Substituting.ShortDesignation }} cessera toute activité s'y rapportant et transmettra les informations nécessaires à la continuité des soins.</p>
+                </section>
+
+                <section>
+                    <h2>Article 8</h2>
+                    <p>Si au terme du remplacement prévu au présent contrat {{ .Substituting.ShortDesignation }} a remplacé le {{ .Replaced.ShortDesignation }} pendant une période de trois mois, consécutifs ou non, il ne pourra sauf accord écrit du {{ .Replaced.ShortDesignation }} <a href="#fn3" id="fnr3" class="footnote-link">(3)</a> s'installer pendant une durée de deux ans dans un poste où il puisse entrer en concurrence directe avec le médecin remplacé ou éventuellement ses associés (préciser ici commune, arrondissement, distance...). <a href="#fn4" id="fnr4" class="footnote-link">(4)</a></p>
+                </section>
+
+                <section>
+                    <h2 class="no-underline"><span class="underlined">Article 9</span> : Conciliation</h2>
+                    <p>Tous les litiges ou différends relatifs notamment à la validité, l’interprétation, l’exécution ou la résolution du présent contrat, seront soumis avant tout recours à une conciliation confiée au Conseil départemental de l’Ordre des médecins, en application de l’article R.4127-56 du code de la santé publique (article 56 du code de déontologie médicale).</p>
+                </section>
+
+                <section>
+                    <h2 class="no-underline"><span class="underlined">Article 10</span> : Arbitrage <a href="#fn5" id="fnr5" class="footnote-link">(5)</a></h2>
+                    <p>En cas d’échec de la conciliation, les litiges ou différends relatifs à la validité, l’interprétation, l’exécution ou la résolution du présent contrat, seront soumis à l’arbitrage conformément au règlement d’arbitrage de la Chambre nationale d’Arbitrage des médecins .</p>
+                    <div class="left-indented-1 mb-1"><div><span class="underlined">1ère option</span> :</div>
+                            Dès à présent, les parties conviennent de soumettre leur litige à un arbitre unique.
+                            <br>
+                            Le tribunal arbitral statuera avec les pouvoirs d’amiable compositeur. <a href="#fn6" id="fnr6" class="footnote-link">(6)</a>
+                            <br>
+                            Les parties peuvent faire appel de la sentence arbitrale.</div>
+                    <div class="left-indented-1"><div><span class="underlined">2ème option</span> :</div>
+                            Dès à présent, les parties conviennent de soumettre leur litige à trois arbitres désignés selon les modalités définies à l’article 4 du règlement d’arbitrage de la Chambre nationale d’Arbitrage des médecins.
+                            <br>
+                            Le tribunal arbitral statuera avec les pouvoirs d’amiable compositeur. <a href="#fn6" class="footnote-link">(6)</a>
+                            <br>
+                            Les parties renoncent à la possibilité de faire appel.</div>
+                    <p>Le siège de la Chambre nationale d’Arbitrage des médecins est fixé à PARIS 8ème, 180 Boulevard Haussmann.</p>
+                </section>
+
+                <section>
+                    <h2>Article 11</h2>
+                    <p>Les parties affirment sur l'honneur n'avoir passé aucune contre-lettre ou avenant relatif au présent contrat qui ne soit soumis au Conseil départemental.</p>
+                </section>
+
+                <section>
+                    <h2>Article 12</h2>
+                    <p>Conformément aux dispositions des articles R.4127-65 et 91 du code de la santé publique (articles 65 et 91 du Code de Déontologie), ce contrat sera communiqué au Conseil départemental de l'Ordre avant le début du remplacement.</p>
+                </section>
+            </section>
+
+            <div>Son renouvellement sera soumis à ces mêmes dispositions.</div>
+
+            <p class="right-aligned">
+                Fait en trois exemplaires
+                <br/>
+                (dont un pour le Conseil départemental)
+                <br/>
+                le {{ .FormattedDateContractEstablished }}
+            </p>
+
+            <div class="signatures">
+                <div class="signature with-signature-img">
+                    <div class="mb-1">{{ .Replaced.Designation }}</div>
+                    {{ .Replaced.SafeSignatureImgHtml }}
+                </div>
+                <div class="signature with-signature-img">
+                    <div class="mb-1">{{ .Substituting.Designation }}</div>
+                    {{ .Substituting.SafeSignatureImgHtml }}
+                </div>
+            </div>
+
+            <section class="footnotes">
+                <ol>
+                    <li id="fn1">Il est recommandé que les modalités habituelles de fonctionnement du cabinet soient précisées au remplaçant, dans le souci de la permanence des soins. <a href="#fnr1" title="Retourner au niveau de la note (1) dans le texte." class="no-print">←</a></li>
+                    <li id="fn2">Il serait souhaitable que la copie de cette assurance soit jointe au présent contrat. <a href="#fnr2" title="Retourner au niveau de la note (2) dans le texte." class="no-print">←</a></li>
+                    <li id="fn3">L'accord peut consister en une renonciation totale ou limitée dans le temps à se prévaloir de l'interdiction d'installation édictée à l'article R.4127-86 du code de la santé publique (article 86 du code de déontologie médicale) et rappelée par cette clause du contrat. <a href="#fnr3" title="Retourner au niveau de la note (3) dans le texte." class="no-print">←</a></li>
+                    <li id="fn4">Pour les remplacements inférieurs à trois mois, les parties au contrat gardent la faculté d'introduire une clause de non-réinstallation si la durée de remplacement le justifie. <a href="#fnr4" title="Retourner au niveau de la note (4) dans le texte." class="no-print">←</a></li>
+                    <li id="fn5">la clause d’arbitrage (clause compromissoire) est facultative et les parties peuvent décider de ne pas y recourir ou encore y recourir dans des conditions différentes de celles proposées ci-dessus. <a href="#fnr5" title="Retourner au niveau de la note (5) dans le texte." class="no-print">←</a></li>
+                    <li id="fn6">les parties peuvent renoncer à cette modalité de l’arbitrage et, dans ce cas, il suffit de supprimer la mention de l’amiable composition. <a href="#fnr6" title="Retourner au niveau de la note (6) dans le texte."class="no-print">←</a></li>
+                </ol>
+            </section>
+        </main>
+    </body>
+</html>

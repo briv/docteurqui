@@ -1,0 +1,46 @@
+@import 'vars.scss';
+
+$button-darker-color: darken($button-bg-color, 20%);
+
+.dp-modal > .dp {
+    &:before {
+        background: $button-darker-color;
+    }
+
+    .dp-today, .dp-clear, .dp-close, .dp-cal-month, .dp-cal-year {
+        &:focus, &:hover {
+            background: lighten($button-darker-color, 20%);
+        }
+    }
+
+    .dp-current {
+        background: lighten($button-darker-color, 20%);
+    }
+
+    .dp-day, .dp-month, .dp-year, .dp-current {
+        &:focus, &:hover {
+            background: lighten($button-darker-color, 20%);
+        }
+    }
+
+    .dp-selected {
+        background: $button-darker-color;
+        &:focus {
+            background: $button-darker-color;
+        }
+    }
+
+    .dp-day-today:after {
+        border-color: darken($button-darker-color, 20%);
+        border-bottom-color: transparent;
+        border-left-color: transparent;
+    }
+
+    .dp-prev, .dp-next {
+        color: #777;
+
+        &:focus, &:hover {
+            background: lighten($button-darker-color, 20%);
+        }
+    }
+}

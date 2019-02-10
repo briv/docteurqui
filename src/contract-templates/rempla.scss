@@ -1,0 +1,267 @@
+@charset "UTF-8";
+
+$indent-margin: 1rem;
+
+$link-color: rgb(80, 80, 80);
+$print-link-color: rgb(0, 0, 0);
+$width-document: 70%;
+$ordre-medecins-logo-color: #263e99;
+
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+@page {
+    size: A4 portrait;
+    margin: 20mm 0mm 20mm 0mm;
+    counter-increment: page;
+    @bottom-center {
+        content: "(c) XX COMPANY - Page " counter(page);
+        color: grey;
+    }
+}
+
+@media print {
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+
+.centered {
+    text-align: center;
+}
+
+.justified {
+    text-align: justify;
+}
+
+.italicized {
+    font-style: italic;
+}
+
+.uppercased {
+    text-transform: uppercase;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.small-caps {
+    font-variant: small-caps;
+}
+
+.no-underline {
+    text-decoration: none;
+}
+
+.underlined {
+    text-decoration: underline;
+}
+
+.color-order-of-doctors-logo {
+    color: $ordre-medecins-logo-color;
+}
+
+.text-smaller {
+    font-size: 0.7rem;
+}
+
+.mh-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mt-2 {
+    margin-top: 3rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.9rem;
+}
+
+.w-70 {
+    width: 70%;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    &:any-link {
+        color: $link-color;
+        text-decoration: underline;
+        text-underline-position: under;
+        // -webkit-text-underline-position: under; // TODO: autoprefix
+    }
+    &:link {
+        color: $link-color;
+        text-decoration: underline;
+        text-underline-position: under;
+        // -webkit-text-underline-position: under; // TODO: autoprefix
+    }
+    &:visited {
+        color: $link-color;
+        text-decoration: underline;
+        text-underline-position: under;
+        // -webkit-text-underline-position: under; // TODO: autoprefix
+    }
+    &:focus {
+        outline: none;
+    }
+
+    &.footnote-link {
+        font-weight: normal;
+    }
+}
+
+@media print {
+    a {
+        &:any-link {
+            color: $print-link-color;
+            text-decoration: none;
+        }
+        &:link {
+            color: $print-link-color;
+            text-decoration: none;
+        }
+        &:visited {
+            color: $print-link-color;
+            text-decoration: none;
+        }
+        &:focus {
+            outline: none;
+        }
+
+        &.footnote-link {
+            font-weight: bold;
+        }
+    }
+}
+
+h1 {
+    font-size: 1.1rem;
+}
+
+h2 {
+    font-size: 1rem;
+}
+
+header {
+    margin-left: auto;
+    margin-right: auto;
+    width: $width-document;
+
+    .header-img {
+        width: 12rem;
+    }
+}
+
+main {
+    margin-top: 5rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: $width-document;
+
+    .left-indented-1 {
+        margin-left: $indent-margin;
+    }
+
+    .right-aligned {
+        text-align: right;
+        margin-right: $indent-margin;
+    }
+
+    h2 {
+        text-decoration: underline;
+        margin-bottom: 0.1rem;
+
+        .no-underline {
+            text-decoration: none;
+        }
+    }
+    h2 + p {
+        margin-top: 0;
+    }
+
+    .signatures {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        text-align: center;
+        margin-bottom: 2rem;
+
+        & > * {
+            min-width: 0;
+        }
+
+        .signature {
+            flex: 0 1 50%;
+            min-height: 6rem;
+            max-height: 8rem;
+
+            &.with-signature-img {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                > * {
+                    flex: 0 1 auto;
+                }
+
+                img {
+                    max-width: 100%;
+                    object-fit: contain;
+                    min-height: 5rem;
+                }
+            }
+        }
+
+        > .leave-space-underneath {
+            padding-bottom: 4rem;
+        }
+    }
+
+    .footnotes {
+        margin-top: 2rem;
+
+        ol:before {
+            content: "";
+            display: block;
+            background: black;
+            height: 1px;
+            width: 50%;
+            margin-bottom: 0.4rem;
+        }
+
+        ol {
+            margin-top: 0.4rem;
+            padding-left: 1.5rem;
+            counter-reset: footnote-counter;
+            list-style: none;
+
+            li {
+                counter-increment: footnote-counter;
+                margin-bottom: 0.3rem;
+
+                &::before {
+                    content: "(" counter(footnote-counter) ") ";
+                }
+
+                a {
+                    line-height: 0;
+                }
+            }
+        }
+
+        @media print {
+            ol > li::before {
+                font-weight: bold;
+            }
+        }
+    }
+}

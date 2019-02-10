@@ -1,0 +1,17 @@
+# Related to use of nix and nixify
+.direnv/
+.go-cache
+.envrc
+
+# Caches & build outputs
+**/.cache/
+**/dist/
+**/node_modules/
+
+# Examples
+contract-models/
+
+# Temporary
+src/test-search/
+!src/test-search/search.go
+

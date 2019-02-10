@@ -1,0 +1,22 @@
+{
+    "name": "autocontract",
+    "description": "A website for generating substituting contracts for médecins géneralistes",
+    "version": "0.0.1",
+    "main": "index.js",
+    "scripts": {
+        "dev": "parcel index.html",
+        "build": "parcel build index.html"
+    },
+    "license": "UNLICENSED",
+    "devDependencies": {
+        "autoprefixer": "^9.3.1",
+        "parcel": "1.12.4",
+        "sass": "^1.15.2",
+        "uuid": "^7.0.2"
+    },
+    "dependencies": {
+        "normalize.css": "^8.0.1",
+        "signature_pad": "^3.0.0-beta.3",
+        "tiny-date-picker": "^3.2.8"
+    }
+}

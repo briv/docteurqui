@@ -1,0 +1,20 @@
+// Colors
+$body-color: black;
+$header-bg-color: #0b0c0c;
+$header-color: rgb(255, 255, 255);
+
+$link-color: #005ea5;
+$link-active-color: #ffbf47;
+
+$call-to-action-bg-color: #eddaf5;
+$error-call-to-action-bg-color: #f57c74;
+$form-legend-bg-color: #dee0e2;
+$form-part-bg-color: lighten($form-legend-bg-color, 5%);
+$input-border-color: #dee0e2;
+
+$button-bg-color: #a4bbcc;
+$button-border-color: darken($button-bg-color, 50%);
+$light-button-active-color: darken($input-border-color, 20%);
+
+// Fonts
+$font-size-body: 16px;

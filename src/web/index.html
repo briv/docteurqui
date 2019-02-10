@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang=fr>
+
+<head>
+    <title>Contrat de remplacement</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width" />
+
+    <link rel="stylesheet" type="text/css" href="static/lib-overrides.scss">
+    <link rel="stylesheet" type="text/css" href="static/app.scss">
+
+    <script async src="static/app.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Contrat de remplacement</h1>
+    </header>
+
+    <main>
+        <noscript>
+            <div class="call-to-action">
+                <p>Il semble que le JavaScript est désactivé. Nous vous encourageons, si possible, à l'activer.</p>
+                <p>Cette page utilise le JavaScript avec parsimonie et à bon escient pour vous faire gagner du temps.</p>
+            </div>
+        </noscript>
+
+        <section>
+            <p>Pour éditer un contrat de remplacement, remplissez le formulaire qui suit.</p>
+        </section>
+
+        <section>
+            <form action="/generate-contract" enctype="multipart/form-data" method="post" class="contract">
+
+                <fieldset class="d-flex flex-column" data-enhanced-form-part="regular" id="regular-fieldset">
+                    <legend>Docteur remplacé</legend>
+
+                    <label for="regular-name">Nom complet:</label>
+                    <div class="d-flex input-prefix user-input">
+                        <span>Dr.</span>
+                        <input required type="text" id="regular-name" name="regular-name" placeholder="Anne-Cécile PIERRE" autofocus>
+                    </div>
+
+                    <label>Numéro RPPS:</label>
+                    <input required type="text" minlength="11" inputmode="numeric" name="regular-rpps" autocomplete="off" placeholder="10010165716" class="user-input">
+
+                    <label>Numéro ADELI:</label>
+                    <input type="text" name="regular-adeli" autocomplete="off" inputmode="numeric" placeholder="75 9145775" class="user-input">
+
+                    <label>Adresse d'exercice:</label>
+                    <input type="text" name="regular-address" placeholder="5 rue des Lilas, 75013 Paris" class="user-input">
+                </fieldset>
+
+                <fieldset class="d-flex flex-column" data-enhanced-form-part="substitute" id="substitute-fieldset">
+                    <legend>Étudiant ou docteur remplaçant</legend>
+
+                    <label>Nom complet:</label>
+                    <input required type="text" name="substitute-name" placeholder="Jean-Baptiste DRUET" autocomplete="name" class="user-input">
+
+                    <fieldset class="nested">
+                        <legend>Civilité</legend>
+
+                        <div class="radio-input-option">
+                            <!-- TODO: use a "required" attribute on these radio buttons. -->
+                            <!-- Unfortunately, currently on iOS, this does not trigger any UI so the
+                            user doesn't know why the form doesn't send. -->
+                            <input id="substitute-title-1" type="radio" name="substitute-title" value="Madame" autocomplete="off">
+                            <label for="substitute-title-1">Madame (non thésée)</label>
+                        </div>
+
+                        <div class="radio-input-option">
+                            <input id="substitute-title-2" type="radio" name="substitute-title" value="Monsieur" autocomplete="off">
+                            <label for="substitute-title-2">Monsieur (non thésé)</label>
+                        </div>
+
+                        <div class="radio-input-option">
+                            <input id="substitute-title-3" type="radio" name="substitute-title" value="Docteur" autocomplete="off">
+                            <label for="substitute-title-3">Docteur (thésé)</label>
+                        </div>
+                    </fieldset>
+
+                    <label>Numéro RPPS:</label>
+                    <input required type="text" minlength="11" inputmode="numeric" name="substitute-rpps" autocomplete="off" placeholder="10010165716" class="user-input">
+
+                    <label for="substitute-substitutingID">Numéro de licence de remplacement ou d'inscription au tableau de l'ordre:</label>
+                    <input type="text" inputmode="numeric" id="substitute-substitutingID" name="substitute-substitutingID" autocomplete="off" placeholder="35 1781063" class="user-input">
+
+                    <label>Adresse:</label>
+                    <input type="text" name="substitute-address" placeholder="13 rue des Cordonniers, 75017 Paris" class="user-input">
+                </fieldset>
+
+
+                <fieldset class="d-flex flex-column date-range-input">
+                    <legend>Dates du remplacement</legend>
+
+                    <noscript class="d-flex flex-column date-range-input">
+                        <label>Du:</label>
+                        <input type="date" name="period-start" placeholder="2019-02-24" class="user-input">
+                        <label>Au:</label>
+                        <input type="date" name="period-end" placeholder="2019-02-29" class="user-input">
+
+                        <div class="call-to-action">
+                            <p>Il semble que le JavaScript est désactivé.</p>
+                            <p>Pour créer un contrat avec plusieurs périodes de remplacement, le JavaScript est requis.</p>
+                        </div>
+                    </noscript>
+                </fieldset>
+
+                <fieldset class="d-flex flex-column">
+                    <legend>Conditions financières</legend>
+
+                    <label>Pourcentage de rétrocession:</label>
+                    <input required type="number" inputmode="numeric" min="0" max="100" name="financials-retrocession" autocomplete="off" class="user-input">
+
+                    <label>Pourcentage de rétrocession des gardes: <span class="text-bold">(Optionnel)</span></label>
+                    <input type="number" inputmode="numeric" min="0" max="100" name="financials-nightShiftRetrocession" placeholder="Si non applicable, laisser vide" autocomplete="off" class="user-input">
+                </fieldset>
+
+                <input type="submit" aria-label="Créer le contrat" value="Créer le contrat">
+            </form>
+        </section>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,386 @@
+@import '../node_modules/normalize.css/normalize.css';
+// @import "~normalize.css/normalize.css";
+// @import '~tiny-date-picker/tiny-date-picker.css';
+
+// Colors
+@import 'vars.scss';
+
+// General styles
+.d-flex {
+    display: flex;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.h-100 {
+    height: 100%;
+}
+
+.text-bold {
+    font-weight: bold;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+.flex-row {
+    flex-direction: row;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+@mixin focused {
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(66,153,225,.5)!important;
+}
+
+@mixin button-like {
+    cursor: pointer;
+    background-color: $button-bg-color;
+    border: 2px solid;
+    border-radius: 8px;
+    border-color: $button-border-color;
+    padding: 0.8em 0.2em;
+
+    &:active, &:focus {
+        @include focused;
+    }
+
+    &:active {
+        background-color: darken($button-bg-color, 20%);
+    }
+}
+
+@mixin input-border-like {
+    border: 2px solid;
+    border-radius: 4px;
+    border-color: $input-border-color;
+}
+
+@mixin input-like {
+    @include input-border-like;
+    // see https://stackoverflow.com/questions/23211656/remove-ios-input-shadow
+    background-clip: padding-box !important;
+
+    padding: 0.4em 0.4em;
+}
+//
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+body {
+    color: $body-color;
+    font-family: system-ui, Arial, sans-serif;
+}
+
+body, button, input, select {
+    font-size: $font-size-body;
+}
+
+a {
+    &:link, &:visited {
+        color: $link-color;
+    }
+
+    &:hover {
+        color: darken($link-color, 15%);
+    }
+
+    &:active {
+        color: $link-active-color;
+    }
+}
+
+header {
+    background-color: $header-bg-color;
+    color: $header-color;
+    width: 100%;
+    text-align: center;
+    padding: 0.6em 0;
+}
+
+main {
+    margin: 0 5px;
+}
+
+@keyframes pulse {
+    to, from {
+      transform: scale3d(1, 1, 1);
+    }
+
+    $scale-max: 1.05;
+    50% {
+      transform: scale3d($scale-max, $scale-max, $scale-max);
+    }
+  }
+
+.error-animation {
+    animation: pulse 0.5s;
+}
+
+.call-to-action {
+    background-color: $call-to-action-bg-color;
+    margin: 0.5em auto;
+    padding: 0.5em 1em;
+    width: 95%;
+
+    &.error {
+        background-color: $error-call-to-action-bg-color;
+        text-align: center;
+    }
+}
+
+h1 {
+    font-size: 1.4em;
+    margin: 0;
+}
+
+h3 {
+    font-size: 1.05em;
+    margin: 1em 0 0.5em 0;
+}
+
+form.contract {
+    > fieldset {
+        margin: {
+            top: 2em;
+            bottom: 1em;
+        }
+        padding: 0;
+        padding-bottom: 1em;
+        border: 0;
+
+        background-color: $form-part-bg-color;
+
+        & > legend {
+            width: 100%;
+            padding: 0.6em 0em;
+            padding-inline-start: 0;
+            padding-inline-end: 0;
+            font-weight: bold;
+            font-size: 1.05em;
+            background-color: $form-legend-bg-color;
+            text-align: center;
+            margin-bottom: 0.6em;
+
+            & + .call-to-action {
+                margin-top: 0;
+            }
+        }
+    }
+
+    $leading-field-margin: 0.2em;
+    $margin-between-label-field: 0.2em;
+
+    label {
+        margin-left: $leading-field-margin;
+        & + input, & + select, & + .input-prefix {
+            margin-bottom: 1em;
+            margin-top: $margin-between-label-field;
+            margin-left: $leading-field-margin;
+        }
+    }
+
+    button {
+        @include button-like;
+
+        &.small {
+            padding: 0.4em;
+        }
+    }
+
+    .user-input {
+        width: 90%;
+    }
+
+    input[type=text], input[type=number], input[type=date] {
+        @include input-like;
+    }
+
+    input, select {
+        &:focus {
+            @include focused;
+        }
+    }
+
+    input[type=submit] {
+        @include button-like;
+        width: 100%;
+        margin: 1em 0;
+        -webkit-appearance: none;
+    }
+
+    fieldset.nested {
+        padding: 0;
+        border: 0;
+
+        margin-bottom: 1.5em;
+        margin-left: $leading-field-margin;
+
+        legend {
+            margin-bottom: $margin-between-label-field;
+        }
+
+        .radio-input-option {
+            margin-left: 1em;
+        }
+
+        .radio-input-option + .radio-input-option {
+            margin-top: 1em;
+        }
+    }
+
+    .input-prefix {
+        @include input-like;
+        padding: 0;
+        background-color: white;
+        & > span {
+            margin: 0 0.6em;
+        }
+        align-items: baseline;
+        font-weight: bold;
+        & > input {
+            border: 0;
+            width: 100%;
+        }
+    }
+
+    .date-range-input {
+        .period {
+            margin: {
+                bottom: 0.8em;
+            }
+
+            label {
+                flex: 2 0 30%;
+                margin-left: 8%;
+                align-self: flex-end;
+            }
+
+            input {
+                flex: 0 0 49%;
+                margin: 0;
+                padding-left: 0;
+                padding-right: 0;
+                margin-left: 0.5%;
+                margin-right: 0.5%;
+                max-width: 49%;
+                width: 49%;
+            }
+
+            .remove-period {
+                flex: 0 0;
+                max-width: 25%;
+                line-height: 100%;
+            }
+        }
+
+        button {
+            align-self: flex-end;
+        }
+    }
+
+    .signature-pad-label-container {
+        margin-top: 1em;
+        align-items: center;
+        justify-content: space-around;
+
+        label {
+            margin: 0;
+        }
+
+        button {
+            // Used to disable annoying selection that occured with signature <canvas>
+            -webkit-user-select: none;
+        }
+    }
+
+    .signature-pad-container {
+        margin-top: 2em;
+        user-select: none;
+        justify-content: center;
+
+        .signature-pad {
+            @include input-border-like;
+            background-color: white;
+            width: 70%;
+            height: 10em;
+            padding: 0.1em;
+
+            // Used to disable annoying selection that occured with signature <canvas>
+            -webkit-user-select: none;
+        }
+    }
+
+    .existing-profiles {
+        justify-content: space-between;
+
+        .profile-wrapper {
+            align-items: stretch;
+            justify-content: space-between;
+            box-sizing: content-box;
+
+            margin-top: 0.4em;
+
+            border: 2px solid;
+            border-radius: 10px;
+            border-color: $button-border-color;
+
+            .profile-option {
+                background-color: white;
+                border-top-left-radius: 8px;
+                border-bottom-left-radius: 8px;
+                padding: 0 0 0 0.5em;
+
+                &:active {
+                    background-color: $light-button-active-color;
+                }
+
+                &:focus {
+                    @include focused;
+                }
+
+                cursor: pointer;
+                flex: 1 1 85%;
+                font-weight: bold;
+
+                align-items: center;
+            }
+
+            button {
+                flex: 1 0 15%;
+                border: unset;
+                border-radius: unset;
+                line-height: 100%;
+                margin: unset;
+
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
+            }
+        }
+    }
+}
+
+
+@media (min-width:768px) {
+    form.contract {
+
+        .signature-pad-container {
+            .signature-pad {
+                max-width: 25em;
+            }
+        }
+    }
+}
