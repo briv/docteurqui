@@ -11,6 +11,9 @@
 # Examples
 contract-models/
 
+# IDEs
+.vscode/
+
 # Temporary
 src/test-search/
 !src/test-search/search.go
