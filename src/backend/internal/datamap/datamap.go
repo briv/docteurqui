@@ -2,14 +2,12 @@ package datamap
 
 import (
 	"fmt"
+	"html/template"
+	"strconv"
 	"sync"
 	"time"
-	"strconv"
-	"html/template"
 
 	"autocontract/internal/uuid"
-
-	"github.com/vincent-petithory/dataurl"
 )
 
 const (
@@ -19,11 +17,9 @@ const (
 )
 
 type Person struct {
-	Name                 string
-	HonorificTitle       string
-	NumberRPPS           string
-	// Only applies to regular doctors
-	NumberADELI          string
+	Name           string
+	HonorificTitle string
+	NumberRPPS     string
 	// Only applies to substitute doctors
 	NumberSubstitutingID string
 	Address              string
@@ -67,7 +63,7 @@ func (p *Person) OfficialCapacity() (string, error) {
 	h := p.HonorificTitle
 	if h == Docteur {
 		return "un médecin inscrit au Tableau de l'Ordre", nil
-	} else if (h == Monsieur || h == Madame)  {
+	} else if h == Monsieur || h == Madame {
 		return "un étudiant en médecine titulaire d'une licence de remplacement", nil
 	}
 	return "", fmt.Errorf("Unexpected OfficialCapacity")
@@ -77,7 +73,7 @@ func (p *Person) ShortOfficialCapacity() (string, error) {
 	h := p.HonorificTitle
 	if h == Docteur {
 		return "médecin remplaçant", nil
-	} else if (h == Monsieur || h == Madame)  {
+	} else if h == Monsieur || h == Madame {
 		return "étudiant en médecine", nil
 	}
 	return "", fmt.Errorf("Unexpected ShortOfficialCapacity")
@@ -87,7 +83,7 @@ func (p *Person) SubstitutingDescription() (string, error) {
 	h := p.HonorificTitle
 	if h == Docteur {
 		return fmt.Sprintf("Numéro d'inscription au tableau: %s", p.NumberSubstitutingID), nil
-	} else if (h == Monsieur || h == Madame)  {
+	} else if h == Monsieur || h == Madame {
 		return fmt.Sprintf("Licence de remplacement N° %s", p.NumberSubstitutingID), nil
 	}
 	return "", fmt.Errorf("Unexpected SubstitutingDescription")
@@ -97,7 +93,7 @@ func (p *Person) SafeSignatureImgHtml() (template.HTML, error) {
 	rawImgData := p.SignatureImgHtml
 
 	var htmlStr string
-	if (rawImgData == "") {
+	if rawImgData == "" {
 		htmlStr = `<img alt="" src="">`
 	} else {
 		htmlStr = fmt.Sprintf(`<img alt="" src="%s">`, rawImgData)
@@ -112,14 +108,14 @@ type Period struct {
 }
 
 type timeFormatted struct {
-	year string
+	year  string
 	month string
-	day string
+	day   string
 }
 
 type periodFormatted struct {
 	start timeFormatted
-	end timeFormatted
+	end   timeFormatted
 }
 
 var frenchMonths = [...]string{
@@ -170,7 +166,7 @@ type Financials struct {
 }
 
 type UserData struct {
-	Replaced                Person
+	Regular                 Person
 	Substituting            Person
 	Periods                 []Period
 	Financials              Financials
@@ -235,7 +231,7 @@ func (u *UserData) FormattedPeriods() string {
 		}
 	}
 
-	formatPeriod := func (pf periodFormatted, isLast bool) string {
+	formatPeriod := func(pf periodFormatted, isLast bool) string {
 		if pf.start == pf.end {
 			s := fmt.Sprintf("le %s %s", pf.start.day, pf.start.month)
 			if !areAllPeriodsInSameYear || isLast {
@@ -267,7 +263,7 @@ func (u *UserData) FormattedPeriods() string {
 	s := ""
 	for idx, fp := range formattedPeriods {
 		numDays := u.Periods[idx].duration()
-		isLastElement := idx == len(formattedPeriods) - 1
+		isLastElement := idx == len(formattedPeriods)-1
 
 		if idx == 0 && numDays == 1 {
 			s += "pour "
@@ -300,99 +296,10 @@ func (s *safeUserData) GetUserData() UserData {
 	return s.userData
 }
 
-func SanitizeUserData(u *UserData) (SafeUserData, error) {
-	err := sanitizePeriods(u.Periods)
-	if err != nil {
-		return nil, err
-	}
-	err = sanitizePerson(&u.Replaced)
-	if err != nil {
-		return nil, err
-	}
-	err = sanitizePerson(&u.Substituting)
-	if err != nil {
-		return nil, err
-	}
+func MarkSafe(u UserData) SafeUserData {
 	return &safeUserData{
-		userData: *u,
-	}, nil
-}
-
-func sanitizePerson(p *Person) error {
-	nameLength := len([]rune(p.Name))
-	if nameLength > 200 {
-		return fmt.Errorf("maximum length of name is 200 characters (input is %d)", nameLength)
+		userData: u,
 	}
-	_, err := p.Designation()
-	if err != nil {
-		return err
-	}
-
-	rppsLength := len(p.NumberRPPS)
-	if rppsLength < 11 || rppsLength > 50 {
-		return fmt.Errorf("invalid RPPS length (%d)", rppsLength)
-	}
-
-	adeliLength := len(p.NumberADELI)
-	// Only check ADELI number if it is specified
-	if adeliLength > 50 {
-		return fmt.Errorf("invalid ADELI length (%d)", adeliLength)
-	}
-
-	substitutingIDLength := len(p.NumberSubstitutingID)
-	// Only check "SubstitutingID" number if it is specified
-	if substitutingIDLength > 50 {
-		return fmt.Errorf("invalid NumberSubstitutingID length (%d)", substitutingIDLength)
-	}
-
-	addressLength := len(p.Address)
-	if addressLength > 400 {
-		return fmt.Errorf("maximum size of address is 400 bytes (input is %d)", addressLength)
-	}
-
-	signatureSize := len(p.SignatureImgHtml)
-	if (signatureSize == 0) {
-		return nil
-	}
-	fmt.Printf("!!!!! Signature size is %dkB\n", signatureSize / 1024)
-	if (signatureSize > 300 * 1024) {
-		p.SignatureImgHtml = ""
-		return fmt.Errorf("maximum size of base64 encoded signature image is 300kB (input is %dkB)", signatureSize / 1024)
-	}
-	dataURL, signatureErr := dataurl.DecodeString(p.SignatureImgHtml)
-	if (signatureErr != nil) {
-		p.SignatureImgHtml = ""
-		return signatureErr
-	}
-
-	if dataURL.ContentType() != "image/svg+xml" {
-		p.SignatureImgHtml = ""
-		return fmt.Errorf("unexpected media type in signature dataurl '%s'", dataURL.ContentType())
-	}
-	// Encode the data ourselves to be sure the Data URL is exactly what we expect
-	// and we can stuff the value into the "src" attribute of an HTML <img> element.
-	safeDataURL := &dataurl.DataURL{
-		MediaType: dataurl.MediaType{
-			"image",
-			"svg+xml",
-			map[string]string{},
-		},
-		Encoding: dataurl.EncodingBase64,
-		Data: dataURL.Data,
-	}
-	p.SignatureImgHtml = safeDataURL.String()
-
-	return nil
-}
-
-func sanitizePeriods(periods []Period) error {
-	const MaxPeriods = 50
-	if len(periods) < 1 {
-		return fmt.Errorf("need at least one period")
-	} else if len(periods) > MaxPeriods {
-		return fmt.Errorf("maximum number of periods is %d (input contains %d)", MaxPeriods, len(periods))
-	}
-	return nil
 }
 
 type DataMap interface {

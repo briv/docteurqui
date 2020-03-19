@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"autocontract/internal/datamap"
+	"autocontract/internal/form"
+	"autocontract/internal/httperror"
 	"autocontract/internal/pdfgen"
 )
 
@@ -89,106 +91,21 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), PdfGenerationTimeout)
 	defer cancel()
 
+	timeLocation := timeZoneLocationFromContext(ctx)
 	err := r.ParseMultipartForm(ParseFormMaxMemoryBytes)
 	if err != nil {
 		// TODO: log this error ?
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
 	}
 
-	var periods []datamap.Period
-	timeLocation := timeZoneLocationFromContext(ctx)
-	periodStartsStr := r.PostForm["period-start"]
-	periodEndsStr := r.PostForm["period-end"]
-	for index, periodStartStr := range periodStartsStr {
-		periodStart, err := time.Parse(TimeLayout, periodStartStr)
-		if err != nil {
-			log.Printf("invalid period start '%s'\n", periodStartStr)
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-
-		if index >= len(periodEndsStr) {
-			log.Printf("invalid periods (%d starts, %d ends)\n", len(periodStartsStr), len(periodEndsStr))
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-
-		periodEndStr := periodEndsStr[index]
-		periodEnd, err := time.Parse(TimeLayout, periodEndStr)
-		if err != nil {
-			log.Printf("invalid period end '%s'\n", periodEndStr)
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-
-		periods = append(periods, datamap.Period{
-			Start: periodStart.In(timeLocation),
-			End:   periodEnd.In(timeLocation),
-		})
-	}
-
-	replacedDoctor := datamap.Person{
-		Name:             r.PostFormValue("regular-name"),
-		HonorificTitle:   datamap.Docteur,
-		NumberRPPS:       r.PostFormValue("regular-rpps"),
-		NumberADELI:      r.PostFormValue("regular-adeli"),
-		Address:          r.PostFormValue("regular-address"),
-		SignatureImgHtml: r.PostFormValue("regular-signature"),
-	}
-
-	substituting := datamap.Person{
-		Name:                 r.PostFormValue("substitute-name"),
-		HonorificTitle:       r.PostFormValue("substitute-title"),
-		NumberRPPS:           r.PostFormValue("substitute-rpps"),
-		NumberSubstitutingID: r.PostFormValue("substitute-substitutingID"),
-		Address:              r.PostFormValue("substitute-address"),
-		SignatureImgHtml:     r.PostFormValue("substitute-signature"),
-	}
-
-	log.Println(r.PostForm)
-
-	retrocessionPercStr := r.PostFormValue("financials-retrocession")
-	retrocessionPerc, err := strconv.Atoi(retrocessionPercStr)
+	safeUserData, err := form.Process(r, form.FormProcessingManner{
+		TimeLocation: timeLocation,
+		TimeLayout:   TimeLayout,
+	})
 	if err != nil {
-		log.Printf("invalid retrocession value '%s'\n", retrocessionPercStr)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
-
-	nightShiftRetrocessionPerc := retrocessionPerc
-	nightShiftRetrocessionPercStr := r.PostFormValue("financials-nightShiftRetrocession")
-	if nightShiftRetrocessionPercStr != "" {
-		nightShiftRetrocessionPerc, err = strconv.Atoi(nightShiftRetrocessionPercStr)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-	}
-
-	retrocessionsDiffer := retrocessionPerc != nightShiftRetrocessionPerc
-	financials := datamap.Financials{
-		HonorairesPercentage: retrocessionPerc,
-		Gardes: datamap.GardesFinancials{
-			Differs:              retrocessionsDiffer,
-			HonorairesPercentage: nightShiftRetrocessionPerc,
-		},
-	}
-
-	userData := &datamap.UserData{
-		Replaced:                replacedDoctor,
-		Substituting:            substituting,
-		Periods:                 periods,
-		Financials:              financials,
-		DateContractEstablished: time.Now().In(timeLocation),
-	}
-
-	safeUserData, err := datamap.SanitizeUserData(userData)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
+		log.Printf("form processing error %v", err)
+		httperror.RichError(w, r, err)
 		return
 	}
 
@@ -236,8 +153,10 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Length", strconv.Itoa(len(pdfData)))
 	_, err = w.Write(pdfData)
 	if err != nil {
+		// TODO: just log error, not much else we can do right ?
 		log.Println(err)
 	}
 

@@ -67,33 +67,51 @@ func TestPeriods(t *testing.T) {
 				},
 			},
 			expectedValues{"1 jour", "pour le 7 Juin 2018"},
-        },
-        {
+		},
+		{
 			"2 single days",
 			[]Period{
 				{
 					time.Date(2018, time.June, 7, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.June, 7, 0, 0, 0, 0, time.UTC),
-                },
-                {
+				},
+				{
 					time.Date(2018, time.June, 9, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.June, 9, 0, 0, 0, 0, time.UTC),
 				},
 			},
 			expectedValues{"2 jours", "pour le 7 Juin et le 9 Juin 2018"},
-        },
-        {
+		},
+		{
+			"the same single day, three times",
+			[]Period{
+				{
+					time.Date(2017, time.March, 3, 0, 0, 0, 0, time.UTC),
+					time.Date(2017, time.March, 3, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					time.Date(2017, time.March, 3, 0, 0, 0, 0, time.UTC),
+					time.Date(2017, time.March, 3, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					time.Date(2017, time.March, 3, 0, 0, 0, 0, time.UTC),
+					time.Date(2017, time.March, 3, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			expectedValues{"1 jour", "pour le 3 Mars"},
+		},
+		{
 			"single days interspersed with period",
 			[]Period{
 				{
 					time.Date(2018, time.June, 7, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.June, 7, 0, 0, 0, 0, time.UTC),
-                },
-                {
+				},
+				{
 					time.Date(2018, time.June, 9, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.June, 11, 0, 0, 0, 0, time.UTC),
 				},
-                {
+				{
 					time.Date(2018, time.June, 13, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.June, 13, 0, 0, 0, 0, time.UTC),
 				},
@@ -106,8 +124,8 @@ func TestPeriods(t *testing.T) {
 				{
 					time.Date(2018, time.June, 10, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.June, 14, 0, 0, 0, 0, time.UTC),
-                },
-                {
+				},
+				{
 					time.Date(2018, time.June, 16, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.June, 16, 0, 0, 0, 0, time.UTC),
 				},
@@ -128,8 +146,8 @@ func TestPeriods(t *testing.T) {
 				{
 					time.Date(2018, time.February, 27, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.March, 1, 0, 0, 0, 0, time.UTC),
-                },
-                {
+				},
+				{
 					time.Date(2018, time.July, 1, 0, 0, 0, 0, time.UTC),
 					time.Date(2018, time.July, 1, 0, 0, 0, 0, time.UTC),
 				},
@@ -199,8 +217,8 @@ func TestPeriods(t *testing.T) {
 				},
 			},
 			expectedValues{"44 jours", "du 12 Février au 27 Mars 2017 compris"},
-        },
-        {
+		},
+		{
 			"same day, a year apart",
 			[]Period{
 				{
