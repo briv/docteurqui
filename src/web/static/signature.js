@@ -40,7 +40,7 @@ export const createSignatureInput = (parentElement) => {
         el.classList.add('d-flex', 'signature-pad-container');
     });
     const canvas = makeElement('canvas', el => {
-        el.classList.add('user-input', 'signature-pad');
+        el.classList.add('signature-pad');
     });
 
     const pad = new SignaturePad(canvas);

@@ -1,12 +1,10 @@
-// TODO: move these imports to css files
-import 'tiny-date-picker/tiny-date-picker.css';
-// import 'normalize.css';
 import { v4 as uuidv4 } from 'uuid';
 
 import { makeElement } from './utils';
-import TinyDatePicker from 'tiny-date-picker';
 import { createSignatureInput, getSignatureImage } from './signature';
 import { saveFilledFormData, createPreviousDataInputUI } from './form-fill';
+import { setupFieldFeedback, Validators } from './live-form-feedback';
+import { createSinglePeriodInput, parseFormattedFRDate } from './periods-input';
 
 const ElementQueries = {
     SubstituteSignatureParent: 'fieldset#substitute-fieldset',
@@ -22,162 +20,8 @@ const Globals = {
     ],
 };
 
-const useCustomDatePicker = (() => {
-    const cachedResult = true;
-
-    return () => cachedResult;
-})();
-
-const frenchMonths = [
-    'Janvier',
-    'Février',
-    'Mars',
-    'Avril',
-    'Mai',
-    'Juin',
-    'Juillet',
-    'Août',
-    'Septembre',
-    'Octobre',
-    'Novembre',
-    'Décembre',
-];
-
-const parseFormattedFRDate = (str) => {
-    let date;
-    if (typeof str === 'string') {
-        const [dayStr, monthStr, yearStr] = str.split(' ');
-        const year = parseInt(yearStr, 10);
-        const month = frenchMonths.findIndex(el => el == monthStr);
-        const day = parseInt(dayStr, 10);
-        date = new Date(year, month, day);
-    } else {
-        date = new Date(str);
-    }
-
-    if (isNaN(date)) {
-        throw new Error(`invalid date ${date}`);
-    }
-    return date;
-}
-
-const createSinglePeriodInput = (container, beforeSibling) => {
-    const periodClass = 'period';
-    const numberCurrentPeriodInputs = container.querySelectorAll(`.${periodClass}`).length;
-
-    const rootContainer = makeElement('div', el => {
-        el.classList.add('d-flex', 'flex-column', `${periodClass}`);
-    })
-    const dateRangeContainer = makeElement('div', el => {
-        el.classList.add('d-flex', 'flex-row');
-    })
-    const labelContainer = makeElement('div', el => {
-        el.classList.add('d-flex', 'flex-row');
-    })
-
-    const startLabel = makeElement('label', el => {
-        if (numberCurrentPeriodInputs === 0) {
-            el.textContent = 'Du';
-        } else {
-            el.textContent = 'et du';
-        }
-    });
-    const endLabel = makeElement('label', el => {
-        el.textContent = 'au';
-    });
-
-    const inputType = useCustomDatePicker() ? 'text' : 'date';
-    const dateRangeStart = makeElement('input', el => {
-        el.setAttribute('type', inputType);
-        el.setAttribute('name', 'period-start');
-    });
-    const dateRangeEnd = makeElement('input', el => {
-        el.setAttribute('type', inputType);
-        el.setAttribute('name', 'period-end');
-    });
-    const removeIcon = makeElement('button', el => {
-        el.classList.add('small', 'remove-period');
-        el.textContent = '❌';
-        el.setAttribute('type', 'button');
-
-        if (numberCurrentPeriodInputs == 0) {
-            el.setAttribute('disabled', true);
-            el.setAttribute('aria-hidden', true);
-            el.classList.add('hidden');
-        }
-    });
-
-    for (let el of [startLabel, endLabel, removeIcon]) {
-        labelContainer.appendChild(el);
-    }
-    for (let el of [dateRangeStart, dateRangeEnd]) {
-        dateRangeContainer.appendChild(el);
-    }
-    for (let el of [labelContainer, dateRangeContainer]) {
-        rootContainer.appendChild(el);
-    }
-
-    removeIcon.addEventListener('click', event => {
-        event.preventDefault();
-        rootContainer.remove();
-    })
-
-    container.insertBefore(rootContainer, beforeSibling);
-
-    const options = {
-        mode: 'dp-modal',
-        lang: {
-            days: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
-            months: [...frenchMonths],
-            today: 'Aujourd\'hui',
-            clear: 'Effacer',
-            close: 'Fermer',
-        },
-        format(date) {
-            const day = date.getDate();
-            const month = frenchMonths[date.getMonth()];
-            const year = date.getFullYear();
-            return `${day} ${month} ${year}`;
-        },
-        parse(str) {
-            try {
-                return parseFormattedFRDate(str);
-            } catch (e) {
-                return new Date();
-            }
-        },
-        dayOffset: 1,
-    };
-
-    if (useCustomDatePicker()) {
-        TinyDatePicker(dateRangeStart, options);
-        const tinyDatePickerEnd = TinyDatePicker(dateRangeEnd, options);
-
-        tinyDatePickerEnd.on('open', (_, dp) => {
-            // Do not do anything if user has already selected end date
-            // or if no start date is selected
-            if (dateRangeEnd.value !== ''
-                || dateRangeStart.value === '') {
-                return;
-            }
-            const startSelectedDate = parseFormattedFRDate(dateRangeStart.value);
-
-            // Otherwise, highlight the start day + 1
-            const dayPlusOne = (date) => {
-                const result = new Date(date);
-                result.setDate(result.getDate() + 1);
-                return result;
-            };
-
-            dp.setState({
-                hilightedDate: dayPlusOne(startSelectedDate),
-            });
-        });
-    }
-}
-
-const createDefaultPeriodInputUI = () => {
-    const fieldSetElement = document.querySelector('form .date-range-input');
+const createDefaultPeriodInputUI = (form) => {
+    const fieldSetElement = form.querySelector('.date-range-input');
 
     const addDateInputButton = makeElement('button', el => {
         el.classList.add('small');
@@ -301,7 +145,7 @@ const createSignaturePads = () => {
     onResizeCanvases();
 };
 
-const createPreviouslyEnteredDataUI = (form) => {
+const createUIForPopulatingWithSavedData = (form) => {
     const fieldSets = form.querySelectorAll('fieldset[data-enhanced-form-part]');
     fieldSets.forEach(fieldSet => {
         const formPart = fieldSet.dataset.enhancedFormPart;
@@ -312,7 +156,7 @@ const createPreviouslyEnteredDataUI = (form) => {
 
 const setupDynamicFormChanges = (form) => {
     const dynamicLabel = form.querySelector('label[for="substitute-substitutingID"]');
-    const elementsToMonitor = document.querySelectorAll('input[type=radio][name="substitute-title"]');
+    const elementsToMonitor = form.querySelectorAll('input[type=radio][name="substitute-title"]');
 
     elementsToMonitor.forEach(element => {
         element.addEventListener('change', event => {
@@ -354,16 +198,59 @@ const formErrorHandler = (form) => (error) => {
     errorContainer.scrollIntoView(scrollArg);
 };
 
+const setupLiveFormFeedback = (form) => {
+    const FormFeedbackParentQuerySelector = '.single-form-input-group';
+
+    const NameMessage = 'Le "Nom complet" doit être renseigné.';
+    const RPPSMessage = 'Le RRPS doit faire 11 chiffres.';
+
+    const formFeedbacks = [
+        {
+            querySelector: 'input#regular-name',
+            check: Validators.Required,
+            message: NameMessage,
+        },
+        {
+            querySelector: 'input#regular-rpps',
+            check: Validators.Length(11),
+            message: RPPSMessage,
+        },
+        {
+            querySelector: 'input#substitute-name',
+            check: Validators.Required,
+            message: NameMessage,
+        },
+        {
+            querySelector: 'input#substitute-rpps',
+            check: Validators.Length(11),
+            message: RPPSMessage,
+        },
+        {
+            querySelector: 'input#substitute-substitutingID',
+            check: Validators.Required,
+            message: 'Ce champ doit être renseigné.',
+        },
+        {
+            querySelector: 'input[name="financials-retrocession"]',
+            check: Validators.Number(0, 100),
+            message: "Entre 0 et 100 s'il vous plaît !",
+        },
+    ];
+    formFeedbacks.forEach(el => { setupFieldFeedback(form, FormFeedbackParentQuerySelector, el) });
+};
+
 const setupUIWithin = (form) => {
-    // TODO: refactor these 2 below
-    createDefaultPeriodInputUI();
+    // TODO: refactor this
     createSignaturePads();
     //
 
-    const extraUI = {};
-    createPreviouslyEnteredDataUI(form);
+    createUIForPopulatingWithSavedData(form);
+    setupLiveFormFeedback(form);
+    createDefaultPeriodInputUI(form);
+
     setupDynamicFormChanges(form);
 
+    const extraUI = {};
     extraUI.errorHandler = formErrorHandler(form);
 
     return extraUI;

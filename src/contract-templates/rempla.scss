@@ -96,19 +96,16 @@ a {
         color: $link-color;
         text-decoration: underline;
         text-underline-position: under;
-        // -webkit-text-underline-position: under; // TODO: autoprefix
     }
     &:link {
         color: $link-color;
         text-decoration: underline;
         text-underline-position: under;
-        // -webkit-text-underline-position: under; // TODO: autoprefix
     }
     &:visited {
         color: $link-color;
         text-decoration: underline;
         text-underline-position: under;
-        // -webkit-text-underline-position: under; // TODO: autoprefix
     }
     &:focus {
         outline: none;

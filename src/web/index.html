@@ -36,55 +36,68 @@
                 <fieldset class="d-flex flex-column" data-enhanced-form-part="regular" id="regular-fieldset">
                     <legend>Docteur remplacé</legend>
 
-                    <label for="regular-name">Nom complet:</label>
-                    <div class="d-flex input-prefix user-input">
-                        <span>Dr.</span>
-                        <input required type="text" id="regular-name" name="regular-name" placeholder="Anne-Cécile PIERRE" autofocus>
+                    <div class="single-form-input-group">
+                        <label for="regular-name">Nom complet:</label>
+                        <div class="d-flex input-prefix">
+                            <span>Dr.</span>
+                            <input type="text" id="regular-name" name="regular-name" placeholder="Anne-Cécile PIERRE" autocomplete="off">
+                        </div>
                     </div>
 
-                    <label>Numéro RPPS:</label>
-                    <input required type="text" minlength="11" inputmode="numeric" name="regular-rpps" autocomplete="off" placeholder="10010165716" class="user-input">
+                    <div class="single-form-input-group">
+                        <label for="regular-rpps">Numéro RPPS:</label>
+                        <input type="text" id="regular-rpps" name="regular-rpps" inputmode="numeric" autocomplete="off" placeholder="10010165716">
+                    </div>
 
-                    <label>Adresse d'exercice:</label>
-                    <input type="text" name="regular-address" placeholder="5 rue des Lilas, 75013 Paris" class="user-input">
+                    <div class="single-form-input-group">
+                        <label for="regular-address">Adresse d'exercice:</label>
+                        <input type="text" id="regular-address" name="regular-address" placeholder="5 rue des Lilas, 75013 Paris">
+                    </div>
                 </fieldset>
 
                 <fieldset class="d-flex flex-column" data-enhanced-form-part="substitute" id="substitute-fieldset">
                     <legend>Étudiant ou docteur remplaçant</legend>
 
-                    <label>Nom complet:</label>
-                    <input required type="text" name="substitute-name" placeholder="Jean-Baptiste DRUET" autocomplete="name" class="user-input">
+                    <div class="single-form-input-group">
+                        <label for="substitute-name">Nom complet:</label>
+                        <input type="text" id="substitute-name" name="substitute-name" placeholder="Jean-Baptiste DRUET" autocomplete="off">
+                    </div>
 
-                    <fieldset class="nested">
-                        <legend>Civilité</legend>
+                    <div class="single-form-input-group">
+                        <fieldset class="nested">
+                            <legend>Civilité</legend>
 
-                        <div class="radio-input-option">
-                            <!-- TODO: use a "required" attribute on these radio buttons. -->
-                            <!-- Unfortunately, currently on iOS, this does not trigger any UI so the
-                            user doesn't know why the form doesn't send. -->
-                            <input id="substitute-title-1" type="radio" name="substitute-title" value="Madame" autocomplete="off">
-                            <label for="substitute-title-1">Madame (non thésée)</label>
-                        </div>
+                            <div class="radio-input-option">
+                                <input id="substitute-title-1" type="radio" name="substitute-title" value="Madame" autocomplete="off">
+                                <label for="substitute-title-1">Madame (non thésée)</label>
+                            </div>
 
-                        <div class="radio-input-option">
-                            <input id="substitute-title-2" type="radio" name="substitute-title" value="Monsieur" autocomplete="off">
-                            <label for="substitute-title-2">Monsieur (non thésé)</label>
-                        </div>
+                            <div class="radio-input-option">
+                                <input id="substitute-title-2" type="radio" name="substitute-title" value="Monsieur" autocomplete="off">
+                                <label for="substitute-title-2">Monsieur (non thésé)</label>
+                            </div>
 
-                        <div class="radio-input-option">
-                            <input id="substitute-title-3" type="radio" name="substitute-title" value="Docteur" autocomplete="off">
-                            <label for="substitute-title-3">Docteur (thésé)</label>
-                        </div>
-                    </fieldset>
+                            <div class="radio-input-option">
+                                <input id="substitute-title-3" type="radio" name="substitute-title" value="Docteur" autocomplete="off">
+                                <label for="substitute-title-3">Docteur (thésé)</label>
+                            </div>
+                        </fieldset>
+                    </div>
 
-                    <label>Numéro RPPS:</label>
-                    <input required type="text" minlength="11" inputmode="numeric" name="substitute-rpps" autocomplete="off" placeholder="10010165716" class="user-input">
+                    <div class="single-form-input-group">
+                        <label>Numéro RPPS:</label>
+                        <input type="text" inputmode="numeric" id="substitute-rpps" name="substitute-rpps" autocomplete="off" placeholder="10010165716">
+                    </div>
 
-                    <label for="substitute-substitutingID">Numéro de licence de remplacement ou d'inscription au tableau de l'ordre:</label>
-                    <input type="text" inputmode="numeric" id="substitute-substitutingID" name="substitute-substitutingID" autocomplete="off" placeholder="35 1781063" class="user-input">
+                    <div class="single-form-input-group">
+                        <label for="substitute-substitutingID">Numéro de licence de remplacement ou d'inscription au tableau de l'ordre:</label>
+                        <input type="text" inputmode="numeric" id="substitute-substitutingID" name="substitute-substitutingID" autocomplete="off" placeholder="35 1781063">
+                    </div>
 
-                    <label>Adresse:</label>
-                    <input type="text" name="substitute-address" placeholder="13 rue des Cordonniers, 75017 Paris" class="user-input">
+                    <div class="single-form-input-group">
+                        <label for="substitute-address">Adresse:</label>
+                        <input type="text" id="substitute-address" name="substitute-address" placeholder="13 rue des Cordonniers, 75017 Paris">
+                    </div>
                 </fieldset>
 
 
@@ -93,9 +106,9 @@
 
                     <noscript class="d-flex flex-column date-range-input">
                         <label>Du:</label>
-                        <input type="date" name="period-start" placeholder="2019-02-24" class="user-input">
+                        <input type="date" name="period-start" placeholder="2019-02-24">
                         <label>Au:</label>
-                        <input type="date" name="period-end" placeholder="2019-02-29" class="user-input">
+                        <input type="date" name="period-end" placeholder="2019-02-29">
 
                         <div class="call-to-action">
                             <p>Il semble que le JavaScript est désactivé.</p>
@@ -107,11 +120,15 @@
                 <fieldset class="d-flex flex-column">
                     <legend>Conditions financières</legend>
 
-                    <label>Pourcentage de rétrocession:</label>
-                    <input required type="number" inputmode="numeric" min="0" max="100" name="financials-retrocession" autocomplete="off" class="user-input">
+                    <div class="single-form-input-group">
+                        <label for="financials-retrocession">Pourcentage de rétrocession:</label>
+                        <input type="number" inputmode="numeric" min="0" max="100" id="financials-retrocession" name="financials-retrocession" autocomplete="off">
+                    </div>
 
-                    <label>Pourcentage de rétrocession des gardes: <span class="text-bold">(Optionnel)</span></label>
-                    <input type="number" inputmode="numeric" min="0" max="100" name="financials-nightShiftRetrocession" placeholder="Si non applicable, laisser vide" autocomplete="off" class="user-input">
+                    <div class="single-form-input-group">
+                        <label for="financials-nightShiftRetrocession">Pourcentage de rétrocession des gardes: <span class="text-bold">(Optionnel)</span></label>
+                        <input type="number" inputmode="numeric" min="0" max="100" id="financials-nightShiftRetrocession" name="financials-nightShiftRetrocession" placeholder="Si non applicable, laisser vide" autocomplete="off">
+                    </div>
                 </fieldset>
 
                 <input type="submit" aria-label="Créer le contrat" value="Créer le contrat">

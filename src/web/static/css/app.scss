@@ -1,6 +1,7 @@
-@import '../node_modules/normalize.css/normalize.css';
-// @import "~normalize.css/normalize.css";
-// @import '~tiny-date-picker/tiny-date-picker.css';
+// TODO: use nicer @imports instead of hard-coded paths.
+// e.g. @import "~normalize.css/normalize.css";
+@import '../../node_modules/normalize.css/normalize.css';
+@import '../../node_modules/tiny-date-picker/tiny-date-picker.css';
 
 // Colors
 @import 'vars.scss';
@@ -36,6 +37,11 @@
 @mixin focused {
     outline: 0;
     box-shadow: 0 0 0 3px rgba(66,153,225,.5)!important;
+}
+
+@mixin focused-invalid {
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(202, 73, 63, 0.5)!important;
 }
 
 @mixin button-like {
@@ -85,7 +91,7 @@ body {
     font-family: system-ui, Arial, sans-serif;
 }
 
-body, button, input, select {
+body, button, input {
     font-size: $font-size-body;
 }
 
@@ -181,15 +187,13 @@ form.contract {
         }
     }
 
-    $leading-field-margin: 0.2em;
     $margin-between-label-field: 0.2em;
 
     label {
-        margin-left: $leading-field-margin;
-        & + input, & + select, & + .input-prefix {
-            margin-bottom: 1em;
+        // margin-left: $leading-field-margin;
+        & + input, & + .input-prefix {
             margin-top: $margin-between-label-field;
-            margin-left: $leading-field-margin;
+            // margin-left: $leading-field-margin;
         }
     }
 
@@ -201,17 +205,17 @@ form.contract {
         }
     }
 
-    .user-input {
-        width: 90%;
-    }
-
     input[type=text], input[type=number], input[type=date] {
         @include input-like;
     }
 
-    input, select {
+    input {
         &:focus {
             @include focused;
+        }
+
+        &.invalid, &.invalid:focus {
+            @include focused-invalid;
         }
     }
 
@@ -222,12 +226,42 @@ form.contract {
         -webkit-appearance: none;
     }
 
+    $leading-field-margin: 0.6em;
+    $margin-below-each-input-group: 1em;
+
+    .single-form-input-group {
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+        margin-bottom: $margin-below-each-input-group;
+        > * {
+            margin-left: $leading-field-margin;
+        }
+    }
+
+    .error-feedback {
+        display: flex;
+
+        &::before {
+            content: "";
+            color: white;
+            padding: 1em 0.4em;
+            background-color: $error-feedback-accent-color;
+            margin-right: 0.2em;
+        }
+        color: $error-feedback-color;
+        margin-top: 0.4em;
+
+        div {
+            align-self: center;
+        }
+    }
+
     fieldset.nested {
         padding: 0;
         border: 0;
 
-        margin-bottom: 1.5em;
-        margin-left: $leading-field-margin;
+        // margin-left: $leading-field-margin;
 
         legend {
             margin-bottom: $margin-between-label-field;
@@ -249,7 +283,7 @@ form.contract {
         & > span {
             margin: 0 0.6em;
         }
-        align-items: baseline;
+        align-items: center;
         font-weight: bold;
         & > input {
             border: 0;

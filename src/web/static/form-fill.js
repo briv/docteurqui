@@ -60,17 +60,7 @@ const fillFormField = (nameAttribute, value) => {
 
     if (tagName === 'INPUT') {
         element.value = value;
-        return;
-    }
-
-    if (tagName === 'SELECT') {
-        for (const child of element.children) {
-            if (child.tagName === 'OPTION' && child.value === value) {
-                child.selected = true;
-                element.dispatchEvent(new Event('change'));
-                break;
-            }
-        }
+        element.dispatchEvent(new Event('input'));
         return;
     }
 };

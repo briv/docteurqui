@@ -16,5 +16,8 @@ $button-bg-color: #a4bbcc;
 $button-border-color: darken($button-bg-color, 50%);
 $light-button-active-color: darken($input-border-color, 20%);
 
+$error-feedback-color: rgb(197, 14, 14);
+$error-feedback-accent-color: rgb(252, 168, 168);;
+
 // Fonts
 $font-size-body: 16px;
