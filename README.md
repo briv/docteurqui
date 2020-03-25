@@ -21,6 +21,8 @@ go run autocontract.go -d 1234
 - must haves, improve UI/UX:
     - ERROR management ! show user something if it goes wrong (7 to do it seems)
     - :hover styles on buttons !!
+    - add RPPS number in parantheses for saved data.
+    - all colors used are in vars.scss and seem nice
     - save any temporary filled data in case the person leaves the page before submitting the form.
     - change button styles to make primary "submit" button pop out WAY more
         see https://lospec.com/palette-list/
@@ -32,9 +34,14 @@ go run autocontract.go -d 1234
         - from back-end, log:
             - a line whith subRRPS | regular RPPS | timestamp on each contract that is genereated
             - a line whenever an error occurs (whether in JS or in backend), with some details: timestamp | requestUUID | errorMessage
+    - security:
+        - CSP headers, both on front-end and also on PDF generation "website"
+
 - nice to haves
+    - auto-complete form using name
+    - only allow numbers in RPPS fields
     - use a real icon instead of emoji X for "delete" buttons
-    - simplify app.js
+    - use an icon (see Stripe register page) next to the form error messages.
 
 - use golangCI-lint for Go linting
 

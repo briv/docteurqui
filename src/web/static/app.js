@@ -1,10 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { makeElement } from './utils';
+import { makeElement, GenericUserError, FormValidationError } from './utils';
 import { createSignatureInput, getSignatureImage } from './signature';
 import { saveFilledFormData, createPreviousDataInputUI } from './form-fill';
-import { setupFieldFeedback, Validators } from './live-form-feedback';
+import { Validators, ErrorHandler, FormValidationIssues } from './live-form-feedback';
 import { createSinglePeriodInput, parseFormattedFRDate } from './periods-input';
+import { polyfill } from './polyfills';
 
 const ElementQueries = {
     SubstituteSignatureParent: 'fieldset#substitute-fieldset',
@@ -21,20 +22,25 @@ const Globals = {
 };
 
 const createDefaultPeriodInputUI = (form) => {
-    const fieldSetElement = form.querySelector('.date-range-input');
+    const fieldsetElement = form.querySelector('.date-range-input');
+
+    const rootDiv = makeElement('div', el => {
+        el.classList.add('single-form-input-group');
+    });
 
     const addDateInputButton = makeElement('button', el => {
         el.classList.add('small');
         el.setAttribute('type', 'button');
         el.textContent = 'Ajouter une autre pèriode';
     });
-    fieldSetElement.appendChild(addDateInputButton);
+    rootDiv.appendChild(addDateInputButton);
+    fieldsetElement.appendChild(rootDiv);
 
-    createSinglePeriodInput(fieldSetElement, addDateInputButton);
+    createSinglePeriodInput(rootDiv, addDateInputButton);
 
     addDateInputButton.addEventListener('click', event => {
         event.preventDefault();
-        createSinglePeriodInput(fieldSetElement, addDateInputButton);
+        createSinglePeriodInput(rootDiv, addDateInputButton);
     });
 };
 
@@ -44,14 +50,32 @@ const setupFormIntercept = (form, UI) => {
             e.preventDefault();
         }
 
-        const formData = new FormData(form);
+        const rawFormData = new FormData(form);
         const url = form.action;
+        const formData = processFormData(rawFormData);
+
         const submission = submitFormData(formData, url)
-            .then(response => {
+            .then(async (response) => {
                 if (response.ok) {
                     return response;
                 } else {
-                    throw new Error('TODO, get detailed error code to show useful info to user');
+                    if (response.status == 422) {
+                        const body = await response.json();
+                        throw new FormValidationError(body);
+                    }
+
+                    const body = await response.text();
+                    if (response.status >= 500) {
+                        throw new GenericUserError(
+                            "Une erreur que nous n'avions pas prévu s'est produite de notre côté, désolé !",
+                            `submitting form: status=${response.status} body=${body}`
+                        );
+                    }
+
+                    throw new GenericUserError(
+                        "Une erreur vraiment inattendue s'est produite, désolé !",
+                        `submitting form: status=${response.status} body=${body}`
+                    );
                 }
             })
             .then(response => response.blob())
@@ -67,7 +91,7 @@ const setupFormIntercept = (form, UI) => {
                 a.remove();
             });
 
-        submission.catch(e => UI.errorHandler(e));
+        submission.catch(err => UI.errorHandler(err));
 
         submission.then(() => {
             // If submission succeeds, serialize form data and save it locally.
@@ -80,25 +104,38 @@ const setupFormIntercept = (form, UI) => {
     })
 };
 
-const submitFormData = (data, url) => {
-    // special processing for dates within period-start and period-end
-    const processDates = (key) => {
-        return data.getAll(key)
-            .map(el => {
-                try {
-                    const date = parseFormattedFRDate(el);
-                    return `${date.getFullYear()}-${(date.getMonth() +1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-                } catch (e) {
-                    return null;
-                }
-            })
-            .filter(el => el != null);
-    };
-    for (let key of ['period-start', 'period-end']) {
-        const dates = processDates(key);
+const processFormData = (data) => {
+    // Special processing for dates (corresponding to "period-start" and "period-end" inputs).
+    const processDates = (key) => data.getAll(key)
+        .map(el => {
+            try {
+                const date = parseFormattedFRDate(el);
+                return `${date.getFullYear()}-${(date.getMonth() +1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            } catch (e) {
+                return '';
+            }
+        });
+
+    const DateStarts = processDates('period-start');
+    const DateEnds = processDates('period-end');
+    const DatePairs = [...Array(Math.max(DateStarts.length, DateEnds.length)).keys()].reduce((acc, idx) => {
+        const start = DateStarts[idx];
+        const end = DateEnds[idx];
+        if (start !== '' || end !== '') {
+            acc.push({
+                'period-start': start,
+                'period-end': end,
+            });
+        }
+        return acc;
+    }, []);
+
+    for (const key of ['period-start', 'period-end']) {
         data.delete(key);
-        for (let e of dates) {
-            data.append(key, e);
+    }
+    for (const pair of DatePairs) {
+        for (const [key, date] of Object.entries(pair)) {
+            data.append(key, date);
         }
     }
 
@@ -109,15 +146,14 @@ const submitFormData = (data, url) => {
         }
     });
 
+    return data;
+};
+
+const submitFormData = (data, url) => {
     // Generate UUID per request for debugging purposes.
     const headers = new Headers();
-    try {
-        const uuid = uuidv4();
-        headers.set('x-request-id', uuid);
-    } catch (e) {
-        // TODO: use our own 'ClientError' type here ??
-        return Promise.reject(e);
-    }
+    const uuid = uuidv4();
+    headers.set('x-request-id', uuid);
 
     return fetch(url, {
         method: 'POST',
@@ -170,73 +206,80 @@ const setupDynamicFormChanges = (form) => {
     });
 };
 
-const formErrorHandler = (form) => (error) => {
-    const potentialErrorContainer = form.querySelector('.call-to-action.error');
-    // const submitButton = form.querySelector('input[type="submit"]');
-    if (!potentialErrorContainer) {
-        const div = makeElement('div', el => {
-            el.classList.add('call-to-action', 'error');
-        });
-        form.appendChild(div);
-    }
-
-    const errorContainer = form.lastChild;
-    while (errorContainer.firstChild) {
-        errorContainer.removeChild(errorContainer.lastChild);
-    }
-    errorContainer.appendChild(makeElement('p', el => {
-        // TODO: this text should tell the user what went wrong, along with links to jump
-        // to the correct spot in the page.
-        // TODO: For errors with the date input system, we should have a little error explanation underneath as well !
-        el.textContent = `An error: "${error}"`;
-        el.classList.add('error-animation');
-    }));
-
-    // TODO: smooth scroll polyfill !
-    const scrollArg = ('scrollBehavior' in document.documentElement.style) ?
-        { behavior: 'smooth', block: 'start', inline: 'nearest' } : true;
-    errorContainer.scrollIntoView(scrollArg);
-};
-
 const setupLiveFormFeedback = (form) => {
-    const FormFeedbackParentQuerySelector = '.single-form-input-group';
-
     const NameMessage = 'Le "Nom complet" doit être renseigné.';
     const RPPSMessage = 'Le RRPS doit faire 11 chiffres.';
+    const PeriodsMessageMap = (error) => {
+        if (error === FormValidationIssues.MissingRequired) {
+            return 'Il faut préciser au moins une pèriode de remplacement.';
+        }
+        if (error === FormValidationIssues.TooMany) {
+            return 'Trop de pèriodes de remplacement, désolé.'
+        }
+        return "Au moins une pèriode de remplacement n'est pas valide. Il manque peut–être une date de début ou de fin ?";
+    }
 
-    const formFeedbacks = [
+    const FormFeedbacks = [
         {
-            querySelector: 'input#regular-name',
+            name: 'regular-name',
+            querySelector: '#regular-name',
             check: Validators.Required,
-            message: NameMessage,
+            overridingMesssage: NameMessage,
+            errorLink: 'le nom du médecin remplacé',
         },
         {
-            querySelector: 'input#regular-rpps',
+            name: 'regular-rpps',
+            querySelector: '#regular-rpps',
             check: Validators.Length(11),
-            message: RPPSMessage,
+            overridingMesssage: RPPSMessage,
+            errorLink: 'le RPPS du médecin remplacé',
         },
         {
-            querySelector: 'input#substitute-name',
+            name: 'substitute-name',
+            querySelector: '#substitute-name',
             check: Validators.Required,
-            message: NameMessage,
+            overridingMesssage: NameMessage,
+            errorLink: 'le nom du remplaçant',
         },
         {
-            querySelector: 'input#substitute-rpps',
+            name: 'substitute-title',
+            querySelector: 'input[name="substitute-title"]',
+            errorLink: 'le titre du remplaçant',
+        },
+        {
+            name: 'substitute-rpps',
+            querySelector: '#substitute-rpps',
             check: Validators.Length(11),
-            message: RPPSMessage,
+            overridingMesssage: RPPSMessage,
+            errorLink: 'le RPPS du remplaçant',
         },
         {
-            querySelector: 'input#substitute-substitutingID',
-            check: Validators.Required,
-            message: 'Ce champ doit être renseigné.',
+            name: 'period-start',
+            querySelector: 'input[name="period-start"]',
+            overridingMesssage: PeriodsMessageMap,
+            errorLink: 'les dates du remplacement',
         },
         {
-            querySelector: 'input[name="financials-retrocession"]',
+            name: 'period-end',
+            querySelector: 'input[name="period-end"]',
+            overridingMesssage: PeriodsMessageMap,
+            errorLink: 'les dates du remplacement',
+        },
+        {
+            name: 'financials-retrocession',
+            querySelector: '#financials-retrocession',
             check: Validators.Number(0, 100),
-            message: "Entre 0 et 100 s'il vous plaît !",
+            overridingMesssage: "Entre 0 et 100 s'il vous plaît !",
+            errorLink: 'la rétrocession',
+        },
+        {
+            name: 'financials-nightShiftRetrocession',
+            querySelector: '#financials-nightShiftRetrocession',
+            errorLink: 'la rétrocession des gardes',
         },
     ];
-    formFeedbacks.forEach(el => { setupFieldFeedback(form, FormFeedbackParentQuerySelector, el) });
+
+    return ErrorHandler(form, FormFeedbacks);
 };
 
 const setupUIWithin = (form) => {
@@ -245,18 +288,21 @@ const setupUIWithin = (form) => {
     //
 
     createUIForPopulatingWithSavedData(form);
-    setupLiveFormFeedback(form);
+    const errorHandler = setupLiveFormFeedback(form);
     createDefaultPeriodInputUI(form);
 
     setupDynamicFormChanges(form);
 
     const extraUI = {};
-    extraUI.errorHandler = formErrorHandler(form);
+    // TODO: use a wrapper to log errors on backend that are not validation errors
+    extraUI.errorHandler = errorHandler;
 
     return extraUI;
 };
 
 const onDOMContentLoaded = () => {
+    polyfill();
+
     const form = document.querySelector('form');
     const extraUI = setupUIWithin(form);
     setupFormIntercept(form, extraUI);
@@ -277,8 +323,12 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 window.addEventListener('error', (event) => {
-    console.info("App INFO 'error'", event.reason);
-    // TODO: send analytics
+    // TODO: first thing, try to send analytics
+    const { error } = event;
+    console.info("App INFO 'error'", event);
+
+    // TODO: show the user some feedback and reassure them we're looking into it.
+    // e.g. "Désolé pour ce contre-temps ! À priori, nous allons être notifié et essayer de régler le problème mais n'hésitez pas à nous envoyer un email avec l'erreur que vous venez de recontrer."
 });
 
 onDOMReady(onDOMContentLoaded);

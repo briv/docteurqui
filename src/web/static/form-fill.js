@@ -1,4 +1,4 @@
-import { makeElement } from './utils';
+import { makeElement, GenericUserError } from './utils';
 
 const StorageFormDataVersion = '1';
 const StorageFormDataKey = `savedFormData-${StorageFormDataVersion}`;
@@ -38,8 +38,7 @@ const fillFormField = (nameAttribute, value) => {
             && el.getAttribute('type') === 'radio'
         );
         if (check === false) {
-            // TODO: this should be prettier so the user can see it (in case).
-            throw new Error(`UH OH ${elements.length} found for query selector [name="${nameAttribute}"]`);
+            throw new Error("Une erreur inattendue s'est produite en remplissant automatiquement le formulaire.");
         }
 
         elements.forEach(el => {

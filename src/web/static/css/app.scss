@@ -96,8 +96,10 @@ body, button, input {
 }
 
 a {
-    &:link, &:visited {
+    &:link, &:visited, &:any-link {
         color: $link-color;
+        text-decoration: underline;
+        text-underline-position: under;
     }
 
     &:hover {
@@ -144,7 +146,6 @@ main {
 
     &.error {
         background-color: $error-call-to-action-bg-color;
-        text-align: center;
     }
 }
 
@@ -214,7 +215,7 @@ form.contract {
             @include focused;
         }
 
-        &.invalid, &.invalid:focus {
+        &.invalid:focus {
             @include focused-invalid;
         }
     }
@@ -292,6 +293,11 @@ form.contract {
     }
 
     .date-range-input {
+        .single-form-input-group {
+            margin-bottom: unset;
+            width: unset;
+        }
+
         .period {
             margin: {
                 bottom: 0.8em;
@@ -337,14 +343,17 @@ form.contract {
 
         button {
             // Used to disable annoying selection that occured with signature <canvas>
+            user-select: none;
             -webkit-user-select: none;
         }
     }
 
     .signature-pad-container {
         margin-top: 2em;
-        user-select: none;
         justify-content: center;
+        // Used to disable annoying selection that occured with signature <canvas>
+        user-select: none;
+        -webkit-user-select: none;
 
         .signature-pad {
             @include input-border-like;
@@ -354,6 +363,7 @@ form.contract {
             padding: 0.1em;
 
             // Used to disable annoying selection that occured with signature <canvas>
+            user-select: none;
             -webkit-user-select: none;
         }
     }
