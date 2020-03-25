@@ -33,9 +33,9 @@
             <section>
                 <div class="italicized mb-1">Entre</div>
                 <div class="left-indented-1 mb-1 flex-column">
-                    <div><span class="bold">{{ .Replaced.Designation }}</span>, médecin généraliste</div>
-                    <div>N° RPPS {{ .Replaced.NumberRPPS }}, N° ADELI {{ .Replaced.NumberADELI }}</div>
-                    <div>exerçant au: {{ .Replaced.Address }}</div>
+                    <div><span class="bold">{{ .Regular.Designation }}</span>, médecin généraliste</div>
+                    <div>N° RPPS {{ .Regular.NumberRPPS }}</div>
+                    <div>exerçant au: {{ .Regular.Address }}</div>
                 </div>
                 <div class="right-aligned mb-1">d'une part</div>
                 <div class="italicized mb-1">Et</div>
@@ -50,9 +50,9 @@
 
             <section class="justified">
                 <h1 class="uppercased centered">Préambule</h1>
-                <p>Face à l'obligation déontologique qui est la sienne d'assurer la permanence des soins et conformément aux dispositions de l'article R.4127-65 du code de la santé publique (article 65 du Code de Déontologie), le {{ .Replaced.ShortDesignation }} a contacté {{ .Substituting.ShortDesignation }}, régulièrement autorisé en vertu de l'article L.4131-2 du code de la santé publique, pour prendre en charge, lors de la cessation temporaire de son activité professionnelle habituelle, les patients qui feraient appel à lui.</p>
+                <p>Face à l'obligation déontologique qui est la sienne d'assurer la permanence des soins et conformément aux dispositions de l'article R.4127-65 du code de la santé publique (article 65 du Code de Déontologie), le {{ .Regular.ShortDesignation }} a contacté {{ .Substituting.ShortDesignation }}, régulièrement autorisé en vertu de l'article L.4131-2 du code de la santé publique, pour prendre en charge, lors de la cessation temporaire de son activité professionnelle habituelle, les patients qui feraient appel à lui.</p>
 
-                <p>Pour permettre le bon déroulement de ce remplacement, le {{ .Replaced.ShortDesignation }} met à la disposition de {{ .Substituting.ShortDesignation }} son cabinet de consultations, {{ .Replaced.Address }} et son secrétariat.</p>
+                <p>Pour permettre le bon déroulement de ce remplacement, le {{ .Regular.ShortDesignation }} met à la disposition de {{ .Substituting.ShortDesignation }} son cabinet de consultations, {{ .Regular.Address }} et son secrétariat.</p>
 
                 <p>{{ .Substituting.ShortDesignation }} assume de ce fait toutes les obligations inscrites dans le Code de Déontologie. Il ne peut aliéner son indépendance professionnelle sous quelque forme que ce soit.</p>
 
@@ -62,7 +62,7 @@
 
                 <section>
                     <h2>Article 1er</h2>
-                    <p>Dans le souci de la permanence  des soins, le {{ .Replaced.ShortDesignation }} charge {{ .Substituting.ShortDesignation }}, qui accepte, de le remplacer temporairement auprès des patients qui feraient appel  à lui.</p>
+                    <p>Dans le souci de la permanence  des soins, le {{ .Regular.ShortDesignation }} charge {{ .Substituting.ShortDesignation }}, qui accepte, de le remplacer temporairement auprès des patients qui feraient appel  à lui.</p>
                     <p>Les patients devront être avertis, dès que possible, de la présence d'un remplaçant et notamment lors de toute demande de visite à domicile ou de rendez-vous au cabinet médical.</p>
                     <p>{{ .Substituting.ShortDesignation }} devra consacrer à cette activité tout le temps nécessaire selon des modalités qu'il fixera librement <a href="#fn1" id="fnr1" class="footnote-link">(1)</a>.</p>
                     <p>Il s'engage à donner, à tout malade faisant appel à lui, des soins consciencieux et attentifs dans le respect des dispositions du code de déontologie.</p>
@@ -77,7 +77,7 @@
 
                 <section>
                     <h2>Article 3</h2>
-                    <p>Pendant la durée du présent contrat de remplacement et pour les besoins de son exécution, {{ .Substituting.ShortDesignation }} aura l'usage des locaux professionnels, installations et appareils que le {{ .Replaced.ShortDesignation }} met à sa disposition. Il en fera usage raisonnablement.</p>
+                    <p>Pendant la durée du présent contrat de remplacement et pour les besoins de son exécution, {{ .Substituting.ShortDesignation }} aura l'usage des locaux professionnels, installations et appareils que le {{ .Regular.ShortDesignation }} met à sa disposition. Il en fera usage raisonnablement.</p>
                     <p>Compte tenu du caractère par nature provisoire de l'activité du remplaçant, celui-ci s'interdit toute modification des lieux ou de leur destination.</p>
                 </section>
 
@@ -88,7 +88,7 @@
 
                 <section>
                     <h2>Article 5</h2>
-                    <p>{{ .Substituting.ShortDesignation }} utilisera conformément à la Convention nationale les ordonnances ainsi que les feuilles de soins et imprimés pré-identifiés au nom du {{ .Replaced.ShortDesignation }} dans son activité relative aux seuls patients du {{ .Replaced.ShortDesignation }}.</p>
+                    <p>{{ .Substituting.ShortDesignation }} utilisera conformément à la Convention nationale les ordonnances ainsi que les feuilles de soins et imprimés pré-identifiés au nom du {{ .Regular.ShortDesignation }} dans son activité relative aux seuls patients du {{ .Regular.ShortDesignation }}.</p>
                     <p>En outre, il devra faire mention de son identification personnelle sur les ordonnances, feuilles de soins et imprimés réglementaires qu'il sera amené à remplir.</p>
                 </section>
 
@@ -101,13 +101,13 @@
                     <h2>Article 7</h2>
                     <p>{{ .Substituting.ShortDesignation }} percevra l'ensemble des honoraires correspondant aux actes effectués sur les patients à qui il aura donné ses soins.</p>
                     <p>Il devra remplir les obligations comptables normales et habituelles qui lui sont imposées réglementairement.</p>
-                    <p>En fin de remplacement, le {{ .Replaced.ShortDesignation }} reversera à {{ .Substituting.ShortDesignation }} <span class="bold">{{ .Financials.HonorairesPercentage }}% du total des honoraires perçus et à percevoir correspondant au remplacement</span>{{ if ( .Financials.Gardes.Differs) }}, et <span class="bold">{{ .Financials.Gardes.HonorairesPercentage }}% des honoraires pour les gardes</span>.{{ else }}.{{ end }}</p>
+                    <p>En fin de remplacement, le {{ .Regular.ShortDesignation }} reversera à {{ .Substituting.ShortDesignation }} <span class="bold">{{ .Financials.HonorairesPercentage }}% du total des honoraires perçus et à percevoir correspondant au remplacement</span>{{ if ( .Financials.Gardes.Differs) }}, et <span class="bold">{{ .Financials.Gardes.HonorairesPercentage }}% des honoraires pour les gardes</span>.{{ else }}.{{ end }}</p>
                     <p>Conformément aux dispositions de l'article R.4127-66 du code de la santé publique (article 66 du code de déontologie), le remplacement terminé, {{ .Substituting.ShortDesignation }} cessera toute activité s'y rapportant et transmettra les informations nécessaires à la continuité des soins.</p>
                 </section>
 
                 <section>
                     <h2>Article 8</h2>
-                    <p>Si au terme du remplacement prévu au présent contrat {{ .Substituting.ShortDesignation }} a remplacé le {{ .Replaced.ShortDesignation }} pendant une période de trois mois, consécutifs ou non, il ne pourra sauf accord écrit du {{ .Replaced.ShortDesignation }} <a href="#fn3" id="fnr3" class="footnote-link">(3)</a> s'installer pendant une durée de deux ans dans un poste où il puisse entrer en concurrence directe avec le médecin remplacé ou éventuellement ses associés (préciser ici commune, arrondissement, distance...). <a href="#fn4" id="fnr4" class="footnote-link">(4)</a></p>
+                    <p>Si au terme du remplacement prévu au présent contrat {{ .Substituting.ShortDesignation }} a remplacé le {{ .Regular.ShortDesignation }} pendant une période de trois mois, consécutifs ou non, il ne pourra sauf accord écrit du {{ .Regular.ShortDesignation }} <a href="#fn3" id="fnr3" class="footnote-link">(3)</a> s'installer pendant une durée de deux ans dans un poste où il puisse entrer en concurrence directe avec le médecin remplacé ou éventuellement ses associés (préciser ici commune, arrondissement, distance...). <a href="#fn4" id="fnr4" class="footnote-link">(4)</a></p>
                 </section>
 
                 <section>
@@ -156,8 +156,8 @@
 
             <div class="signatures">
                 <div class="signature with-signature-img">
-                    <div class="mb-1">{{ .Replaced.Designation }}</div>
-                    {{ .Replaced.SafeSignatureImgHtml }}
+                    <div class="mb-1">{{ .Regular.Designation }}</div>
+                    {{ .Regular.SafeSignatureImgHtml }}
                 </div>
                 <div class="signature with-signature-img">
                     <div class="mb-1">{{ .Substituting.Designation }}</div>
