@@ -29,7 +29,6 @@ func EmptyIssues() ValidationIssues {
 }
 
 func (v ValidationIssues) MarshalJSON() ([]byte, error) {
-	// TODO
 	m := make(map[string]string, len(v.issues))
 
 	for key, err := range v.issues {
@@ -64,6 +63,10 @@ func (v ValidationIssues) Error() error {
 }
 
 func (v ValidationIssues) Set(k string, e error) {
+	_, ok := v.issues[k]
+	if ok {
+		return
+	}
 	v.issues[k] = e
 }
 
