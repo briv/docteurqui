@@ -48,37 +48,54 @@ const useCustomDatePicker = (() => {
 
 export const createSinglePeriodInput = (container, beforeSibling) => {
     const periodClass = 'period';
-    const numberCurrentPeriodInputs = container.querySelectorAll(`.${periodClass}`).length;
+    const allCurrentPeriodInputContainers = container.querySelectorAll(`.${periodClass}`);
+    const numberCurrentPeriodInputs = allCurrentPeriodInputContainers.length;
 
     const rootContainer = makeElement('div', el => {
         el.classList.add('d-flex', 'flex-column', `${periodClass}`);
-    })
+    });
     const dateRangeContainer = makeElement('div', el => {
         el.classList.add('d-flex', 'flex-row');
-    })
+    });
     const labelContainer = makeElement('div', el => {
         el.classList.add('d-flex', 'flex-row');
-    })
+    });
 
+    const newPeriodInputNum = (() => {
+        if (numberCurrentPeriodInputs === 0) {
+            return 0;
+        }
+        const lastContainer = allCurrentPeriodInputContainers[allCurrentPeriodInputContainers.length - 1];
+        const input = lastContainer.querySelector('input');
+        return parseInt(input.dataset.num) + 1;
+    })();
+    const inputStartId = `period-start-${newPeriodInputNum}`;
+    const inputEndId = `period-end-${newPeriodInputNum}`;
     const startLabel = makeElement('label', el => {
         if (numberCurrentPeriodInputs === 0) {
             el.textContent = 'Du';
         } else {
             el.textContent = 'et du';
         }
+        el.setAttribute('for', inputStartId);
     });
     const endLabel = makeElement('label', el => {
         el.textContent = 'au';
+        el.setAttribute('for', inputEndId);
     });
 
     const inputType = useCustomDatePicker() ? 'text' : 'date';
     const dateRangeStart = makeElement('input', el => {
         el.setAttribute('type', inputType);
         el.setAttribute('name', 'period-start');
+        el.setAttribute('id', inputStartId);
+        el.dataset.num = `${newPeriodInputNum}`;
     });
     const dateRangeEnd = makeElement('input', el => {
         el.setAttribute('type', inputType);
         el.setAttribute('name', 'period-end');
+        el.setAttribute('id', inputEndId);
+        el.dataset.num = `${newPeriodInputNum}`;
     });
     const removeIcon = makeElement('button', el => {
         el.classList.add('small', 'remove-period');
