@@ -78,10 +78,11 @@ const createContentForError = (errorHandler, root, error) => {
         const firstInput = allInputs[0];
 
         const newErrItem = makeElement('li', el => {
+            el.dataset['errorId'] = issueName;
+
             const a = makeElement('a', el => {
                 el.textContent = feedBackDescription.errorLink;
                 el.setAttribute('href', '');
-                el.dataset['errorId'] = issueName;
 
                 let shouldFocus = true;
                 // Special handling for period inputs.
