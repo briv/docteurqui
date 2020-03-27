@@ -21,7 +21,6 @@ go run autocontract.go -d 1234
 - must haves, improve UI/UX:
     - ERROR management ! show user something if it goes wrong (7 to do it seems)
     - :hover styles on buttons !!
-    - add RPPS number in parantheses for saved data.
     - all colors used are in vars.scss and seem nice
     - save any temporary filled data in case the person leaves the page before submitting the form.
     - change button styles to make primary "submit" button pop out WAY more

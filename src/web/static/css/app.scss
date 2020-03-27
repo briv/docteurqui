@@ -398,9 +398,17 @@ form.contract {
 
                 cursor: pointer;
                 flex: 1 1 85%;
-                font-weight: bold;
 
                 align-items: center;
+                justify-content: space-around;
+
+                .profile-name {
+                    min-width: 50%;
+                }
+                .profile-rpps {
+                    font-size: 80%;
+                    text-align: center;
+                }
             }
 
             button {

@@ -150,14 +150,21 @@ export const createPreviousDataInputUI = (formPart, parentNode, siblingChildNode
 
                 const option = makeElement('div', el => {
                     el.classList.add('d-flex', 'flex-row', 'profile-option');
-
                     el.setAttribute('tabindex', '0');
 
-                    const s = makeElement('span', el => {
+                    const bold = makeElement('span', el => {
+                        el.classList.add('text-bold', 'profile-name');
                         const name = profile[FormDataKeySuffixes.Name] || '';
                         el.textContent = formPart == FormParts.Regular ? `Dr. ${name}` : `${name}`;
                     });
-                    el.appendChild(s);
+
+                    const notBold = makeElement('span', el => {
+                        el.classList.add('profile-rpps');
+                        const rpps = profile[FormDataKeySuffixes.Primary];
+                        el.textContent = `RPPS: ${rpps}`;
+                    });
+                    el.appendChild(bold);
+                    el.appendChild(notBold);
                 });
 
                 const deleteButton = makeElement('button', el => {
