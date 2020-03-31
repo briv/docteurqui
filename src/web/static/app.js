@@ -235,16 +235,16 @@ const setupLiveFormFeedback = (form) => {
             errorLink: 'le RPPS du médecin remplacé',
         },
         {
+            name: 'substitute-title',
+            querySelector: 'input[name="substitute-title"]',
+            errorLink: 'le titre du remplaçant',
+        },
+        {
             name: 'substitute-name',
             querySelector: '#substitute-name',
             check: Validators.Required,
             overridingMesssage: NameMessage,
             errorLink: 'le nom du remplaçant',
-        },
-        {
-            name: 'substitute-title',
-            querySelector: 'input[name="substitute-title"]',
-            errorLink: 'le titre du remplaçant',
         },
         {
             name: 'substitute-rpps',
