@@ -17,7 +17,15 @@ $button-border-color: darken($button-bg-color, 50%);
 $light-button-active-color: darken($input-border-color, 20%);
 
 $error-feedback-color: rgb(197, 14, 14);
-$error-feedback-accent-color: rgb(252, 168, 168);;
+$error-feedback-accent-color: rgb(252, 168, 168);
+
+// Focus colors
+$focused-color: rgba(66,153,225,.5);
+$invalid-focused-color: rgba(202, 73, 63, 0.5);
+
+// Very specific colors
+$split-button-main-bg-color: white;
+$custom-input-bg-color: white;
 
 // Fonts
 $font-size-body: 16px;

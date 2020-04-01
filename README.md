@@ -21,11 +21,11 @@ go run autocontract.go -d 1234
 - must haves, improve UI/UX:
     - ERROR management ! show user something if it goes wrong (7 to do it seems)
     - :hover styles on buttons !!
-    - all colors used are in vars.scss and seem nice
-    - save any temporary filled data in case the person leaves the page before submitting the form.
+    - auto-complete form using name
+    - submit disables the submit button and shows error on timeout (30s ?)
+    - all colors seem nice
     - change button styles to make primary "submit" button pop out WAY more
         see https://lospec.com/palette-list/
-    - check https://www.smashingmagazine.com/2018/08/best-practices-for-mobile-form-design/ for tips on form design.
     - have a footer/header with info about the site and links to other sites
     - make desktop version better
     - analytics for ME:
@@ -37,7 +37,6 @@ go run autocontract.go -d 1234
         - CSP headers, both on front-end and also on PDF generation "website"
 
 - nice to haves
-    - auto-complete form using name
     - only allow numbers in RPPS fields
     - use a real icon instead of emoji X for "delete" buttons
     - use an icon (see Stripe register page) next to the form error messages.

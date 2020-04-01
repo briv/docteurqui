@@ -29,8 +29,8 @@ const FormDataKeySuffixWhiteList = {
     ])),
 };
 
-const fillFormField = (nameAttribute, value) => {
-    const elements = [...document.querySelectorAll(`form *[name=${nameAttribute}]`).values()];
+const fillFormField = (form, nameAttribute, value) => {
+    const elements = [...form.querySelectorAll(`*[name=${nameAttribute}]`).values()];
     if (elements.length > 1) {
         // Check that all elements are <input[type="radio"]>.
         const check = elements.every(el =>
@@ -111,7 +111,7 @@ const onDeletePreviousData = (event, rootElement) => {
     storeAllData(newData);
 };
 
-const onSelectPreviousData = (event) => {
+const onSelectPreviousData = (form, event) => {
     const currentTarget = event.currentTarget;
     const rowForData = currentTarget.closest('.profile-wrapper');
     const formPart = rowForData.dataset.enhancedFormPart;
@@ -125,11 +125,11 @@ const onSelectPreviousData = (event) => {
         return;
     }
     Object.entries(partToFill).forEach(([suffix, value]) => {
-        fillFormField(`${formPart}-${suffix}`, value);
+        fillFormField(form, `${formPart}-${suffix}`, value);
     });
 };
 
-export const createPreviousDataInputUI = (formPart, parentNode, siblingChildNode) => {
+export const createPersistedDataQuickFillUI = (form, formPart, parentNode, siblingChildNode) => {
     const previousData = previouslyEnteredData(formPart);
     if (!previousData || previousData.length === 0) {
         return;
@@ -182,12 +182,12 @@ export const createPreviousDataInputUI = (formPart, parentNode, siblingChildNode
 
                 option.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
-                        onSelectPreviousData(e);
+                        onSelectPreviousData(form, e);
                     }
                 });
 
                 el.addEventListener('click', (e) => {
-                    onSelectPreviousData(e);
+                    onSelectPreviousData(form, e);
                 });
                 deleteButton.addEventListener('click', (e) => {
                     onDeletePreviousData(e, rootDiv);

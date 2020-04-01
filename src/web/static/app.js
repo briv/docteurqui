@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { makeElement, GenericUserError, FormValidationError } from './utils';
 import { createSignatureInput, getSignatureImage } from './signature';
-import { saveFilledFormData, createPreviousDataInputUI } from './form-fill';
+import { saveFilledFormData, createPersistedDataQuickFillUI } from './form-fill';
 import { Validators, ErrorHandler, FormValidationIssues } from './live-form-feedback';
 import { createSinglePeriodInput, parseFormattedFRDate } from './periods-input';
 import { polyfill } from './polyfills';
@@ -186,7 +186,7 @@ const createUIForPopulatingWithSavedData = (form) => {
     fieldSets.forEach(fieldSet => {
         const formPart = fieldSet.dataset.enhancedFormPart;
         const legend = fieldSet.querySelector('legend');
-        createPreviousDataInputUI(formPart, fieldSet, legend);
+        createPersistedDataQuickFillUI(form, formPart, fieldSet, legend);
     });
 };
 

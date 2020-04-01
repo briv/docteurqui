@@ -36,12 +36,12 @@
 
 @mixin focused {
     outline: 0;
-    box-shadow: 0 0 0 3px rgba(66,153,225,.5)!important;
+    box-shadow: 0 0 0 3px $focused-color!important;
 }
 
 @mixin focused-invalid {
     outline: 0;
-    box-shadow: 0 0 0 3px rgba(202, 73, 63, 0.5)!important;
+    box-shadow: 0 0 0 3px $invalid-focused-color!important;
 }
 
 @mixin button-like {
@@ -245,7 +245,6 @@ form.contract {
 
         &::before {
             content: "";
-            color: white;
             padding: 1em 0.4em;
             background-color: $error-feedback-accent-color;
             margin-right: 0.2em;
@@ -261,8 +260,6 @@ form.contract {
     fieldset.nested {
         padding: 0;
         border: 0;
-
-        // margin-left: $leading-field-margin;
 
         legend {
             margin-bottom: $margin-between-label-field;
@@ -280,7 +277,7 @@ form.contract {
     .input-prefix {
         @include input-like;
         padding: 0;
-        background-color: white;
+        background-color: $custom-input-bg-color;
         & > span {
             margin: 0 0.6em;
         }
@@ -357,7 +354,7 @@ form.contract {
 
         .signature-pad {
             @include input-border-like;
-            background-color: white;
+            background-color: $custom-input-bg-color;
             width: 70%;
             height: 10em;
             padding: 0.1em;
@@ -383,7 +380,7 @@ form.contract {
             border-color: $button-border-color;
 
             .profile-option {
-                background-color: white;
+                background-color: $split-button-main-bg-color;
                 border-top-left-radius: 8px;
                 border-bottom-left-radius: 8px;
                 padding: 0 0 0 0.5em;
