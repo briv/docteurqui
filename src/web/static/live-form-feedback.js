@@ -223,7 +223,6 @@ export const ErrorHandler = (form, formFeedbackDescriptions) => {
             eh.clearError(feedBackDescription);
         }
     };
-    form.addEventListener('input', uncheckedFieldListener);
     form.addEventListener('change', uncheckedFieldListener);
 
     formFeedbackDescriptions.forEach(el => { setupFieldFeedback(eh, el) });

@@ -43,8 +43,10 @@ const fillFormField = (form, nameAttribute, value) => {
 
         elements.forEach(el => {
             if (el.value === value) {
-                el.checked = true;
-                el.dispatchEvent(new Event('change'));
+                if (el.checked === false) {
+                    el.checked = true;
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             } else {
                 el.checked = false;
             }
@@ -58,9 +60,11 @@ const fillFormField = (form, nameAttribute, value) => {
     const tagName = element.tagName;
 
     if (tagName === 'INPUT') {
-        element.value = value;
-        element.dispatchEvent(new Event('input'));
-        return;
+        if (element.value !== value) {
+            element.value = value;
+            element.dispatchEvent(new Event('change', { bubbles: true }));
+            return;
+        }
     }
 };
 
