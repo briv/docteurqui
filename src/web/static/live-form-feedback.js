@@ -55,7 +55,7 @@ const createContentForError = (errorHandler, root, error) => {
     }
 
     const errorDescription = makeElement('div', el => {
-        el.textContent = 'Aie, il y a quelques soucis à régler dans le formulaire:';
+        el.textContent = 'Zut, il y a quelques soucis à régler dans le formulaire:';
     });
     root.appendChild(errorDescription);
 
@@ -181,7 +181,7 @@ export const ErrorHandler = (form, formFeedbackDescriptions) => {
         const globalErrEl = errContainer.querySelector(`[data-error-id="${feedbackDescription.name}"]`);
         if (globalErrEl) {
             globalErrEl.remove();
-            if (errContainer.firstChild.children.length === 0) {
+            if (errContainer.firstChild.lastChild.childElementCount === 0) {
                 errContainer.remove();
             }
         }
