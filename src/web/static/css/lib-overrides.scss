@@ -2,6 +2,12 @@
 
 $button-darker-color: darken($button-bg-color, 20%);
 
+// Override the "normalize.css" rule that changed these elements.
+// The issue is that tiny-date has a parent match rule and not a direct element rule.
+.dp .dp-day {
+    line-height: 1.4;
+}
+
 .dp-modal > .dp {
     &:before {
         background: $button-darker-color;

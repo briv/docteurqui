@@ -84,6 +84,7 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100%;
+    line-height: 1.25;
 }
 
 body {
@@ -99,11 +100,10 @@ a {
     &:link, &:visited, &:any-link {
         color: $link-color;
         text-decoration: underline;
-        text-underline-position: under;
     }
 
     &:hover {
-        color: darken($link-color, 15%);
+        color: lighten($link-color, 15%);
     }
 
     &:active {
@@ -111,7 +111,7 @@ a {
     }
 }
 
-header {
+.header {
     background-color: $header-bg-color;
     color: $header-color;
     width: 100%;
@@ -119,8 +119,14 @@ header {
     padding: 0.6em 0;
 }
 
-main {
+.main, .footer {
     margin: 0 5px;
+}
+
+.footer {
+    margin-top: 1em;
+    padding-top: 1em;
+    border-top: 2px solid gray;
 }
 
 @keyframes pulse {
@@ -403,7 +409,7 @@ form.contract {
                     min-width: 50%;
                 }
                 .profile-rpps {
-                    font-size: 80%;
+                    font-size: 75%;
                     text-align: center;
                 }
             }

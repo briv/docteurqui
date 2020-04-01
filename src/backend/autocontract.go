@@ -241,7 +241,7 @@ func main() {
 			publicServeMux.Handle("/", httputil.NewSingleHostReverseProxy(urlToProxyTo))
 		}
 
-		publicServeMux.HandleFunc("/generate-contract", withContext(
+		publicServeMux.HandleFunc("/b/generate-contract", withContext(
 			withTimeZoneLocation(parisLocation, forMethod(http.MethodPost, genContractHandler))))
 
 		s := &http.Server{

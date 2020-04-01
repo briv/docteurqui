@@ -7,18 +7,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width" />
 
-    <link rel="stylesheet" type="text/css" href="static/css/lib-overrides.scss">
-    <link rel="stylesheet" type="text/css" href="static/css/app.scss">
+    <link rel="stylesheet" type="text/css" href="/static/css/lib-overrides.scss">
+    <link rel="stylesheet" type="text/css" href="/static/css/app.scss">
 
-    <script async src="static/app.js"></script>
+    <script async src="/static/app.js"></script>
 </head>
 
 <body>
-    <header>
+    <header class="header">
         <h1>Contrat de remplacement</h1>
     </header>
 
-    <main>
+    <main class="main">
         <noscript>
             <div class="call-to-action">
                 <p>Il semble que le JavaScript est désactivé. Nous vous encourageons, si possible, à l'activer.</p>
@@ -28,10 +28,11 @@
 
         <section>
             <p>Pour éditer un contrat de remplacement, remplissez le formulaire qui suit.</p>
+            <p>Pour savoir si vous pouvez nous faire confiance, vous pouvez en lire <a href="#about-us">un peu plus sur nous</a> ou bien sur <a href="#data-use">la protection de vos données</a>. Attention, on est un peu biaisé.</p>
         </section>
 
         <section>
-            <form action="/generate-contract" enctype="multipart/form-data" method="post" class="contract">
+            <form action="/b/generate-contract" enctype="multipart/form-data" method="post" class="contract">
 
                 <fieldset class="d-flex flex-column" data-enhanced-form-part="regular" id="regular-fieldset">
                     <legend>Docteur remplacé</legend>
@@ -135,6 +136,30 @@
             </form>
         </section>
     </main>
+
+    <footer class="footer">
+        <div id="about-us">
+            <div>Qui sommes nous ?</div>
+            <p>Nous est en fait un "je", développeur en France, qui a créé ce site pour faire gagner du temps aux médecins, dont son épouse fait partie.</p>
+            <p>Si vous avez aimé le site, n'hésitez pas à le partager, c'est un beau compliment. À l'inverse, si vous pensez qu'on pourrait améliorer quelque chose, ce serait un plaisir de lire vos remarques <a href="mailto:b@docteurqui.com">par email</a>.</p>
+        </div>
+
+        <div id="data-use">
+            <div>Protection des données</div>
+            <p>Soyons clair, nous gardons pendant 1 mois une seule trace de votre passage ici: les couples de numéros RPPS qui ont été utilisés pour créer des contrats.
+            Pourquoi ? Pour avoir une idée du nombre de personnes qui utilisent ce site. Après 1 mois, nous supprimons ces données (en aggrégeant les numéros sur le mois).
+            Aucune autre donnée n'est stockée de notre côté - pas de cookies, etc...</p>
+        </div>
+
+        <div id="alternatives">
+            <div>Alternatives</div>
+            <p>Au cas où, voici deux autres sites qui traitent de ces contrats (Monsieur De Mesmaeker serait content):</p>
+            <ul>
+                <li>le Syndicat National des Jeunes Médecins Géneralistes propose également un <a href="http://www.snjmg.org/remplacement/formulaire">éditeur de contrats</a>.</li>
+                <li>le Conseil de l'Ordre regroupe plusieurs <a href="https://www.conseil-national.medecin.fr/documents-types-demarches/documents-types-medecins/cabinet-carriere/modeles-contrats#sommaire-id-0">contrats types dont ceux pour le remplacement</a>.</li>
+            </ul>
+        </div>
+    </footer>
 </body>
 
 </html>
