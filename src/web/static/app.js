@@ -6,6 +6,7 @@ import { saveFilledFormData, createPersistedDataQuickFillUI } from './form-fill'
 import { Validators, ErrorHandler, FormValidationIssues } from './live-form-feedback';
 import { createSinglePeriodInput, parseFormattedFRDate } from './periods-input';
 import { polyfill } from './polyfills';
+import { makeInputAutocomplete } from './autocomplete';
 
 const ElementQueries = {
     SubstituteSignatureParent: 'fieldset#substitute-fieldset',
@@ -89,6 +90,7 @@ const setupFormIntercept = (form, UI) => {
                 a.click();
                 // Afterwards we remove the element again.
                 a.remove();
+                URL.revokeObjectURL(blobUrl);
             });
 
         submission.catch(err => UI.errorHandler(err));
@@ -162,7 +164,7 @@ const submitFormData = (data, url) => {
         credentials: 'omit',
         redirect: 'follow',
         body: data,
-    })
+    });
 };
 
 const createSignaturePads = () => {
@@ -282,6 +284,11 @@ const setupLiveFormFeedback = (form) => {
     return ErrorHandler(form, FormFeedbacks);
 };
 
+const setupAutocomplete = (form) => {
+    const regularNameInput = form.querySelector('#regular-name');
+    makeInputAutocomplete(regularNameInput);
+};
+
 const setupUIWithin = (form) => {
     // TODO: refactor this
     createSignaturePads();
@@ -291,6 +298,7 @@ const setupUIWithin = (form) => {
     const errorHandler = setupLiveFormFeedback(form);
     createDefaultPeriodInputUI(form);
 
+    setupAutocomplete(form);
     setupDynamicFormChanges(form);
 
     const extraUI = {};

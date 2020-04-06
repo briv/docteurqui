@@ -197,10 +197,8 @@ form.contract {
     $margin-between-label-field: 0.2em;
 
     label {
-        // margin-left: $leading-field-margin;
-        & + input, & + .input-prefix {
+        & + input, & + .input-wrapper {
             margin-top: $margin-between-label-field;
-            // margin-left: $leading-field-margin;
         }
     }
 
@@ -241,9 +239,7 @@ form.contract {
         flex-direction: column;
         width: 90%;
         margin-bottom: $margin-below-each-input-group;
-        > * {
-            margin-left: $leading-field-margin;
-        }
+        margin-left: $leading-field-margin;
     }
 
     .error-feedback {
@@ -297,6 +293,7 @@ form.contract {
 
     .date-range-input {
         .single-form-input-group {
+            margin-left: unset;
             margin-bottom: unset;
             width: unset;
         }
@@ -423,6 +420,44 @@ form.contract {
 
                 border-top-right-radius: 8px;
                 border-bottom-right-radius: 8px;
+            }
+        }
+    }
+}
+
+.autocomplete-parent {
+    position: relative;
+    display: block;
+
+    & > * {
+        width: 100%;
+    };
+}
+
+.autocomplete-list {
+    // TODO: just for debug
+    background-color: pink;
+
+    position: absolute;
+    width: 100%;
+    display: flex;
+    // Avoid the user being able to select the autocomplete possibilites.
+    user-select: none;
+
+    ul {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        list-style-type: none;
+
+        display: flex;
+        flex-direction: column;
+
+        li {
+            margin: 0;
+
+            &:hover {
+                background-color: gray;
             }
         }
     }

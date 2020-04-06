@@ -29,7 +29,7 @@ const FormDataKeySuffixWhiteList = {
     ])),
 };
 
-const fillFormField = (form, nameAttribute, value) => {
+export const fillFormField = (form, nameAttribute, value) => {
     const elements = [...form.querySelectorAll(`*[name=${nameAttribute}]`).values()];
     if (elements.length > 1) {
         // Check that all elements are <input[type="radio"]>.
