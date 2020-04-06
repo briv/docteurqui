@@ -16,5 +16,3 @@ contract-models/
 
 # Temporary
 src/test-search/
-!src/test-search/search.go
-

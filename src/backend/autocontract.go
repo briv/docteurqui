@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -9,9 +11,11 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"autocontract/internal/datamap"
+	"autocontract/internal/doctorsearch"
 	"autocontract/internal/form"
 	"autocontract/internal/httperror"
 	"autocontract/internal/pdfgen"
@@ -25,30 +29,45 @@ const (
 )
 
 const (
-	PdfGeneratorInitializationTimeout = 5 * time.Second
+	PdfGeneratorInitializationTimeout = 3 * time.Second
 	PdfGeneratorBrowserDevToolsUrl    = "http://localhost:9222"
 	PdfGenerationTimeout              = 10 * time.Second
 	PurePdfGenerationTimeoutDiff      = 1 * time.Second
+
+	DoctorSearchQueryTimeout         = 5 * time.Second
+	DoctorSearchMaxNumberResults     = 5
+	MaxDoctorSearchQueryLength       = 40
+	MaxDoctorSearchConcurrentQueries = 100
 
 	InternalHttpServerPdfTemplatePath                = "/pdf"
 	InternalHttpServerPdfTemplatePort                = "18081"
 	InternalHttpServerPdfTemplateRequestUserQueryKey = "userDataId"
 
-	ContextUserDataMapKey      = 0
-	ContextPdfGenControlKey    = 1
-	ContextTimeZoneLocationKey = 2
+	ContextUserDataMapKey = iota
+	ContextDoctorSearchKey
+	ContextPdfGenControlKey
+	ContextTimeZoneLocationKey
 )
 
 var (
-	SharedUserData      = datamap.NewDataMap()
-	SharedPdfGenControl = &pdfgen.Control{}
+	SharedUserData       = datamap.NewDataMap()
+	SharedDoctorSearcher doctorsearch.DoctorSearcher
+	SharedPdfGenControl  = &pdfgen.Control{}
 )
 
 func sharedUserDataFromContext(ctx context.Context) datamap.DataMap {
 	return ctx.Value(ContextUserDataMapKey).(datamap.DataMap)
 }
 
+func sharedDoctorSearcherFromContext(ctx context.Context) doctorsearch.DoctorSearcher {
+	return ctx.Value(ContextDoctorSearchKey).(doctorsearch.DoctorSearcher)
+}
+
 func pdfGenControlFromContext(ctx context.Context) *pdfgen.Control {
+	return ctx.Value(ContextPdfGenControlKey).(*pdfgen.Control)
+}
+
+func doctorQueryIndexFromContext(ctx context.Context) *pdfgen.Control {
 	return ctx.Value(ContextPdfGenControlKey).(*pdfgen.Control)
 }
 
@@ -60,6 +79,7 @@ func withContext(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var ctx context.Context
 		ctx = context.WithValue(req.Context(), ContextUserDataMapKey, SharedUserData)
+		ctx = context.WithValue(ctx, ContextDoctorSearchKey, SharedDoctorSearcher)
 		ctx = context.WithValue(ctx, ContextPdfGenControlKey, SharedPdfGenControl)
 		h(w, req.WithContext(ctx))
 	}
@@ -164,6 +184,45 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Generating PDF from user data took %s", elapsed)
 }
 
+func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), DoctorSearchQueryTimeout)
+	defer cancel()
+
+	sharedDoctorSearcher := sharedDoctorSearcherFromContext(ctx)
+
+	userQuery := strings.TrimSpace(r.URL.Query().Get("query"))
+	potentialDoctorMatches, err := sharedDoctorSearcher.Query(ctx, userQuery, DoctorSearchMaxNumberResults)
+
+	if err != nil {
+		if errors.Is(err, doctorsearch.TemporarilyUnavailable) {
+			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
+		} else if errors.Is(err, doctorsearch.InvalidUserQuery) {
+			log.Printf("error: %v\n", err)
+			http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
+		} else {
+			// TODO: log ?
+			log.Printf("error: %v\n", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	b, err := json.Marshal(
+		struct {
+			Matches []doctorsearch.DoctorRecord `json:"matches"`
+		}{
+			potentialDoctorMatches,
+		},
+	)
+	if err != nil {
+		// TODO: log ?
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	w.Write(b)
+}
+
 func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 	userDataKey := r.URL.Query().Get(InternalHttpServerPdfTemplateRequestUserQueryKey)
 
@@ -208,6 +267,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Setup doctor search structure
+	// TODO: use flag for value
+	SharedDoctorSearcher = doctorsearch.New("/Users/blaiserivet/Documents/Blaise/dev/autoContratRempla/src/test-search/PS_LibreAcces_202003041402/", MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
+
 	// Internal HTTP server for use with headless Web browser instance to convert web pages to PDF.
 	errChan := make(chan error)
 	go func() {
@@ -243,6 +306,8 @@ func main() {
 
 		publicServeMux.HandleFunc("/b/generate-contract", withContext(
 			withTimeZoneLocation(parisLocation, forMethod(http.MethodPost, genContractHandler))))
+
+		publicServeMux.HandleFunc("/b/search-doctor", withContext(forMethod(http.MethodGet, doctorSearchHandler)))
 
 		s := &http.Server{
 			Addr:              fmt.Sprintf(":%s", *publicFacingWebsitePort),
