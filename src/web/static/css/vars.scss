@@ -13,8 +13,11 @@ $form-part-bg-color: lighten($form-legend-bg-color, 5%);
 $input-border-color: #dee0e2;
 
 $button-bg-color: #a4bbcc;
+$hover-button-bg-color: darken($button-bg-color, 20%);
 $button-border-color: darken($button-bg-color, 50%);
-$light-button-active-color: darken($input-border-color, 20%);
+// "Special button" colors
+$split-button-bg-color: white;
+$hover-split-button-bg-color: darken($input-border-color, 20%);
 
 $error-feedback-color: rgb(197, 14, 14);
 $error-feedback-accent-color: rgb(252, 168, 168);
@@ -24,7 +27,6 @@ $focused-color: rgba(66,153,225,.5);
 $invalid-focused-color: rgba(202, 73, 63, 0.5);
 
 // Very specific colors
-$split-button-main-bg-color: white;
 $custom-input-bg-color: white;
 
 // Fonts

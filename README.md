@@ -19,7 +19,6 @@ go run autocontract.go -d 1234
 
 # TODOs
 - must haves, improve UI/UX:
-    - :hover styles on buttons !!
     - auto-complete form using name
     - submit disables the submit button and shows error on timeout (30s ?)
     - all colors seem nice

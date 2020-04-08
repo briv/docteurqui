@@ -59,6 +59,10 @@
     &:active {
         background-color: darken($button-bg-color, 20%);
     }
+
+    &:hover {
+        background-color: $hover-button-bg-color;
+    }
 }
 
 @mixin input-border-like {
@@ -383,19 +387,18 @@ form.contract {
             border-color: $button-border-color;
 
             .profile-option {
-                background-color: $split-button-main-bg-color;
+                background-color: $split-button-bg-color;
                 border-top-left-radius: 8px;
                 border-bottom-left-radius: 8px;
                 padding: 0 0 0 0.5em;
 
-                &:active {
-                    background-color: $light-button-active-color;
+                &:active, &:hover {
+                    background-color: $hover-split-button-bg-color;
                 }
 
                 &:focus {
                     @include focused;
                 }
-
                 cursor: pointer;
                 flex: 1 1 85%;
 
@@ -441,8 +444,10 @@ form.contract {
     position: absolute;
     width: 100%;
     display: flex;
+
     // Avoid the user being able to select the autocomplete possibilites.
     user-select: none;
+    cursor: default;
 
     ul {
         margin: 0;
