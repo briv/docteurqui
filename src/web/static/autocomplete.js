@@ -76,7 +76,9 @@ export const InputAutocompleter = function (input) {
     }
     const formPart = fieldset.dataset.enhancedFormPart;
 
+    let isCurrentlyFocused = false;
     const handleBlur = (e) => {
+        isCurrentlyFocused = false;
         // Do not remove our autocomplete list on blur if the user just selected one of the items:
         // the 'click' handler won't fire otherwise !
         if (e.relatedTarget && e.relatedTarget.dataset.isAutoCompleteItem) {
@@ -88,6 +90,7 @@ export const InputAutocompleter = function (input) {
 
     let previousRequestInfo = {};
     const handleInput = (e) => {
+        isCurrentlyFocused = true;
         if (previousRequestInfo.abortController) {
             previousRequestInfo.abortController.abort();
         }
@@ -135,7 +138,12 @@ export const InputAutocompleter = function (input) {
                 try {
                     const results = await response.json();
                     const parentNode = inputEl.closest('.autocomplete-parent');
-                    createAutoCompleteList(parentNode, inputEl, formPart, results.matches);
+                    // Since the response is asynchronous, we might end up here after the user has
+                    // changed focus to a different input field. We don't want autocomplete results
+                    // popping up in that case.
+                    if (isCurrentlyFocused) {
+                        createAutoCompleteList(parentNode, inputEl, formPart, results.matches);
+                    }
                 } catch (err) {
 
                 }
