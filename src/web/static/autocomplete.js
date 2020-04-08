@@ -118,6 +118,11 @@ export const InputAutocompleter = function (input) {
             removeAutoCompleteList(inputEl);
         }, MsDurationToHideOldResultsIfWaitIsTooLong);
 
+        // If a request is aborted, we need to clear the timer otherwise it will fire for sure.
+        abortController.signal.addEventListener('abort', () => {
+            clearTimeout(hideOldResultsIfWaitIsTooLongTimerId);
+        });
+
         fetch(url, {
             method: 'GET',
             cache: 'no-cache',
@@ -125,10 +130,10 @@ export const InputAutocompleter = function (input) {
             redirect: 'follow',
             signal: abortController.signal,
         }).then(async (response) => {
+            clearTimeout(hideOldResultsIfWaitIsTooLongTimerId);
             if (response.ok) {
                 try {
                     const results = await response.json();
-                    clearTimeout(hideOldResultsIfWaitIsTooLongTimerId);
                     const parentNode = inputEl.closest('.autocomplete-parent');
                     createAutoCompleteList(parentNode, inputEl, formPart, results.matches);
                 } catch (err) {

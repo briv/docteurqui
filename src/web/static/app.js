@@ -51,6 +51,11 @@ const setupFormIntercept = (form, UI) => {
             e.preventDefault();
         }
 
+        // Blur any currently focused input.
+        if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+            document.activeElement.blur();
+        }
+
         const rawFormData = new FormData(form);
         const url = form.action;
         const formData = processFormData(rawFormData);
@@ -81,16 +86,19 @@ const setupFormIntercept = (form, UI) => {
             })
             .then(response => response.blob())
             .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
+                // See https://bugs.webkit.org/show_bug.cgi?id=197441 for WebKit error with blobs.
+                const blobUrl = window.URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = blobUrl;
-                a.download = "Contrat remplacement.pdf";
-                // We need to append the element to the dom, otherwise it will not work in firefox.
+                if ('download' in a) {
+                    a.download = 'Contrat remplacement.pdf';
+                }
+                // We need to append the element to the dom, otherwise it will not work in IE or recent Firefox versions.
                 document.body.appendChild(a);
                 a.click();
                 // Afterwards we remove the element again.
                 a.remove();
-                URL.revokeObjectURL(blobUrl);
+                window.URL.revokeObjectURL(blobUrl);
             });
 
         submission.catch(err => UI.errorHandler(err));

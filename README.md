@@ -19,7 +19,6 @@ go run autocontract.go -d 1234
 
 # TODOs
 - must haves, improve UI/UX:
-    - auto-complete form using name
     - submit disables the submit button and shows error on timeout (30s ?)
     - all colors seem nice
     - change button styles to make primary "submit" button pop out WAY more
