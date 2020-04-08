@@ -42,15 +42,20 @@ type drSearcher struct {
 	index              *atomic.Value // really an *nGramsIndex
 	dataDirectory      string
 	semWorkLimiter     *semaphore.Weighted
+	nGramSize          int
 	maxUserQueryLength int
 }
 
-func New(rawDataDir string, maxUserQueryLength int, maxConcurrentQueries int) DoctorSearcher {
+// New returns a DoctorSearcher capable of servicing user queries.
+//
+// Note that maxUserQueryLength is measured in bytes (and not in runes i.e characteres).
+func New(rawDataDir string, nGramSize int, maxUserQueryLength int, maxConcurrentQueries int) DoctorSearcher {
 	semTotalWeight := int64(maxConcurrentQueries)
 	s := &drSearcher{
 		index:              &atomic.Value{},
 		dataDirectory:      rawDataDir,
 		semWorkLimiter:     semaphore.NewWeighted(semTotalWeight),
+		nGramSize:          nGramSize,
 		maxUserQueryLength: maxUserQueryLength,
 	}
 	// On creation, build search index to enable queries.
@@ -68,12 +73,16 @@ func (ds drSearcher) Query(ctx context.Context, unsafeUserQuery string, maxNumbe
 
 	// Check that our user query is valid UTF-8
 	if utf8.ValidString(unsafeUserQuery) == false {
-		return nil, fmt.Errorf("%w, query (length %d) was not valid utf-8", InvalidUserQuery, len(unsafeUserQuery))
+		return nil, fmt.Errorf("%w, query (%d bytes) was not valid utf-8", InvalidUserQuery, len(unsafeUserQuery))
 	}
 
 	normalizedNoAccentQuery, _, err := transform.String(removeAccentsTransformer, unsafeUserQuery)
 	if err != nil {
 		return nil, fmt.Errorf("%w, query normalization and accent removal failed", InvalidUserQuery)
+	}
+
+	if utf8.RuneCountInString(normalizedNoAccentQuery) < ds.nGramSize {
+		return nil, fmt.Errorf("%w, minimum query length is %d", InvalidUserQuery, ds.nGramSize)
 	}
 
 	// Limit the number of concurrent queries.
@@ -120,9 +129,8 @@ func (ds *drSearcher) tryToRecreateIndex() {
 		log.Fatalf("error opening data file %s \n", err)
 		return
 	}
-	const NGramSize = 3
 	start := time.Now()
-	index, err := newNGramsIndex(databaseFile, NGramSize)
+	index, err := newNGramsIndex(databaseFile, ds.nGramSize)
 	if err != nil {
 		log.Fatalf("error creating index %s \n", err)
 		return

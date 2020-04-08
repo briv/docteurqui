@@ -34,6 +34,7 @@ const (
 	PdfGenerationTimeout              = 10 * time.Second
 	PurePdfGenerationTimeoutDiff      = 1 * time.Second
 
+	DoctorSearchNGramSize            = 3
 	DoctorSearchQueryTimeout         = 5 * time.Second
 	DoctorSearchMaxNumberResults     = 5
 	MaxDoctorSearchQueryLength       = 40
@@ -269,7 +270,7 @@ func main() {
 
 	// Setup doctor search structure
 	// TODO: use flag for value
-	SharedDoctorSearcher = doctorsearch.New("/Users/blaiserivet/Documents/Blaise/dev/autoContratRempla/src/test-search/PS_LibreAcces_202003041402/", MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
+	SharedDoctorSearcher = doctorsearch.New("/Users/blaiserivet/Documents/Blaise/dev/autoContratRempla/src/test-search/PS_LibreAcces_202003041402/", DoctorSearchNGramSize, MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
 
 	// Internal HTTP server for use with headless Web browser instance to convert web pages to PDF.
 	errChan := make(chan error)
