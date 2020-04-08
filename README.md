@@ -40,6 +40,7 @@ go run autocontract.go -d 1234
     - use a real icon instead of emoji X for "delete" buttons
     - use an icon (see Stripe register page) next to the form error messages.
     - use https://github.com/Polymer/lit-html for HTML generation within JS code ?
+    - fix error popping up on address field when user autocompletes with a Dr who has a blank "address" field.
 
 - use golangCI-lint for Go linting
 

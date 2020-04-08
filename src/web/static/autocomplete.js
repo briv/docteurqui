@@ -67,15 +67,14 @@ const createAutoCompleteList = (parentNode, input, formPart, results) => {
     parentNode.appendChild(list);
 };
 
-export const makeInputAutocomplete = (input) => {
+export const InputAutocompleter = function (input) {
     const fieldset = input.closest('fieldset');
     if (!fieldset) {
-        return;
+        throw new Error('InputAutocompleter expects an ancestor <fieldset> element');
     }
     const formPart = fieldset.dataset.enhancedFormPart;
 
-    let previousValue = null;
-    input.addEventListener('blur', (e) => {
+    const handleBlur = (e) => {
         // Do not remove our autocomplete list on blur if the user just selected one of the items:
         // the 'click' handler won't fire otherwise !
         if (e.relatedTarget && e.relatedTarget.dataset.isAutoCompleteItem) {
@@ -83,9 +82,10 @@ export const makeInputAutocomplete = (input) => {
         }
         const inputEl = e.currentTarget;
         removeAutoCompleteList(inputEl);
-    });
+    };
 
-    input.addEventListener('input', (e) => {
+    let previousValue = null;
+    const handleInput = (e) => {
         const inputEl = e.currentTarget;
         const { value } = inputEl;
 
@@ -122,5 +122,25 @@ export const makeInputAutocomplete = (input) => {
         query.catch(() => {
             // TODO: do nothing if it fails ?
         });
-    });
+    };
+
+    // This boolean allows setup() and remove() calls to be used without fear
+    // of calling one too many times.
+    let isSetup = false;
+
+    this.setup = () => {
+        if (isSetup === false) {
+            isSetup = true;
+            input.addEventListener('blur', handleBlur);
+            input.addEventListener('input', handleInput);
+        }
+    };
+
+    this.remove = () => {
+        if (isSetup === true) {
+            isSetup = false;
+            input.removeEventListener('blur', handleBlur);
+            input.removeEventListener('input', handleInput);
+        }
+    };
 };

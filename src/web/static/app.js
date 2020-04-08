@@ -6,7 +6,7 @@ import { saveFilledFormData, createPersistedDataQuickFillUI } from './form-fill'
 import { Validators, ErrorHandler, FormValidationIssues } from './live-form-feedback';
 import { createSinglePeriodInput, parseFormattedFRDate } from './periods-input';
 import { polyfill } from './polyfills';
-import { makeInputAutocomplete } from './autocomplete';
+import { InputAutocompleter } from './autocomplete';
 
 const ElementQueries = {
     SubstituteSignatureParent: 'fieldset#substitute-fieldset',
@@ -196,13 +196,22 @@ const setupDynamicFormChanges = (form) => {
     const dynamicLabel = form.querySelector('label[for="substitute-substitutingID"]');
     const elementsToMonitor = form.querySelectorAll('input[type=radio][name="substitute-title"]');
 
+    const substituteNameInput = form.querySelector('#substitute-name');
+    const autocompleter = new InputAutocompleter(substituteNameInput);
+
     elementsToMonitor.forEach(element => {
         element.addEventListener('change', event => {
             const newValue = event.target.value;
             if (newValue === 'Madame' || newValue === 'Monsieur') {
                 dynamicLabel.textContent = 'Numéro de licence de remplacement:';
+
+                autocompleter.remove();
+
             } else if (newValue === 'Docteur') {
                 dynamicLabel.textContent = `Numéro d'inscription au tableau de l'ordre:`;
+
+                // Setup auto-complete of names if the substitute is a doctor.
+                autocompleter.setup();
             }
         });
     });
@@ -315,7 +324,8 @@ const setupLiveFormFeedback = (form) => {
 
 const setupAutocomplete = (form) => {
     const regularNameInput = form.querySelector('#regular-name');
-    makeInputAutocomplete(regularNameInput);
+    const autocompleter = new InputAutocompleter(regularNameInput);
+    autocompleter.setup();
 };
 
 const setupUIWithin = (form) => {
