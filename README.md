@@ -19,7 +19,6 @@ go run autocontract.go -d 1234
 
 # TODOs
 - must haves, improve UI/UX:
-    - ERROR management ! show user something if it goes wrong (7 to do it seems)
     - :hover styles on buttons !!
     - auto-complete form using name
     - submit disables the submit button and shows error on timeout (30s ?)
@@ -37,9 +36,11 @@ go run autocontract.go -d 1234
         - CSP headers, both on front-end and also on PDF generation "website"
 
 - nice to haves
+    - fix autocomplete menu on desktop Safari (involves changing label/input "name" and "id" attrs so Safari doesn't guess about autocomplete)
     - only allow numbers in RPPS fields
     - use a real icon instead of emoji X for "delete" buttons
     - use an icon (see Stripe register page) next to the form error messages.
+    - use https://github.com/Polymer/lit-html for HTML generation within JS code ?
 
 - use golangCI-lint for Go linting
 

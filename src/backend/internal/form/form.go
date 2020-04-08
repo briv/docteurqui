@@ -98,7 +98,7 @@ var (
 		requiredField, maxLength(MaxTitleLength), oneOf([]string{datamap.Docteur, datamap.Madame, datamap.Monsieur}),
 	}
 	GenericMaxLength = []validationFunc{
-		maxLength(MaxGenericLength),
+		requiredField, maxLength(MaxGenericLength),
 	}
 )
 
@@ -107,17 +107,17 @@ func sanitizeSignature(rawData string) (string, error) {
 	if signatureSize == 0 {
 		return "", nil
 	}
-	// fmt.Printf("!!!!! Signature size is %dkB\n", signatureSize/1024)
+
 	if signatureSize > MaxSignatureSizeBytes {
-		return "", fmt.Errorf("maximum size of base64 encoded signature image is %dkB (input is %dkB)", MaxSignatureSizeBytes/1024, signatureSize/1024)
+		return "", fmt.Errorf("%w, maximum size of base64 encoded signature image is %dkB (input is %dkB)", validation.LengthError, MaxSignatureSizeBytes/1024, signatureSize/1024)
 	}
 	dataURL, signatureErr := dataurl.DecodeString(rawData)
 	if signatureErr != nil {
-		return "", signatureErr
+		return "", fmt.Errorf("%w, %s", validation.ParseError, signatureErr)
 	}
 
 	if dataURL.ContentType() != "image/svg+xml" {
-		return "", fmt.Errorf("unexpected media type in signature dataurl '%s'", dataURL.ContentType())
+		return "", fmt.Errorf("%w, unexpected media type in signature dataurl '%s'", validation.ParseError, dataURL.ContentType())
 	}
 	// Encode the data ourselves to be sure the Data URL is exactly what we expect
 	// and we can stuff the value into the "src" attribute of an HTML <img> element.

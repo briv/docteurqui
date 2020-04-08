@@ -211,6 +211,7 @@ const setupDynamicFormChanges = (form) => {
 const setupLiveFormFeedback = (form) => {
     const NameMessage = 'Le "Nom complet" doit être renseigné.';
     const RPPSMessage = 'Le RRPS doit faire 11 chiffres.';
+    const AddressMessage = `L'addresse doit être renseignée.`;
     const SIRETMessage = 'Le SIRET doit faire 14 chiffres.';
     const PeriodsMessageMap = (error) => {
         if (error === FormValidationIssues.MissingRequired) {
@@ -238,6 +239,13 @@ const setupLiveFormFeedback = (form) => {
             errorLink: 'le RPPS du médecin remplacé',
         },
         {
+            name: 'regular-address',
+            querySelector: '#regular-address',
+            check: Validators.Required,
+            overridingMesssage: AddressMessage,
+            errorLink: `l'addresse du médecin remplacé`,
+        },
+        {
             name: 'substitute-title',
             querySelector: 'input[name="substitute-title"]',
             errorLink: 'le titre du remplaçant',
@@ -262,6 +270,19 @@ const setupLiveFormFeedback = (form) => {
             check: Validators.Length(14),
             overridingMesssage: SIRETMessage,
             errorLink: 'le SIRET du remplaçant',
+        },
+        {
+            name: 'substitute-substitutingID',
+            querySelector: '#substitute-substitutingID',
+            check: Validators.Required,
+            errorLink: `le numéro d'inscription au tableau / la licence de remplaçement`,
+        },
+        {
+            name: 'substitute-address',
+            querySelector: '#substitute-address',
+            check: Validators.Required,
+            overridingMesssage: AddressMessage,
+            errorLink: `l'addresse du remplaçant`,
         },
         {
             name: 'period-start',
