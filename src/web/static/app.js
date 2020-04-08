@@ -86,7 +86,6 @@ const setupFormIntercept = (form, UI) => {
             })
             .then(response => response.blob())
             .then(blob => {
-                // See https://bugs.webkit.org/show_bug.cgi?id=197441 for WebKit error with blobs.
                 const blobUrl = window.URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = blobUrl;
@@ -98,7 +97,12 @@ const setupFormIntercept = (form, UI) => {
                 a.click();
                 // Afterwards we remove the element again.
                 a.remove();
-                window.URL.revokeObjectURL(blobUrl);
+
+                // See https://bugs.webkit.org/show_bug.cgi?id=197441 for WebKit error with blobs.
+                // Maybe revoking the ObjectURL too soon causes an issue ?
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(blobUrl);
+                }, 10 * 1000);
             });
 
         submission.catch(err => UI.errorHandler(err));
