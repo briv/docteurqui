@@ -4,11 +4,13 @@ import { fillFormField } from "./form-fill";
 const AutoCompleteURLPath = '/b/search-doctor';
 const MinQueryLength = 3;
 
-const shouldAutoCompleteForValue = (value, previousValue) => {
+const MsDurationToHideOldResultsIfWaitIsTooLong = 1000;
+
+const shouldAutoCompleteForValue = (value, previousRequestInfo) => {
     if (value.length < MinQueryLength) {
         return false;
     }
-    if (value !== previousValue) {
+    if (!previousRequestInfo.value || value !== previousRequestInfo.value) {
         return true;
     }
     return false;
@@ -84,48 +86,65 @@ export const InputAutocompleter = function (input) {
         removeAutoCompleteList(inputEl);
     };
 
-    let previousValue = null;
+    let previousRequestInfo = {};
     const handleInput = (e) => {
+        if (previousRequestInfo.abortController) {
+            previousRequestInfo.abortController.abort();
+        }
+
         const inputEl = e.currentTarget;
         const { value } = inputEl;
 
-        const parentNode = inputEl.closest('.autocomplete-parent');
-
-        if (shouldAutoCompleteForValue(value, previousValue) === false) {
+        if (shouldAutoCompleteForValue(value, previousRequestInfo) === false) {
+            removeAutoCompleteList(inputEl);
             return;
         }
-        previousValue = value;
 
         const url = new URL(AutoCompleteURLPath, document.URL);
         const params = new URLSearchParams();
         params.set('query', value);
         url.search = params.toString();
 
-        const query = fetch(url, {
+        const abortController = new AbortController();
+
+        previousRequestInfo = {
+            ...previousRequestInfo,
+            abortController,
+            value,
+        };
+
+        // If the new request is taking too long, remove old autocomplete results.
+        const hideOldResultsIfWaitIsTooLongTimerId = setTimeout(() => {
+            removeAutoCompleteList(inputEl);
+        }, MsDurationToHideOldResultsIfWaitIsTooLong);
+
+        fetch(url, {
             method: 'GET',
             cache: 'no-cache',
             credentials: 'omit',
             redirect: 'follow',
-        });
-
-        query.then(async (response) => {
+            signal: abortController.signal,
+        }).then(async (response) => {
             if (response.ok) {
                 try {
                     const results = await response.json();
+                    clearTimeout(hideOldResultsIfWaitIsTooLongTimerId);
+                    const parentNode = inputEl.closest('.autocomplete-parent');
                     createAutoCompleteList(parentNode, inputEl, formPart, results.matches);
                 } catch (err) {
 
                 }
             }
-        });
-
-        query.catch(() => {
-            // TODO: do nothing if it fails ?
+        }).catch((err) => {
+            if (err.name === 'AbortError') {
+                // Do nothing in case of an aborted request.
+            }
+            // Do nothing in case a query fails.
         });
     };
 
     // This boolean allows setup() and remove() calls to be used without fear
-    // of calling one too many times.
+    // of calling one more times than the other.
     let isSetup = false;
 
     this.setup = () => {
