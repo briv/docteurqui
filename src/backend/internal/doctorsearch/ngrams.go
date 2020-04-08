@@ -412,24 +412,32 @@ func (rec *rawPersonActivityRecord) Address() string {
 		return ""
 	}
 
+	didWriteStreetNumber := false
+
 	var sb strings.Builder
 	// Only include number if it is present.
 	numeroVoie := strings.TrimSpace(rec.NumeroVoie)
 	if numeroVoie != "" {
 		sb.WriteString(numeroVoie)
+		didWriteStreetNumber = true
 	}
 	// Only include bis/ter/... if present.
 	indiceRepetitionVoie := strings.TrimSpace(rec.IndiceRepetitionVoie)
 	if indiceRepetitionVoie != "" {
 		sb.WriteString(indiceRepetitionVoie)
+		didWriteStreetNumber = true
+	}
+
+	if didWriteStreetNumber {
+		sb.WriteString(" ")
 	}
 
 	libelleTypeDeVoie := strings.TrimSpace(rec.LibelleTypeDeVoie)
 	if libelleTypeDeVoie != "" {
-		fmt.Fprintf(&sb, " %s", strings.ToLower(libelleTypeDeVoie))
+		fmt.Fprintf(&sb, "%s ", strings.ToLower(libelleTypeDeVoie))
 	}
 
-	fmt.Fprintf(&sb, " %s, %s %s",
+	fmt.Fprintf(&sb, "%s, %s %s",
 		strings.Title(strings.ToLower(libelleVoie)),
 		codePostal,
 		strings.ToUpper(libelleCommune),
