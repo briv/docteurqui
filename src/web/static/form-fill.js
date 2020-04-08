@@ -24,6 +24,7 @@ const FormDataKeySuffixWhiteList = {
         FormDataKeySuffixes.Primary,
         FormDataKeySuffixes.Name,
         FormDataKeySuffixes.Title,
+        'siret',
         'substitutingID',
         'address',
     ])),

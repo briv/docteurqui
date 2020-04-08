@@ -21,6 +21,7 @@ type Person struct {
 	HonorificTitle string
 	NumberRPPS     string
 	// Only applies to substitute doctors
+	NumberSIRET          string
 	NumberSubstitutingID string
 	Address              string
 	SignatureImgHtml     string

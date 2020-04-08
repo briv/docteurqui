@@ -211,6 +211,7 @@ const setupDynamicFormChanges = (form) => {
 const setupLiveFormFeedback = (form) => {
     const NameMessage = 'Le "Nom complet" doit être renseigné.';
     const RPPSMessage = 'Le RRPS doit faire 11 chiffres.';
+    const SIRETMessage = 'Le SIRET doit faire 14 chiffres.';
     const PeriodsMessageMap = (error) => {
         if (error === FormValidationIssues.MissingRequired) {
             return 'Il faut préciser au moins une pèriode de remplacement.';
@@ -254,6 +255,13 @@ const setupLiveFormFeedback = (form) => {
             check: Validators.Length(11),
             overridingMesssage: RPPSMessage,
             errorLink: 'le RPPS du remplaçant',
+        },
+        {
+            name: 'substitute-siret',
+            querySelector: '#substitute-siret',
+            check: Validators.Length(14),
+            overridingMesssage: SIRETMessage,
+            errorLink: 'le SIRET du remplaçant',
         },
         {
             name: 'period-start',

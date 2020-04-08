@@ -455,8 +455,9 @@ form.contract {
 
         li {
             margin: 0;
+            padding: 0.4em 0.2em;
 
-            &:hover {
+            &:hover, &:active {
                 background-color: gray;
             }
         }

@@ -16,8 +16,8 @@ import (
 
 const (
 	MaxNameLength    = 200
-	MinRPPSLength    = 11
-	MaxRPPSLength    = 11
+	RPPSLength       = 11
+	SIRETLength      = 14
 	MaxTitleLength   = 50
 	MaxGenericLength = 400
 
@@ -89,7 +89,10 @@ var (
 		requiredField, maxLength(MaxNameLength),
 	}
 	RPPSValidators = []validationFunc{
-		requiredField, maxLength(MaxRPPSLength), minLength(MinRPPSLength),
+		requiredField, maxLength(RPPSLength), minLength(RPPSLength),
+	}
+	SIRETValidators = []validationFunc{
+		requiredField, maxLength(SIRETLength), minLength(SIRETLength),
 	}
 	TitleValidators = []validationFunc{
 		requiredField, maxLength(MaxTitleLength), oneOf([]string{datamap.Docteur, datamap.Madame, datamap.Monsieur}),
@@ -203,6 +206,7 @@ func Process(r *http.Request, manner FormProcessingManner) (datamap.SafeUserData
 	substituteName := validateField("substitute-name", r, validationIssues, NameValidators)
 	substituteTitle := validateField("substitute-title", r, validationIssues, TitleValidators)
 	substituteRPPS := validateField("substitute-rpps", r, validationIssues, RPPSValidators)
+	substituteSIRET := validateField("substitute-siret", r, validationIssues, SIRETValidators)
 
 	safeSubstituteSignature, err := sanitizeSignature(r.PostFormValue("substitute-signature"))
 	if err != nil {
@@ -213,6 +217,7 @@ func Process(r *http.Request, manner FormProcessingManner) (datamap.SafeUserData
 		Name:                 substituteName,
 		HonorificTitle:       substituteTitle,
 		NumberRPPS:           substituteRPPS,
+		NumberSIRET:          substituteSIRET,
 		NumberSubstitutingID: validateField("substitute-substitutingID", r, validationIssues, GenericMaxLength),
 		Address:              validateField("substitute-address", r, validationIssues, GenericMaxLength),
 		SignatureImgHtml:     safeSubstituteSignature,
