@@ -56,10 +56,6 @@
         @include focused;
     }
 
-    &:active {
-        background-color: darken($button-bg-color, 20%);
-    }
-
     &:hover {
         background-color: $hover-button-bg-color;
     }
@@ -103,15 +99,12 @@ body, button, input {
 a {
     &:link, &:visited, &:any-link {
         color: $link-color;
-        text-decoration: underline;
+        text-decoration: none;
     }
 
     &:hover {
         color: lighten($link-color, 15%);
-    }
-
-    &:active {
-        color: $link-active-color;
+        text-decoration: underline;
     }
 }
 
@@ -123,14 +116,30 @@ a {
     padding: 0.6em 0;
 }
 
-.main, .footer {
-    margin: 0 5px;
+.main-explanation {
+    margin: 0 0.2em;
 }
 
 .footer {
     margin-top: 1em;
     padding-top: 1em;
-    border-top: 2px solid gray;
+    background-color: $footer-bg-color;
+
+    flex-wrap: wrap;
+
+    .footer-section {
+        flex: 0 0 100%;
+        padding: 0 1em;
+        margin-bottom: 2em;
+
+        .title {
+            margin: 0;
+        }
+
+        p {
+            margin: 1em 0;
+        }
+    }
 }
 
 @keyframes pulse {
@@ -171,6 +180,7 @@ h3 {
 
 form.contract {
     > fieldset {
+        margin: 0;
         margin: {
             top: 2em;
             bottom: 1em;
@@ -243,7 +253,7 @@ form.contract {
         align-self: center;
         background-color: $submit-button-bg-color;
 
-        &:hover, &:active {
+        &:hover {
             background-color: $hover-submit-button-bg-color;
         }
     }
@@ -405,7 +415,7 @@ form.contract {
                 border-bottom-left-radius: 8px;
                 padding: 0 0 0 0.5em;
 
-                &:active, &:hover {
+                &:hover {
                     background-color: $hover-split-button-bg-color;
                 }
 
@@ -498,20 +508,11 @@ form.contract {
             padding: 0.4em 0.2em;
 
             &:hover, &:active {
-                background-color: gray;
+                background-color: $highlight-autocomplete-bg-color;
             }
         }
     }
 }
 
-
-@media (min-width:768px) {
-    form.contract {
-
-        .signature-pad-container {
-            .signature-pad {
-                max-width: 25em;
-            }
-        }
-    }
-}
+// For larger displays such as desktop.
+@import 'media.scss';

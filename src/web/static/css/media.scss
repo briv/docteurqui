@@ -1,0 +1,24 @@
+$min-width-for-desktop: 840px;
+@media (min-width: $min-width-for-desktop) {
+    .main {
+        max-width: $min-width-for-desktop;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .footer {
+        .footer-section {
+            flex: 0 0 33%;
+        }
+    }
+
+    form.contract {
+        max-width: $min-width-for-desktop;
+
+        .signature-pad-container {
+            .signature-pad {
+                max-width: 25em;
+            }
+        }
+    }
+}

@@ -3,8 +3,9 @@ $body-color: black;
 $header-bg-color: #0b0c0c;
 $header-color: rgb(255, 255, 255);
 
+$footer-bg-color: lightgray;
+
 $link-color: #005ea5;
-$link-active-color: #ffbf47;
 
 $call-to-action-bg-color: #eddaf5;
 $error-call-to-action-bg-color: #f57c74;
@@ -34,6 +35,7 @@ $invalid-focused-color: rgba(202, 73, 63, 0.5);
 
 // Autocomplete colors
 $autocomplete-bg-color: rgb(204, 204, 204);
+$highlight-autocomplete-bg-color: darken($autocomplete-bg-color, 40%);
 
 // Very specific colors
 $custom-input-bg-color: white;
