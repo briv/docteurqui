@@ -15,7 +15,7 @@ var defaultCSPConfig = &secureheader.Config{
 	ContentTypeOptions: true,
 
 	CSP:          true,
-	CSPBody:      "default-src 'self'; connect-src 'self' ws:",
+	CSPBody:      "default-src 'self'; connect-src 'self' ws:;script-src 'self' 'unsafe-eval'",
 	CSPReportURI: "",
 
 	CSPReportOnly: false,
