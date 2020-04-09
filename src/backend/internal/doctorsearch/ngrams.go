@@ -424,7 +424,7 @@ func (rec *rawPersonActivityRecord) Address() string {
 	// Only include bis/ter/... if present.
 	indiceRepetitionVoie := strings.TrimSpace(rec.IndiceRepetitionVoie)
 	if indiceRepetitionVoie != "" {
-		sb.WriteString(indiceRepetitionVoie)
+		sb.WriteString(strings.ToLower(indiceRepetitionVoie))
 		didWriteStreetNumber = true
 	}
 
