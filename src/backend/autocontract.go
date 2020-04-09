@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"autocontract/internal/csp"
 	"autocontract/internal/datamap"
 	"autocontract/internal/doctorsearch"
 	"autocontract/internal/form"
@@ -225,6 +226,11 @@ func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
+	// As an extra paranoid step, use a CSP header for internal web-server used for PDF generation.
+	// Go's html/template package is used for escaping user content so injections shouldn't be an issue,
+	// but defense in depth can't hurt.
+	w.Header().Set(csp.CSPHeader, csp.PdfCSPHeader)
+
 	userDataKey := r.URL.Query().Get(InternalHttpServerPdfTemplateRequestUserQueryKey)
 
 	sharedUserData := sharedUserDataFromContext(r.Context())
@@ -295,15 +301,18 @@ func main() {
 	// Public-facing HTTP server.
 	go func() {
 		publicServeMux := http.NewServeMux()
+
+		var rootHandler http.Handler
 		if *devWebsiteProxyPort == "" {
-			publicServeMux.Handle("/", http.FileServer(http.Dir(*publicFacingWebsitePathRoot)))
+			rootHandler = http.FileServer(http.Dir(*publicFacingWebsitePathRoot))
 		} else {
 			urlToProxyTo, err := url.Parse(fmt.Sprintf("http://localhost:%s/", *devWebsiteProxyPort))
 			if err != nil {
 				log.Fatal(err)
 			}
-			publicServeMux.Handle("/", httputil.NewSingleHostReverseProxy(urlToProxyTo))
+			rootHandler = httputil.NewSingleHostReverseProxy(urlToProxyTo)
 		}
+		publicServeMux.Handle("/", csp.WithSecurityHeaders(rootHandler))
 
 		publicServeMux.HandleFunc("/b/generate-contract", withContext(
 			withTimeZoneLocation(parisLocation, forMethod(http.MethodPost, genContractHandler))))

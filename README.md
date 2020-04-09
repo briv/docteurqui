@@ -22,13 +22,12 @@ go run autocontract.go -d 1234
     - all colors seem nice https://lospec.com/palette-list/
     - have a footer/header with info about the site and links to other sites
     - make desktop version better
+    - remove all hard-coded paths/...
     - analytics for ME:
         - try grafana + loki https://github.com/grafana/loki/tree/master/docs, with 25GB of disk space should be plenty before dedicated aggregated metrics are needed
         - from back-end, log:
             - a line whith subRRPS | regular RPPS | timestamp on each contract that is genereated
             - a line whenever an error occurs (whether in JS or in backend), with some details: timestamp | requestUUID | errorMessage
-    - security:
-        - CSP headers, both on front-end and also on PDF generation "website"
 
 - nice to haves
     - fix autocomplete menu on desktop Safari (involves changing label/input "name" and "id" attrs so Safari doesn't guess about autocomplete)

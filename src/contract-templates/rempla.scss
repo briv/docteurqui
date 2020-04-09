@@ -18,7 +18,8 @@ html, body {
     margin: 20mm 0mm 20mm 0mm;
     counter-increment: page;
     @bottom-center {
-        content: "(c) XX COMPANY - Page " counter(page);
+        // This doesn't work currently.
+        content: "Page " counter(page);
         color: grey;
     }
 }

@@ -1,11 +1,11 @@
 package pdfgen
 
 import (
-	"io/ioutil"
 	"context"
-	"net/http"
 	"fmt"
 	"html/template"
+	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/mafredri/cdp"
@@ -18,8 +18,8 @@ import (
 
 // TODO: improve manager for concurrent access to the single chromium frame/target for pdf generation
 type Control struct {
-	devToolsConnUrl string
-	devToolsConnTimeout time.Duration
+	devToolsConnUrl      string
+	devToolsConnTimeout  time.Duration
 	devToolsProtocolConn *rpcc.Conn
 	oneTargetClient      *cdp.Client
 	Template             *template.Template
@@ -30,17 +30,13 @@ func (pdfGen *Control) Init(url string, connectionTimeout time.Duration) error {
 	// TODO: finish real template generation
 
 	// initialize templates
+	// TODO: this should not be hard-coded.
 	b, err := ioutil.ReadFile("/Users/blaiserivet/Documents/Blaise/dev/autoContratRempla/src/contract-templates/dist/index.html")
 	if err != nil {
 		return err
 	}
 
-	funcMap := template.FuncMap{
-		"safe": func(s string) template.HTML {
-			return template.HTML(s)
-		},
-	}
-	t, err := template.New("rempla-étudiant").Funcs(funcMap).Parse(string(b))
+	t, err := template.New("rempla-étudiant").Parse(string(b))
 	if err != nil {
 		return err
 	}
