@@ -1,41 +1,47 @@
+@use "sass:color";
+
+// Root colors
+$--error-color: #c92c17;
+$--form-main-bg-color: #f3f3f3;
+
 // Colors
-$body-color: black;
-$header-bg-color: #0b0c0c;
-$header-color: rgb(255, 255, 255);
+$body-color: #10121c;
+$header-bg-color: #10121c;
+$header-color: #ffffff;
 
-$footer-bg-color: lightgray;
+$footer-bg-color: #f6e8e0;
 
-$link-color: #005ea5;
+$link-color: #3859b3;
 
-$call-to-action-bg-color: #eddaf5;
-$error-call-to-action-bg-color: #f57c74;
-$form-legend-bg-color: #dee0e2;
-$form-part-bg-color: lighten($form-legend-bg-color, 5%);
-$input-border-color: #dee0e2;
+$call-to-action-bg-color: $footer-bg-color;
+$error-call-to-action-bg-color: color.scale($--error-color, $lightness: 80%);
+$form-legend-bg-color: color.scale($--form-main-bg-color, $lightness: -8%);
+$form-part-bg-color: $--form-main-bg-color;
+$input-border-color: $form-legend-bg-color;
 
-$button-bg-color: #a4bbcc;
-$hover-button-bg-color: darken($button-bg-color, 20%);
-$button-border-color: darken($button-bg-color, 50%);
+$button-bg-color: #aba8b2;
+$hover-button-bg-color: color.scale($button-bg-color, $lightness: -15%);
+$button-border-color: color.scale($button-bg-color, $lightness: -50%);
 
 // "Special button" colors:
 // - the submit button
-$submit-button-bg-color: #63cc75;
-$hover-submit-button-bg-color: darken($submit-button-bg-color, 20%);
-$submit-button-spinner-color: rgb(0, 102, 5);
+$submit-button-bg-color: #8ed081;
+$hover-submit-button-bg-color: color.scale($submit-button-bg-color, $lightness: -25%);
+$submit-button-spinner-color: color.scale($submit-button-bg-color, $lightness: 35%);
 // - the split buttons
-$split-button-bg-color: white;
-$hover-split-button-bg-color: darken($input-border-color, 20%);
+$split-button-bg-color: $button-bg-color;
+$hover-split-button-bg-color: $hover-button-bg-color;
 
-$error-feedback-color: rgb(197, 14, 14);
-$error-feedback-accent-color: rgb(252, 168, 168);
+$error-feedback-color: $--error-color;
+$error-feedback-accent-color: color.scale($--error-color, $lightness: 30%);
 
 // Focus colors
-$focused-color: rgba(66,153,225,.5);
-$invalid-focused-color: rgba(202, 73, 63, 0.5);
+$focused-color: #3388de;
+$invalid-focused-color: $error-feedback-accent-color;
 
 // Autocomplete colors
 $autocomplete-bg-color: rgb(204, 204, 204);
-$highlight-autocomplete-bg-color: darken($autocomplete-bg-color, 40%);
+$highlight-autocomplete-bg-color: color.scale($autocomplete-bg-color, $lightness: -35%);
 
 // Very specific colors
 $custom-input-bg-color: white;

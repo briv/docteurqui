@@ -131,7 +131,8 @@ export const ErrorHandler = (form, formFeedbackDescriptions) => {
             el.classList.add('error-animation', 'd-flex', 'flex-column');
         }));
 
-        smoothScrollTo(errorContainer);
+        // TODO: see https://stackoverflow.com/questions/50074823/how-can-i-keep-scroll-position-when-add-dom-to-top for how we could keep our scroll position while adding error elements and have a prettier effect.
+        setTimeout(() => { smoothScrollTo(errorContainer); }, 10);
     };
 
     eh.form = form;

@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // TODO: use nicer @imports instead of hard-coded paths.
 // e.g. @import "~normalize.css/normalize.css";
 @import '../../node_modules/normalize.css/normalize.css';
@@ -103,7 +105,7 @@ a {
     }
 
     &:hover {
-        color: lighten($link-color, 15%);
+        color: color.scale($link-color, $saturation: 80%, $lightness: 10%);
         text-decoration: underline;
     }
 }
@@ -320,7 +322,9 @@ form.contract {
 
     .date-range-input {
         .single-form-input-group {
-            margin-left: unset;
+            // Use all available width and small margin to allow for long dates on mobile.
+            margin-left: 0.1em;
+            margin-right: 0.4em;
             margin-bottom: unset;
             width: unset;
         }

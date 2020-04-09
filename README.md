@@ -19,7 +19,6 @@ go run autocontract.go -d 1234
 
 # TODOs
 - must haves, improve UI/UX:
-    - all colors seem nice https://lospec.com/palette-list/
     - remove all hard-coded paths/...
     - analytics for ME:
         - try grafana + loki https://github.com/grafana/loki/tree/master/docs, with 25GB of disk space should be plenty before dedicated aggregated metrics are needed
@@ -28,6 +27,7 @@ go run autocontract.go -d 1234
             - a line whenever an error occurs (whether in JS or in backend), with some details: timestamp | requestUUID | errorMessage
 
 - nice to haves
+    - fix scroll position when submitting form to avoid glitching effect.
     - allow keyboard use to select autocomplete entries
     - fix autocomplete menu on desktop Safari (involves changing label/input "name" and "id" attrs so Safari doesn't guess about autocomplete)
     - only allow numbers in RPPS fields
