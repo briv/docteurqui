@@ -105,7 +105,7 @@ a {
     }
 
     &:hover {
-        color: color.scale($link-color, $saturation: 80%, $lightness: 10%);
+        color: color.scale($link-color, $saturation: -30%, $lightness: -10%);
         text-decoration: underline;
     }
 }
