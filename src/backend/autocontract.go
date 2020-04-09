@@ -116,9 +116,8 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	timeLocation := timeZoneLocationFromContext(ctx)
 	err := r.ParseMultipartForm(ParseFormMaxMemoryBytes)
 	if err != nil {
-		// TODO: log this error ?
-		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
 	}
 
 	safeUserData, err := form.Process(r, form.FormProcessingManner{
