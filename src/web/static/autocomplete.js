@@ -149,10 +149,7 @@ export const InputAutocompleter = function (input) {
                 }
             }
         }).catch((err) => {
-            if (err.name === 'AbortError') {
-                // Do nothing in case of an aborted request.
-            }
-            // Do nothing in case a query fails.
+            // Do nothing in case a query fails (even if due to an abort()).
         });
     };
 

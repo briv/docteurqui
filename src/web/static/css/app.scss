@@ -135,14 +135,14 @@ a {
 
 @keyframes pulse {
     to, from {
-      transform: scale3d(1, 1, 1);
+        transform: scale3d(1, 1, 1);
     }
 
     $scale-max: 1.05;
     50% {
-      transform: scale3d($scale-max, $scale-max, $scale-max);
+        transform: scale3d($scale-max, $scale-max, $scale-max);
     }
-  }
+}
 
 .error-animation {
     animation: pulse 0.5s;
@@ -228,11 +228,24 @@ form.contract {
         }
     }
 
-    input[type=submit] {
+    button.form-submit {
         @include button-like;
-        width: 100%;
         margin: 1em 0;
         -webkit-appearance: none;
+
+        height: 3em;
+        min-width: 12em;
+
+        justify-content: center;
+        align-items: center;
+
+        padding: 0.5em 1em;
+        align-self: center;
+        background-color: $submit-button-bg-color;
+
+        &:hover, &:active {
+            background-color: $hover-submit-button-bg-color;
+        }
     }
 
     $leading-field-margin: 0.6em;
@@ -426,6 +439,27 @@ form.contract {
             }
         }
     }
+}
+
+.spinner {
+    $size: 1.5em;
+    width: $size;
+    height: $size;
+    margin-left: 1em;
+
+    // Pertaining to the animation.
+    border: 0.25rem solid $submit-button-spinner-color;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border .75s linear infinite;
+
+    @keyframes spinner-border {
+        0% {
+            transform: rotate(0deg);
+        } 100% {
+            transform: rotate(360deg);
+        }
+      }
 }
 
 .autocomplete-parent {

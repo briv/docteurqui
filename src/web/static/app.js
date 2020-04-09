@@ -56,6 +56,19 @@ const setupFormIntercept = (form, UI) => {
             document.activeElement.blur();
         }
 
+        // Disable form submission.
+        const submitButton = form.querySelector('[type="submit"]');
+        submitButton.setAttribute('disabled', '');
+        const spinner = makeElement('div', el => {
+            el.classList.add('spinner');
+        });
+        submitButton.appendChild(spinner);
+
+        const reenableFormSubmission = () => {
+            submitButton.removeAttribute('disabled');
+            spinner.remove();
+        };
+
         const rawFormData = new FormData(form);
         const url = form.action;
         const formData = processFormData(rawFormData);
@@ -102,12 +115,17 @@ const setupFormIntercept = (form, UI) => {
                 // Maybe revoking the ObjectURL too soon causes an issue ?
                 setTimeout(() => {
                     window.URL.revokeObjectURL(blobUrl);
-                }, 10 * 1000);
+                }, 5 * 1000);
             });
 
-        submission.catch(err => UI.errorHandler(err));
+        submission.catch(err => {
+            reenableFormSubmission();
+            UI.errorHandler(err)
+        });
 
         submission.then(() => {
+            // Re-enable form on successful download.
+            reenableFormSubmission();
             // If submission succeeds, serialize form data and save it locally.
             saveFilledFormData(formData);
         }).catch(() => {

@@ -19,10 +19,7 @@ go run autocontract.go -d 1234
 
 # TODOs
 - must haves, improve UI/UX:
-    - submit disables the submit button and shows error on timeout (30s ?)
-    - all colors seem nice
-    - change button styles to make primary "submit" button pop out WAY more
-        see https://lospec.com/palette-list/
+    - all colors seem nice https://lospec.com/palette-list/
     - have a footer/header with info about the site and links to other sites
     - make desktop version better
     - analytics for ME:

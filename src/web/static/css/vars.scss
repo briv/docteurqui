@@ -15,7 +15,13 @@ $input-border-color: #dee0e2;
 $button-bg-color: #a4bbcc;
 $hover-button-bg-color: darken($button-bg-color, 20%);
 $button-border-color: darken($button-bg-color, 50%);
-// "Special button" colors
+
+// "Special button" colors:
+// - the submit button
+$submit-button-bg-color: #63cc75;
+$hover-submit-button-bg-color: darken($submit-button-bg-color, 20%);
+$submit-button-spinner-color: rgb(0, 102, 5);
+// - the split buttons
 $split-button-bg-color: white;
 $hover-split-button-bg-color: darken($input-border-color, 20%);
 
