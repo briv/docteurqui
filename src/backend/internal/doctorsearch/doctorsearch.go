@@ -135,7 +135,7 @@ func (ds *drSearcher) tryToRecreateIndex() {
 		log.Fatalf("error creating index %s \n", err)
 		return
 	}
-	log.Printf("Index creation (%d entries) took %s", len(index.underlyingIndex), time.Since(start))
+	log.Printf("index creation (%d entries) took %s", len(index.underlyingIndex), time.Since(start))
 
 	previousIndexInterface := ds.index.Load()
 	if previousIndexInterface != nil {

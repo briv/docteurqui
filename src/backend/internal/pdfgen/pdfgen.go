@@ -148,8 +148,6 @@ func (pdfGen *Control) GeneratePdf(ctx context.Context, url string) ([]byte, err
 		return nil, err
 	}
 
-	fmt.Printf("Page loaded with frame ID: %s\n", nav.FrameID)
-
 	// footerTemplate := `<span class=pageNumber></span><span class=totalPages></span>`
 	pdfArgs := page.NewPrintToPDFArgs().
 		SetPreferCSSPageSize(true).

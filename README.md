@@ -20,9 +20,6 @@ go run autocontract.go -d 1234
 # TODOs
 - must haves, improve UI/UX:
     - remove all hard-coded paths/...
-    - analytics for ME:
-        - from back-end, log:
-            - a line whith subRRPS | regular RPPS | timestamp on each contract that is genereated
 
 - nice to haves
     - fix scroll position when submitting form to avoid glitching effect.

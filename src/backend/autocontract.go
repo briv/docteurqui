@@ -182,8 +182,12 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	elapsed := time.Since(start)
-	log.Printf("Generating PDF from user data took %s", elapsed)
+	userData := safeUserData.GetUserData()
+	log.Printf("successful contract PDF generation: regular=%s substitute=%s (took %s)\n",
+		userData.Regular.NumberRPPS,
+		userData.Substituting.NumberRPPS,
+		time.Since(start),
+	)
 }
 
 func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
