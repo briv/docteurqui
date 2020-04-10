@@ -22,7 +22,6 @@ go run autocontract.go -d 1234
     - remove all hard-coded paths/...
 
 - nice to haves
-    - fix scroll position when submitting form to avoid glitching effect.
     - allow keyboard use to select autocomplete entries
     - fix autocomplete menu on desktop Safari (involves changing label/input "name" and "id" attrs so Safari doesn't guess about autocomplete)
     - only allow numbers in RPPS fields

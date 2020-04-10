@@ -42,7 +42,11 @@ const getErrorContainer = (form) => form.querySelector('.call-to-action.error');
 
 const createContentForError = (errorHandler, root, error) => {
     // Reset all error elements within form.
-    errorHandler.feedbackDescriptions.forEach(f => errorHandler.clearError(f));
+    errorHandler.feedbackDescriptions.forEach(f => {
+        compensateScrollDuring(() => {
+            errorHandler.clearError(f);
+        });
+    });
 
     if (! (error instanceof FormValidationError)) {
         root.textContent = error.message;
@@ -73,7 +77,9 @@ const createContentForError = (errorHandler, root, error) => {
             continue;
         }
 
-        errorHandler.notifyError(feedBackDescription, value);
+        compensateScrollDuring(() => {
+            errorHandler.notifyError(feedBackDescription, value);
+        });
 
         const allInputs = errorHandler.form.querySelectorAll(feedBackDescription.querySelector);
         const firstInput = allInputs[0];
@@ -112,6 +118,15 @@ const getCorrespondingFeedbackDescription = (errorHandler, name) => {
     return errorHandler.feedbackDescriptions.find(el => el.name === name);
 };
 
+const compensateScrollDuring = (f) => {
+    const oldScrollY = document.scrollingElement.scrollHeight;
+    f();
+    const diff = document.scrollingElement.scrollHeight - oldScrollY;
+    if (diff !== 0) {
+        document.scrollingElement.scrollTop += diff;
+    }
+};
+
 export const ErrorHandler = (form, formFeedbackDescriptions) => {
     const eh = (error) => {
         const potentialErrorContainer = getErrorContainer(form);
@@ -132,8 +147,15 @@ export const ErrorHandler = (form, formFeedbackDescriptions) => {
             el.classList.add('error-animation', 'd-flex', 'flex-column');
         }));
 
-        // TODO: see https://stackoverflow.com/questions/50074823/how-can-i-keep-scroll-position-when-add-dom-to-top for how we could keep our scroll position while adding error elements and have a prettier effect.
-        setTimeout(() => { smoothScrollTo(errorContainer); }, 10);
+        // Only scroll for the user if they can't already see that there is a list of errors.
+        const rect = errorContainer.getBoundingClientRect();
+        const verticalPixelsToShowAtLeast = 70;
+        const isVisibleEnough =
+            rect.top < (document.scrollingElement.clientHeight - verticalPixelsToShowAtLeast)
+            && rect.bottom >= 0;
+        if (isVisibleEnough === false) {
+            setTimeout(() => { smoothScrollTo(errorContainer); }, 100);
+        }
     };
 
     eh.form = form;
