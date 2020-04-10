@@ -1,4 +1,5 @@
-import { makeElement, FormValidationError, smoothScrollTo } from "./utils";
+import { makeElement, smoothScrollTo } from "./utils";
+import { FormValidationError } from "./errors";
 
 export const FormValidationIssues = {
     MissingRequired: 'input can not be empty',

@@ -21,7 +21,6 @@ go run autocontract.go -d 1234
 - must haves, improve UI/UX:
     - remove all hard-coded paths/...
     - analytics for ME:
-        - try grafana + loki https://github.com/grafana/loki/tree/master/docs, with 25GB of disk space should be plenty before dedicated aggregated metrics are needed
         - from back-end, log:
             - a line whith subRRPS | regular RPPS | timestamp on each contract that is genereated
             - a line whenever an error occurs (whether in JS or in backend), with some details: timestamp | requestUUID | errorMessage
@@ -35,6 +34,7 @@ go run autocontract.go -d 1234
     - use an icon (see Stripe register page) next to the form error messages.
     - use https://github.com/Polymer/lit-html for HTML generation within JS code ?
     - fix error popping up on address field when user autocompletes with a Dr who has a blank "address" field.
+    - analytics/errors going though grafana + loki https://github.com/grafana/loki/tree/master/docs, with 25GB of disk space should be plenty before dedicated aggregated metrics are needed
 
 - use golangCI-lint for Go linting
 
