@@ -180,14 +180,6 @@ h3 {
     margin: 1em 0 0.5em 0;
 }
 
-button {
-    @include button-like;
-
-    &.small {
-        padding: 0.4em;
-    }
-}
-
 form.contract {
     > fieldset {
         margin: 0;
@@ -237,6 +229,14 @@ form.contract {
 
         &.invalid:focus {
             @include focused-invalid;
+        }
+    }
+
+    button {
+        @include button-like;
+
+        &.small {
+            padding: 0.4em;
         }
     }
 
@@ -543,6 +543,12 @@ form.contract {
     button {
         min-width: 50%;
         flex: 1 0 auto;
+
+        // TODO: use class instead of "button" to differentiate our buttons from dependencies.
+        @include button-like;
+        &.small {
+            padding: 0.4em;
+        }
     }
 }
 

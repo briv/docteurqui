@@ -127,7 +127,7 @@ func (pdfGen *Control) GeneratePdf(ctx context.Context, url string) ([]byte, err
 	// Create the Navigate arguments with the optional Referrer field set.
 	navArgs := page.NewNavigateArgs(url)
 	// SetReferrer("https://duckduckgo.com")
-	nav, err := c.Page.Navigate(ctx, navArgs)
+	_, err = c.Page.Navigate(ctx, navArgs)
 	if err != nil {
 		return nil, err
 	}
