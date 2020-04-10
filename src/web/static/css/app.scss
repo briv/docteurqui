@@ -180,6 +180,14 @@ h3 {
     margin: 1em 0 0.5em 0;
 }
 
+button {
+    @include button-like;
+
+    &.small {
+        padding: 0.4em;
+    }
+}
+
 form.contract {
     > fieldset {
         margin: 0;
@@ -215,14 +223,6 @@ form.contract {
     label {
         & + input, & + .input-wrapper {
             margin-top: $margin-between-label-field;
-        }
-    }
-
-    button {
-        @include button-like;
-
-        &.small {
-            padding: 0.4em;
         }
     }
 
@@ -487,7 +487,7 @@ form.contract {
 
 .autocomplete-list {
     background-color: $autocomplete-bg-color;
-    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.5);
+    box-shadow: $generic-front-box-shadow;
     border: 1px solid black;
 
     position: absolute;
@@ -515,6 +515,34 @@ form.contract {
                 background-color: $highlight-autocomplete-bg-color;
             }
         }
+    }
+}
+
+.sticky-global-error {
+    position: sticky;
+    top: 0px;
+    z-index: 1; // to cover other elements with "position: relative"
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: $error-call-to-action-bg-color;
+    box-shadow: $generic-front-box-shadow;
+
+    padding: 0.25em 0.25em;
+
+    h3 {
+        margin-top: 0;
+    }
+
+    p {
+        margin: 0;
+        margin-bottom: 1em;
+    }
+
+    button {
+        min-width: 50%;
+        flex: 1 0 auto;
     }
 }
 

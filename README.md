@@ -23,7 +23,6 @@ go run autocontract.go -d 1234
     - analytics for ME:
         - from back-end, log:
             - a line whith subRRPS | regular RPPS | timestamp on each contract that is genereated
-            - a line whenever an error occurs (whether in JS or in backend), with some details: timestamp | requestUUID | errorMessage
 
 - nice to haves
     - fix scroll position when submitting form to avoid glitching effect.

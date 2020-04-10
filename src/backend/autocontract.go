@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -224,6 +225,44 @@ func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+var newLineRegexp = regexp.MustCompile(`\r?\n`)
+
+const FrontEndErrLogItemLimit = 800
+
+func limitAndReplaceNewlinesWithSpaces(s string) string {
+	if len(s) > FrontEndErrLogItemLimit {
+		s = s[:FrontEndErrLogItemLimit]
+		s += " [...]"
+	}
+	return newLineRegexp.ReplaceAllString(s, " ")
+}
+
+func frontendErrorLogHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	errorEventType := limitAndReplaceNewlinesWithSpaces(r.PostFormValue("eventType"))
+	message := limitAndReplaceNewlinesWithSpaces(r.PostFormValue("message"))
+	userAgent := limitAndReplaceNewlinesWithSpaces(r.PostFormValue("useragent"))
+
+	if errorEventType == "" || message == "" || userAgent == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	stack := limitAndReplaceNewlinesWithSpaces(r.PostFormValue("stack"))
+
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "Front-end issue (of type \"%s\") received from UA \"%s\": \"%s\"", errorEventType, userAgent, message)
+	if stack != "" {
+		fmt.Fprintf(&sb, ", stack: %s", stack)
+	}
+
+	log.Println(sb.String())
+}
+
 func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 	// As an extra paranoid step, use a CSP header for internal web-server used for PDF generation.
 	// Go's html/template package is used for escaping user content so injections shouldn't be an issue,
@@ -317,6 +356,8 @@ func main() {
 			withTimeZoneLocation(parisLocation, forMethod(http.MethodPost, genContractHandler))))
 
 		publicServeMux.HandleFunc("/b/search-doctor", withContext(forMethod(http.MethodGet, doctorSearchHandler)))
+
+		publicServeMux.HandleFunc("/b/log-error", withContext(forMethod(http.MethodPost, frontendErrorLogHandler)))
 
 		s := &http.Server{
 			Addr:              fmt.Sprintf(":%s", *publicFacingWebsitePort),

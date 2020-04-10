@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { makeElement, GenericUserError, FormValidationError } from './utils';
+import { makeElement } from './utils';
+import { GenericUserError, FormValidationError, remoteLogError } from './errors';
 import { createSignatureInput, getSignatureImage } from './signature';
 import { saveFilledFormData, createPersistedDataQuickFillUI } from './form-fill';
 import { Validators, ErrorHandler, FormValidationIssues } from './live-form-feedback';
@@ -394,18 +395,64 @@ const onDOMReady = (callback) => {
     document.addEventListener('DOMContentLoaded', callback);
 };
 
-window.addEventListener('unhandledrejection', (event) => {
-    console.info("App INFO 'unhandledrejection'", event.reason);
-    // TODO: send analytics
-});
+const unhandledErrorEventHandler = (event) => {
+    // Do not call preventDefault(). In case we mess up remote logging, something will at
+    // least show up locally on the user's console and possibly allow them to alert us.
+
+    // The very backwards-compatible 'errorhandler.js' will take care of
+    // sending the error to our backend.
+
+    // Show the user some feedback and reassure them we're looking into it.
+
+    // If feedback is already shown, we're done here, though it isn't reassuring.
+    if (document.body.querySelector('.sticky-global-error')) {
+        return;
+    }
+
+    const stickyError = makeElement('div', el => {
+        el.classList.add('sticky-global-error');
+
+        const p1 = makeElement('h3', el => {
+            el.textContent = `Une erreur que nous n'avions pas du tout prévue est survenue.`;
+        });
+        const p2 = makeElement('p', el => {
+            const email = makeElement('a', el => {
+                el.href = 'mailto:b@docteurqui.com';
+                el.textContent = 'un email';
+            });
+            el.append(`Désolé pour ce contre-temps ! À priori, nous allons être notifié et essayer de régler le problème mais n'hésitez pas à nous envoyer `, email, ' si le souci persiste.');
+        });
+
+        const root = el;
+        const closeButton = makeElement('button', el => {
+            el.classList.add('small');
+            el.setAttribute('type', 'button');
+            el.textContent = 'Fermer';
+
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                root.remove();
+            });
+        });
+
+        el.append(p1, p2, closeButton);
+    });
+    document.body.prepend(stickyError);
+};
 
 window.addEventListener('error', (event) => {
-    // TODO: first thing, try to send analytics
-    const { error } = event;
-    console.info("App INFO 'error'", event);
+    // Not likely, but use try/catch just in case we'd end up in a loop for some browser implementations.
+    try {
+        unhandledErrorEventHandler(event);
+    } catch (err) {
+    }
+});
 
-    // TODO: show the user some feedback and reassure them we're looking into it.
-    // e.g. "Désolé pour ce contre-temps ! À priori, nous allons être notifié et essayer de régler le problème mais n'hésitez pas à nous envoyer un email avec l'erreur que vous venez de recontrer."
+window.addEventListener('unhandledrejection', (event) => {
+    try {
+        unhandledErrorEventHandler(event);
+    } catch (err) {
+    }
 });
 
 onDOMReady(onDOMContentLoaded);
