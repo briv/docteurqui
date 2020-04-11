@@ -23,6 +23,7 @@ go run autocontract.go -d 1234
 
 - nice to haves
     - allow keyboard use to select autocomplete entries
+    - add date of rempla to generated PDF (i.e. "Contrat remplacement - 2 Avril 2020.pdf")
     - fix autocomplete menu on desktop Safari (involves changing label/input "name" and "id" attrs so Safari doesn't guess about autocomplete)
     - only allow numbers in RPPS fields
     - use a real icon instead of emoji X for "delete" buttons

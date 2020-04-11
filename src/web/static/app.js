@@ -100,12 +100,19 @@ const setupFormIntercept = (form, UI) => {
             })
             .then(response => response.blob())
             .then(blob => {
+                // TODO: In case we want to trigger an actual download on iOS 13:
+                // see https://github.com/eligrey/FileSaver.js/issues/12#issue-9781926
+                // Basically, we need to create a FileReader and use readAsDataURL(blob)
+                // and use that data url as the link href rather than our blob.
+                // Changing our blob beforehand to a 'application/octet-stream' content type also is necessary.
+
                 const blobUrl = window.URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = blobUrl;
                 if ('download' in a) {
                     a.download = 'Contrat remplacement.pdf';
                 }
+                a.style.display = 'none';
                 // We need to append the element to the dom, otherwise it will not work in IE or recent Firefox versions.
                 document.body.appendChild(a);
                 a.click();
