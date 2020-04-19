@@ -300,25 +300,40 @@ func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 // - A statistics/analytics service which records and also serves a public facing route to see them.
 func main() {
 	publicFacingWebsitePort := flag.String("p", PublicFacingWebsitePort, "port to serve on")
-	publicFacingWebsitePathRoot := flag.String("d", "../../dist/", "the directory containing files to host over HTTP")
-	devWebsiteProxyPort := flag.String("dev", "", "a port to reverse-proxy the user-facing web HTTP requests (useful for developping front-end)")
+	publicFacingWebsitePathRoot := flag.String("http-data", "", "the directory containing files to host over HTTP")
+	drDataFilePath := flag.String("dr-data-file", "", "the file containing the doctor contact data. This should be an extraction from https://annuaire.sante.fr/web/site-pro/extractions-publiques")
+
+	pdfTemplateFilePath := flag.String("pdf-template-file", "", "the HTML file used as a template for contract PDFs")
+	pdfGenBrowserDevToolsUrl := flag.String("pdf-browser-devtools-url", PdfGeneratorBrowserDevToolsUrl, "the URL of the browser devtools server to target and control for PDF generation")
+
+	// Flags useful when developping.
+	devWebsiteProxyPort := flag.String("http-proxy", "", "a port to reverse-proxy the user-facing web HTTP requests (useful for developping front-end)")
 	flag.Parse()
 
-	err := SharedPdfGenControl.Init(PdfGeneratorBrowserDevToolsUrl, PdfGeneratorInitializationTimeout)
-	if err != nil {
-		log.Fatal(err)
+	if *drDataFilePath == "" {
+		log.Fatalln("a file must be specified for doctor data")
 	}
-	defer SharedPdfGenControl.Shutdown()
+	if *pdfTemplateFilePath == "" {
+		log.Fatalln("an HTML file must be specified for PDF template")
+	}
+	if *pdfGenBrowserDevToolsUrl == "" {
+		log.Fatalln("an HTML file must be specified for PDF template")
+	}
 
-	// load time-zone for Paris
+	// Load time-zone for Paris.
 	parisLocation, err := time.LoadLocation("Europe/Paris")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Setup doctor search structure
-	// TODO: use flag for value
-	SharedDoctorSearcher = doctorsearch.New("/Users/blaiserivet/Documents/Blaise/dev/autoContratRempla/src/test-search/PS_LibreAcces_202003041402/", DoctorSearchNGramSize, MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
+	err = SharedPdfGenControl.Init(*pdfTemplateFilePath, *pdfGenBrowserDevToolsUrl, PdfGeneratorInitializationTimeout)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer SharedPdfGenControl.Shutdown()
+
+	// Setup doctor search structure.
+	SharedDoctorSearcher = doctorsearch.New(*drDataFilePath, DoctorSearchNGramSize, MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
 
 	// Internal HTTP server for use with headless Web browser instance to convert web pages to PDF.
 	errChan := make(chan error)
@@ -345,14 +360,16 @@ func main() {
 		publicServeMux := http.NewServeMux()
 
 		var rootHandler http.Handler
-		if *devWebsiteProxyPort == "" {
+		if *publicFacingWebsitePathRoot != "" {
 			rootHandler = http.FileServer(http.Dir(*publicFacingWebsitePathRoot))
-		} else {
+		} else if *devWebsiteProxyPort != "" {
 			urlToProxyTo, err := url.Parse(fmt.Sprintf("http://localhost:%s/", *devWebsiteProxyPort))
 			if err != nil {
 				log.Fatal(err)
 			}
 			rootHandler = httputil.NewSingleHostReverseProxy(urlToProxyTo)
+		} else {
+			log.Fatalf("error: you must specify one of -http-data or -http-proxy flags\n")
 		}
 		publicServeMux.Handle("/", csp.WithSecurityHeaders(rootHandler))
 

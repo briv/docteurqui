@@ -26,12 +26,9 @@ type Control struct {
 	mutex                csync.Mutex
 }
 
-func (pdfGen *Control) Init(url string, connectionTimeout time.Duration) error {
-	// TODO: finish real template generation
-
-	// initialize templates
-	// TODO: this should not be hard-coded.
-	b, err := ioutil.ReadFile("/Users/blaiserivet/Documents/Blaise/dev/autoContratRempla/src/contract-templates/dist/index.html")
+func (pdfGen *Control) Init(templateFilePath string, url string, connectionTimeout time.Duration) error {
+	// Initialize template.
+	b, err := ioutil.ReadFile(templateFilePath)
 	if err != nil {
 		return err
 	}

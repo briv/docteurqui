@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"sync/atomic"
 	"time"
 	"unicode"
@@ -40,7 +39,7 @@ type DoctorSearcher interface {
 
 type drSearcher struct {
 	index              *atomic.Value // really an *nGramsIndex
-	dataDirectory      string
+	dataFilePath       string
 	semWorkLimiter     *semaphore.Weighted
 	nGramSize          int
 	maxUserQueryLength int
@@ -49,11 +48,11 @@ type drSearcher struct {
 // New returns a DoctorSearcher capable of servicing user queries.
 //
 // Note that maxUserQueryLength is measured in bytes (and not in runes i.e characteres).
-func New(rawDataDir string, nGramSize int, maxUserQueryLength int, maxConcurrentQueries int) DoctorSearcher {
+func New(rawDataFilePath string, nGramSize int, maxUserQueryLength int, maxConcurrentQueries int) DoctorSearcher {
 	semTotalWeight := int64(maxConcurrentQueries)
 	s := &drSearcher{
 		index:              &atomic.Value{},
-		dataDirectory:      rawDataDir,
+		dataFilePath:       rawDataFilePath,
 		semWorkLimiter:     semaphore.NewWeighted(semTotalWeight),
 		nGramSize:          nGramSize,
 		maxUserQueryLength: maxUserQueryLength,
@@ -123,8 +122,7 @@ func (ds drSearcher) Query(ctx context.Context, unsafeUserQuery string, maxNumbe
 
 func (ds *drSearcher) tryToRecreateIndex() {
 	// TODO: remove this hard-coded value
-	dataFilePath := filepath.Join(ds.dataDirectory, "PS_LibreAcces_Personne_activite_202003041023.txt")
-	databaseFile, err := os.Open(dataFilePath)
+	databaseFile, err := os.Open(ds.dataFilePath)
 	if err != nil {
 		log.Fatalf("error opening data file %s \n", err)
 		return
