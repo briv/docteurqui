@@ -1,0 +1,8 @@
+# Build caches & build outputs
+.cache/
+.parcel-cache/
+dist/
+
+# js dependencies
+node_modules/
+

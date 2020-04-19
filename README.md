@@ -14,7 +14,7 @@ yarn dev
 - Launch go backend:
 ```bash
 cd src/backend
-go run autocontract.go -d 1234
+go run -tags dev autocontract.go -dev 1234
 ```
 
 # TODOs
@@ -26,6 +26,7 @@ go run autocontract.go -d 1234
     - add date of rempla to generated PDF (i.e. "Contrat remplacement - 2 Avril 2020.pdf")
     - fix autocomplete menu on desktop Safari (involves changing label/input "name" and "id" attrs so Safari doesn't guess about autocomplete)
     - only allow numbers in RPPS fields
+    - add native sharing of the website on iOS with https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
     - use a real icon instead of emoji X for "delete" buttons
     - use an icon (see Stripe register page) next to the form error messages.
     - use https://github.com/Polymer/lit-html for HTML generation within JS code ?

@@ -1,13 +1,10 @@
-# Related to use of nix and nixify
-.direnv/
-.go-cache
+# Related to use of direnv as well as Nix integration with direnv
 .envrc
+.direnv/
 
-# Caches & build outputs
-**/.cache/
-**/dist/
-**/node_modules/
-**/.parcel-cache/
+# Build caches & build outputs
+## specific to our go code
+.go-cache/
 
 # Examples
 contract-models/

@@ -1,0 +1,7 @@
+# Build caches & build outputs
+.cache/
+dist/
+
+# JS dependencies
+node_modules/
+
