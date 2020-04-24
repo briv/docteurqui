@@ -34,7 +34,6 @@ const (
 	PdfGeneratorInitializationTimeout = 3 * time.Second
 	PdfGeneratorBrowserDevToolsUrl    = "http://localhost:9222"
 	PdfGenerationTimeout              = 10 * time.Second
-	PurePdfGenerationTimeoutDiff      = 1 * time.Second
 
 	DoctorSearchNGramSize            = 3
 	DoctorSearchQueryTimeout         = 5 * time.Second
@@ -168,13 +167,7 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(pdfUrl.String())
 	pdfGenerator := pdfGenControlFromContext(r.Context())
 
-	// try to leave some time for writing the HTTP response (error) if we aren't able to generate the
-	// pdf in time.
-	currentDeadline, _ := ctx.Deadline()
-	purePdfGenerationContext, cancelFunc := context.WithDeadline(ctx, currentDeadline.Add(-PurePdfGenerationTimeoutDiff))
-	defer cancelFunc()
-
-	pdfData, err := pdfGenerator.GeneratePdf(purePdfGenerationContext, pdfUrl.String())
+	pdfData, err := pdfGenerator.GeneratePdf(ctx, pdfUrl.String())
 	if err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
