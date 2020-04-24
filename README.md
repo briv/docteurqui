@@ -14,16 +14,24 @@ yarn dev
 - Launch go backend:
 ```bash
 cd src/backend
-go run -tags dev autocontract.go -dev 1234
+go run -tags devmode autocontract.go -http-proxy 1234
 ```
 
 # TODOs
-- must haves, improve UI/UX:
-    - remove all hard-coded paths/...
+- docker
+    - 1 image with caddy
+        - 2 named volumes ? (data + configuration)
+        - read https://www.breakds.org/post/declarative-docker-in-nixos/#fnref:1 for help ?
+- must haves
+    - fix behaviour that any previous error isn't cleared on new submissions => the logic is flawed, the JS only clears errors when a new error occurs but it should always happen
+    - fix re-attach to pdf-gen service / once broken, it doesn't work again.
+    - "hash" (argon2) the RPPS to make it a little more painful to access them.
+    - improve use of build tag "devhttps" in go program, maybe have a "devmode" tag instead which uses sane defaults for all flags rather ?
 
 - nice to haves
     - allow keyboard use to select autocomplete entries
     - add date of rempla to generated PDF (i.e. "Contrat remplacement - 2 Avril 2020.pdf")
+    - use https://github.com/go-sourcemap/sourcemap to print nicer error messages by using JS sourcemaps.
     - fix autocomplete menu on desktop Safari (involves changing label/input "name" and "id" attrs so Safari doesn't guess about autocomplete)
     - only allow numbers in RPPS fields
     - add native sharing of the website on iOS with https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
@@ -32,6 +40,7 @@ go run -tags dev autocontract.go -dev 1234
     - use https://github.com/Polymer/lit-html for HTML generation within JS code ?
     - fix error popping up on address field when user autocompletes with a Dr who has a blank "address" field.
     - analytics/errors going though grafana + loki https://github.com/grafana/loki/tree/master/docs, with 25GB of disk space should be plenty before dedicated aggregated metrics are needed
+    - get current time for contract establishment from user's browser.
 
 - use golangCI-lint for Go linting
 

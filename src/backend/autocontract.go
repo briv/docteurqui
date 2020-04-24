@@ -50,6 +50,7 @@ const (
 	ContextDoctorSearchKey
 	ContextPdfGenControlKey
 	ContextTimeZoneLocationKey
+	ContextInternalTemplateWebHostKey
 )
 
 var (
@@ -78,6 +79,10 @@ func timeZoneLocationFromContext(ctx context.Context) *time.Location {
 	return ctx.Value(ContextTimeZoneLocationKey).(*time.Location)
 }
 
+func internalTemplateWebHostnameFromContext(ctx context.Context) string {
+	return ctx.Value(ContextInternalTemplateWebHostKey).(string)
+}
+
 func withContext(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var ctx context.Context
@@ -92,6 +97,14 @@ func withTimeZoneLocation(location *time.Location, h http.HandlerFunc) http.Hand
 	return func(w http.ResponseWriter, req *http.Request) {
 		var ctx context.Context
 		ctx = context.WithValue(req.Context(), ContextTimeZoneLocationKey, location)
+		h(w, req.WithContext(ctx))
+	}
+}
+
+func withInternalTemplateWebHostname(host string, h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		var ctx context.Context
+		ctx = context.WithValue(req.Context(), ContextInternalTemplateWebHostKey, host)
 		h(w, req.WithContext(ctx))
 	}
 }
@@ -143,21 +156,15 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 
 	q := url.Values{}
 	q.Set(InternalHttpServerPdfTemplateRequestUserQueryKey, userDataKey)
+	internalTemplateWebHostname := internalTemplateWebHostnameFromContext(r.Context())
+	host := fmt.Sprintf("%s:%s", internalTemplateWebHostname, InternalHttpServerPdfTemplatePort)
 	pdfUrl := &url.URL{
 		Scheme:   "http",
-		Host:     fmt.Sprintf("host.docker.internal:%s", InternalHttpServerPdfTemplatePort),
+		Host:     host,
 		Path:     InternalHttpServerPdfTemplatePath,
 		RawQuery: q.Encode(),
 	}
 
-	// ************
-	// TODO: debug mode for connecting directly to dev mode of HTML behind the PDFs
-	// pdfUrl = &url.URL{
-	// 	Scheme: "http",
-	// 	Host:   fmt.Sprintf("host.docker.internal:%s", "1234"),
-	// 	Path:   "/",
-	// }
-	// ************
 	log.Println(pdfUrl.String())
 	pdfGenerator := pdfGenControlFromContext(r.Context())
 
@@ -305,6 +312,7 @@ func main() {
 
 	pdfTemplateFilePath := flag.String("pdf-template-file", "", "the HTML file used as a template for contract PDFs")
 	pdfGenBrowserDevToolsUrl := flag.String("pdf-browser-devtools-url", PdfGeneratorBrowserDevToolsUrl, "the URL of the browser devtools server to target and control for PDF generation")
+	pdfInternalTemplateWebHostname := flag.String("pdf-internal-web-hostname", "", "the hostname that external services should use to access the internal contract template web server")
 
 	// Flags useful when developping.
 	devWebsiteProxyPort := flag.String("http-proxy", "", "a port to reverse-proxy the user-facing web HTTP requests (useful for developping front-end)")
@@ -317,7 +325,10 @@ func main() {
 		log.Fatalln("an HTML file must be specified for PDF template")
 	}
 	if *pdfGenBrowserDevToolsUrl == "" {
-		log.Fatalln("an HTML file must be specified for PDF template")
+		log.Fatalln("a URL must be specified for the browser devtools")
+	}
+	if *pdfInternalTemplateWebHostname == "" {
+		log.Fatalln("a hostname must be specified for the internal template web host")
 	}
 
 	// Load time-zone for Paris.
@@ -342,7 +353,8 @@ func main() {
 		pdfServeMux.HandleFunc(InternalHttpServerPdfTemplatePath, withContext(forMethod(http.MethodGet, pdfTemplateHandler)))
 
 		pdfServer := &http.Server{
-			Addr:              fmt.Sprintf("localhost:%s", InternalHttpServerPdfTemplatePort),
+			// TODO: when not running within a container, we'd ideally want this to be bound to localhost and not to all interfaces.
+			Addr:              fmt.Sprintf(":%s", InternalHttpServerPdfTemplatePort),
 			Handler:           pdfServeMux,
 			ReadHeaderTimeout: 10 * time.Second,
 			ReadTimeout:       10 * time.Second,
@@ -373,12 +385,22 @@ func main() {
 		}
 		publicServeMux.Handle("/", csp.WithSecurityHeaders(rootHandler))
 
-		publicServeMux.HandleFunc("/b/generate-contract", withContext(
-			withTimeZoneLocation(parisLocation, forMethod(http.MethodPost, genContractHandler))))
+		publicServeMux.HandleFunc("/b/generate-contract",
+			withContext(
+				withInternalTemplateWebHostname(*pdfInternalTemplateWebHostname,
+					withTimeZoneLocation(parisLocation,
+						forMethod(http.MethodPost,
+							genContractHandler)))))
 
-		publicServeMux.HandleFunc("/b/search-doctor", withContext(forMethod(http.MethodGet, doctorSearchHandler)))
+		publicServeMux.HandleFunc("/b/search-doctor",
+			withContext(
+				forMethod(http.MethodGet,
+					doctorSearchHandler)))
 
-		publicServeMux.HandleFunc("/b/log-error", withContext(forMethod(http.MethodPost, frontendErrorLogHandler)))
+		publicServeMux.HandleFunc("/b/log-error",
+			withContext(
+				forMethod(http.MethodPost,
+					frontendErrorLogHandler)))
 
 		s := &http.Server{
 			Addr:              fmt.Sprintf(":%s", *publicFacingWebsitePort),
@@ -394,7 +416,7 @@ func main() {
 		}
 	}()
 
-	fmt.Printf("Auto-contract service starting: http://localhost:%s\n", *publicFacingWebsitePort)
+	fmt.Printf("Auto-contract HTTP service starting on port %s\n", *publicFacingWebsitePort)
 	err = <-errChan
 	log.Fatal(err)
 }
