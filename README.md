@@ -24,9 +24,7 @@ go run -tags devmode autocontract.go -http-proxy 1234
         - read https://www.breakds.org/post/declarative-docker-in-nixos/#fnref:1 for help ?
 - must haves
     - fix behaviour that any previous error isn't cleared on new submissions => the logic is flawed, the JS only clears errors when a new error occurs but it should always happen
-    - fix re-attach to pdf-gen service / once broken, it doesn't work again.
     - "hash" (argon2) the RPPS to make it a little more painful to access them.
-    - improve use of build tag "devhttps" in go program, maybe have a "devmode" tag instead which uses sane defaults for all flags rather ?
 
 - nice to haves
     - allow keyboard use to select autocomplete entries
