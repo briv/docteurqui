@@ -16,14 +16,24 @@ import (
 	"github.com/sasha-s/go-csync"
 )
 
-// TODO: improve manager for concurrent access to the single chromium frame/target for pdf generation
-type Control struct {
-	devToolsConnUrl      string
-	devToolsConnTimeout  time.Duration
+type browserControl struct {
 	devToolsProtocolConn *rpcc.Conn
 	oneTargetClient      *cdp.Client
-	Template             *template.Template
-	mutex                csync.Mutex
+}
+
+func (bc *browserControl) cleanup() {
+	if bc.devToolsProtocolConn != nil {
+		// Leaving connections open will leak memory otherwise.
+		bc.devToolsProtocolConn.Close()
+	}
+}
+
+type Control struct {
+	devToolsConnUrl     string
+	devToolsConnTimeout time.Duration
+	browserControl      *browserControl
+	Template            *template.Template
+	mutex               csync.Mutex
 }
 
 func (pdfGen *Control) Init(templateFilePath string, url string, connectionTimeout time.Duration) error {
@@ -33,7 +43,7 @@ func (pdfGen *Control) Init(templateFilePath string, url string, connectionTimeo
 		return err
 	}
 
-	t, err := template.New("rempla-étudiant").Parse(string(b))
+	t, err := template.New("rempla-contract").Parse(string(b))
 	if err != nil {
 		return err
 	}
@@ -42,23 +52,27 @@ func (pdfGen *Control) Init(templateFilePath string, url string, connectionTimeo
 	pdfGen.devToolsConnUrl = url
 	pdfGen.devToolsConnTimeout = connectionTimeout
 
-	pdfGen.connectIfNeeded()
+	ctx, cancel := context.WithTimeout(context.Background(), pdfGen.devToolsConnTimeout)
+	defer cancel()
+	// Try to connect right-away to the remote-controlled browser as an optimization,
+	// but ignore any error.
+	pdfGen.setupBrowserControlIfNeeded(ctx)
 
 	return nil
 }
 
-func (pdfGen *Control) connectIfNeeded() error {
-	if pdfGen.devToolsProtocolConn != nil {
+func (pdfGen *Control) setupBrowserControlIfNeeded(ctx context.Context) error {
+	if pdfGen.browserControl != nil {
 		return nil
 	}
 
 	// initialize connection to browser (PDF renderer)
-	ctx, _ := context.WithTimeout(context.Background(), pdfGen.devToolsConnTimeout)
 
 	// Use the DevTools HTTP/JSON API to manage targets (e.g. pages, webworkers).
 	devt := devtool.New(pdfGen.devToolsConnUrl)
 	pt, err := devt.Get(ctx, devtool.Page)
 	if err != nil {
+		// TODO: improve manager for concurrent access to the single chromium frame/target for pdf generation. This Create() call is where we create a new page. Instead of having just one, we could use a pool perhaps.
 		pt, err = devt.Create(ctx)
 		if err != nil {
 			return err
@@ -71,34 +85,43 @@ func (pdfGen *Control) connectIfNeeded() error {
 		return err
 	}
 
-	pdfGen.devToolsProtocolConn = conn
-	pdfGen.oneTargetClient = cdp.NewClient(conn)
-
+	pdfGen.browserControl = &browserControl{
+		devToolsProtocolConn: conn,
+		oneTargetClient:      cdp.NewClient(conn),
+	}
 	return nil
 }
 
 func (pdfGen *Control) Shutdown() {
-	if pdfGen.devToolsProtocolConn != nil {
-		// Leaving connections open will leak memory.
-		pdfGen.devToolsProtocolConn.Close()
+	if pdfGen.browserControl != nil {
+		pdfGen.browserControl.cleanup()
 	}
 }
 
 func (pdfGen *Control) GeneratePdf(ctx context.Context, url string) ([]byte, error) {
-	err := pdfGen.mutex.CLock(ctx)
-	if err != nil {
+	if err := pdfGen.mutex.CLock(ctx); err != nil {
 		// Failed to lock.
 		return nil, err
 	}
 	defer pdfGen.mutex.Unlock()
 
-	err = pdfGen.connectIfNeeded()
-	if err != nil {
+	setupCtx, cancel := context.WithTimeout(ctx, pdfGen.devToolsConnTimeout)
+	defer cancel()
+	if err := pdfGen.setupBrowserControlIfNeeded(setupCtx); err != nil {
 		return nil, err
 	}
 
-	c := pdfGen.oneTargetClient
+	data, err := pdfFromUrl(ctx, url, pdfGen.browserControl.oneTargetClient)
+	if err != nil {
+		pdfGen.browserControl.cleanup()
+		// Reset our browser connection if something went wrong.
+		pdfGen.browserControl = nil
+		return nil, err
+	}
+	return data, nil
+}
 
+func pdfFromUrl(ctx context.Context, url string, c *cdp.Client) ([]byte, error) {
 	// Open a DOMContentEventFired client to buffer this event.
 	loadEventClient, err := c.Page.LoadEventFired(ctx)
 	if err != nil {
