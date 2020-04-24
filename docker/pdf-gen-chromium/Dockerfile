@@ -1,4 +1,4 @@
-FROM golang:1.11-alpine
+FROM alpine:3.11.5
 
 # Installs latest Chromium package.
 RUN apk update && apk upgrade \
@@ -25,6 +25,7 @@ RUN mkdir -p /usr/src/app \
 # TMP: add commands below this line for testing
 RUN mkdir -p /home/chrome/.fonts
 ADD ./fonts/* /home/chrome/.fonts/
+RUN chown -R chrome:chrome /home/chrome/.fonts
 
 # Run Chrome as non-privileged
 USER chrome
@@ -37,4 +38,4 @@ WORKDIR /usr/src/app
 #     CHROME_PATH=/usr/lib/chromium/
 
 # Autorun chrome headless with no GPU, plus remote debugging set up
-ENTRYPOINT ["chromium-browser", "--headless", "--disable-gpu", "--remote-debugging-address=0.0.0.0", "--remote-debugging-port=9222"]
+CMD ["chromium-browser", "--headless", "--disable-gpu", "--remote-debugging-address=0.0.0.0", "--remote-debugging-port=9222"]
