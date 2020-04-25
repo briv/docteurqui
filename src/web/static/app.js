@@ -4,7 +4,7 @@ import { makeElement } from './utils';
 import { GenericUserError, FormValidationError, remoteLogError } from './errors';
 import { createSignatureInput, getSignatureImage } from './signature';
 import { saveFilledFormData, createPersistedDataQuickFillUI } from './form-fill';
-import { Validators, ErrorHandler, FormValidationIssues } from './live-form-feedback';
+import { Validators, FormErrorHandler, FormValidationIssues } from './live-form-feedback';
 import { createSinglePeriodInput, parseFormattedFRDate } from './periods-input';
 import { polyfill } from './polyfills';
 import { InputAutocompleter } from './autocomplete';
@@ -46,7 +46,7 @@ const createDefaultPeriodInputUI = (form) => {
     });
 };
 
-const setupFormIntercept = (form, UI) => {
+const setupFormIntercept = (form, formErrorHandler) => {
     form.addEventListener('submit', (e) => {
         if (e.preventDefault) {
             e.preventDefault();
@@ -70,6 +70,9 @@ const setupFormIntercept = (form, UI) => {
             spinner.remove();
         };
 
+        // Clear any errors before this new submission.
+        formErrorHandler.clear();
+
         const rawFormData = new FormData(form);
         const url = form.action;
         const formData = processFormData(rawFormData);
@@ -87,7 +90,7 @@ const setupFormIntercept = (form, UI) => {
                     const body = await response.text();
                     if (response.status >= 500) {
                         throw new GenericUserError(
-                            "Une erreur que nous n'avions pas prévu s'est produite de notre côté, désolé !",
+                            "Une erreur s'est produite de notre côté, désolé, nous allons investiguer !",
                             `submitting form: status=${response.status} body=${body}`
                         );
                     }
@@ -128,7 +131,7 @@ const setupFormIntercept = (form, UI) => {
 
         submission.catch(err => {
             reenableFormSubmission();
-            UI.errorHandler(err)
+            formErrorHandler.handle(err);
         });
 
         submission.then(() => {
@@ -357,7 +360,7 @@ const setupLiveFormFeedback = (form) => {
         },
     ];
 
-    return ErrorHandler(form, FormFeedbacks);
+    return new FormErrorHandler(form, FormFeedbacks);
 };
 
 const setupAutocomplete = (form) => {
@@ -372,25 +375,21 @@ const setupUIWithin = (form) => {
     //
 
     createUIForPopulatingWithSavedData(form);
-    const errorHandler = setupLiveFormFeedback(form);
+    const formErrorHandler = setupLiveFormFeedback(form);
     createDefaultPeriodInputUI(form);
 
     setupAutocomplete(form);
     setupDynamicFormChanges(form);
 
-    const extraUI = {};
-    // TODO: use a wrapper to log errors on backend that are not validation errors
-    extraUI.errorHandler = errorHandler;
-
-    return extraUI;
+    return formErrorHandler;
 };
 
 const onDOMContentLoaded = () => {
     polyfill();
 
     const form = document.querySelector('form');
-    const extraUI = setupUIWithin(form);
-    setupFormIntercept(form, extraUI);
+    const formErrorHandler = setupUIWithin(form);
+    setupFormIntercept(form, formErrorHandler);
 };
 
 const onDOMReady = (callback) => {

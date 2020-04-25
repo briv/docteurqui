@@ -38,16 +38,9 @@ const FormFeedbackParentQuerySelector = '.single-form-input-group';
 const ErrorClass = 'error-feedback';
 const InputInvalidClass = 'invalid';
 
-const getErrorContainer = (form) => form.querySelector('.call-to-action.error');
+const getFormErrorRecapContainer = (form) => form.querySelector('.call-to-action.error');
 
 const createContentForError = (errorHandler, root, error) => {
-    // Reset all error elements within form.
-    errorHandler.feedbackDescriptions.forEach(f => {
-        compensateScrollDuring(() => {
-            errorHandler.clearError(f);
-        });
-    });
-
     if (! (error instanceof FormValidationError)) {
         root.textContent = error.message;
         return;
@@ -118,28 +111,49 @@ const getCorrespondingFeedbackDescription = (errorHandler, name) => {
     return errorHandler.feedbackDescriptions.find(el => el.name === name);
 };
 
+// This function tries to keep the form submit button at the same top-relative position compared to the current scroll position.
 const compensateScrollDuring = (f) => {
-    const oldScrollY = document.scrollingElement.scrollHeight;
+    const submitButton = document.querySelector('button[type="submit"]');
+
+    const topOffsetOfButtonRelativeToScroll = () => {
+        return submitButton.offsetTop - document.scrollingElement.scrollTop;
+    };
+
+    const before = topOffsetOfButtonRelativeToScroll();
     f();
-    const diff = document.scrollingElement.scrollHeight - oldScrollY;
+    const diff = topOffsetOfButtonRelativeToScroll() - before;
+
     if (diff !== 0) {
         document.scrollingElement.scrollTop += diff;
     }
 };
 
-export const ErrorHandler = (form, formFeedbackDescriptions) => {
+// Clears all errors from the recap
+const clearFormErrorRecap = (errorHandler) => {
+    const errorContainer = getFormErrorRecapContainer(errorHandler.form);
+    if (!errorContainer) {
+        return;
+    }
+
+    // Reset all error elements within form.
+    errorHandler.feedbackDescriptions.forEach(f => {
+        compensateScrollDuring(() => {
+            errorHandler.clearError(f);
+        });
+    });
+
+    // Just in case, but this should never happen.
+    errorContainer.remove();
+};
+
+export function FormErrorHandler(form, formFeedbackDescriptions) {
     const eh = (error) => {
-        const potentialErrorContainer = getErrorContainer(form);
-        if (!potentialErrorContainer) {
-            const div = makeElement('div', el => {
+        let errorContainer = getFormErrorRecapContainer(form);
+        if (!errorContainer) {
+            errorContainer = makeElement('div', el => {
                 el.classList.add('call-to-action', 'error');
             });
-            form.appendChild(div);
-        }
-
-        const errorContainer = getErrorContainer(form);
-        while (errorContainer.firstChild) {
-            errorContainer.removeChild(errorContainer.lastChild);
+            form.appendChild(errorContainer);
         }
 
         errorContainer.appendChild(makeElement('div', el => {
@@ -198,7 +212,7 @@ export const ErrorHandler = (form, formFeedbackDescriptions) => {
         clearErrorMessage(parent, inputEl);
 
         // Also clear the error from the "global form errors" area if needed.
-        const errContainer = getErrorContainer(form);
+        const errContainer = getFormErrorRecapContainer(form);
         if (!errContainer) {
             return;
         }
@@ -251,7 +265,8 @@ export const ErrorHandler = (form, formFeedbackDescriptions) => {
 
     formFeedbackDescriptions.forEach(el => { setupFieldFeedback(eh, el) });
 
-    return eh;
+    this.handle = (err) => { eh(err); };
+    this.clear = () => { clearFormErrorRecap(eh); };
 };
 
 const clearErrorMessage = (parent, input) => {

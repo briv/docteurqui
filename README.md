@@ -23,10 +23,10 @@ go run -tags devmode autocontract.go -http-proxy 1234
         - 2 named volumes ? (data + configuration)
         - read https://www.breakds.org/post/declarative-docker-in-nixos/#fnref:1 for help ?
 - must haves
-    - fix behaviour that any previous error isn't cleared on new submissions => the logic is flawed, the JS only clears errors when a new error occurs but it should always happen
     - "hash" (argon2) the RPPS to make it a little more painful to access them.
 
 - nice to haves
+    - investigate requestAnimationFrame (and 'fastdom' lib) for batching DOM measurements/mutations, especially when submitting form and clearing / adding errors.
     - allow keyboard use to select autocomplete entries
     - add date of rempla to generated PDF (i.e. "Contrat remplacement - 2 Avril 2020.pdf")
     - use https://github.com/go-sourcemap/sourcemap to print nicer error messages by using JS sourcemaps.
