@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"sync/atomic"
 	"time"
@@ -14,6 +13,8 @@ import (
 	"golang.org/x/sync/semaphore"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
+
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -64,7 +65,7 @@ func New(rawDataFilePath string, nGramSize int, maxUserQueryLength int, maxConcu
 
 func (ds drSearcher) Query(ctx context.Context, unsafeUserQuery string, maxNumberResults int) ([]DoctorRecord, error) {
 	start := time.Now()
-	defer func() { log.Printf("Query took %s", time.Since(start)) }()
+	defer func() { log.Trace().Msgf("doctor query took %s", time.Since(start)) }()
 
 	if len(unsafeUserQuery) > ds.maxUserQueryLength {
 		return nil, fmt.Errorf("%w, query length %d exceeds limit %d", InvalidUserQuery, len(unsafeUserQuery), ds.maxUserQueryLength)
@@ -86,7 +87,7 @@ func (ds drSearcher) Query(ctx context.Context, unsafeUserQuery string, maxNumbe
 
 	// Limit the number of concurrent queries.
 	if err := ds.semWorkLimiter.Acquire(ctx, 1); err != nil {
-		// log.Printf("Failed to acquire semaphore: %v", err)
+		log.Trace().Msgf("failed to acquire semaphore for doctor search: %v", err)
 		return nil, err
 	}
 	defer ds.semWorkLimiter.Release(1)
@@ -121,19 +122,18 @@ func (ds drSearcher) Query(ctx context.Context, unsafeUserQuery string, maxNumbe
 }
 
 func (ds *drSearcher) tryToRecreateIndex() {
-	// TODO: remove this hard-coded value
 	databaseFile, err := os.Open(ds.dataFilePath)
 	if err != nil {
-		log.Fatalf("error opening data file %s \n", err)
+		log.Fatal().Msgf("error opening data file %s", err)
 		return
 	}
 	start := time.Now()
 	index, err := newNGramsIndex(databaseFile, ds.nGramSize)
 	if err != nil {
-		log.Fatalf("error creating index %s \n", err)
+		log.Fatal().Msgf("error creating index %s", err)
 		return
 	}
-	log.Printf("index creation (%d entries) took %s", len(index.underlyingIndex), time.Since(start))
+	log.Info().Msgf("index creation (%d entries) took %s", len(index.underlyingIndex), time.Since(start))
 
 	previousIndexInterface := ds.index.Load()
 	if previousIndexInterface != nil {

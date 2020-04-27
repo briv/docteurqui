@@ -6,10 +6,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,6 +21,9 @@ import (
 	"autocontract/internal/form"
 	"autocontract/internal/httperror"
 	"autocontract/internal/pdfgen"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -138,7 +141,7 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 		TimeLayout:   TimeLayout,
 	})
 	if err != nil {
-		log.Printf("form processing error %v", err)
+		log.Debug().Msgf("form processing error %s", err)
 		httperror.RichError(w, r, err)
 		return
 	}
@@ -147,7 +150,7 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	sharedUserData := sharedUserDataFromContext(r.Context())
 	userDataKey, err := sharedUserData.Set(safeUserData)
 	if err != nil {
-		log.Println(err)
+		log.Warn().Msgf("issue storing user data for future internal use %s", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -164,12 +167,11 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 		RawQuery: q.Encode(),
 	}
 
-	log.Println(pdfUrl.String())
 	pdfGenerator := pdfGenControlFromContext(r.Context())
 
 	pdfData, err := pdfGenerator.GeneratePdf(ctx, pdfUrl.String())
 	if err != nil {
-		log.Println(err)
+		log.Error().Msgf("error generating PDF: %s", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -178,12 +180,11 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Length", strconv.Itoa(len(pdfData)))
 	_, err = w.Write(pdfData)
 	if err != nil {
-		// TODO: just log error, not much else we can do right ?
-		log.Println(err)
+		log.Warn().Msgf("writing PDF data failed: %s", err)
 	}
 
 	userData := safeUserData.GetUserData()
-	log.Printf("successful contract PDF generation: regular=%s substitute=%s (took %s)\n",
+	log.Info().Msgf("successful contract PDF generation: regular=%s substitute=%s (took %s)",
 		userData.Regular.NumberRPPS,
 		userData.Substituting.NumberRPPS,
 		time.Since(start),
@@ -203,11 +204,12 @@ func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, doctorsearch.TemporarilyUnavailable) {
 			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
 		} else if errors.Is(err, doctorsearch.InvalidUserQuery) {
-			log.Printf("error: %v\n", err)
+			log.Debug().Msgf("invalid doctor search query: %s", err)
 			http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
 		} else {
-			// TODO: log ?
-			log.Printf("error: %v\n", err)
+			if errors.Is(err, context.Canceled) == false {
+				log.Warn().Msgf("unexpected error with doctor search query: %s", err)
+			}
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
 		return
@@ -222,7 +224,6 @@ func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		// TODO: log ?
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -264,7 +265,7 @@ func frontendErrorLogHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(&sb, ", stack: %s", stack)
 	}
 
-	log.Println(sb.String())
+	log.Warn().Msg(sb.String())
 }
 
 func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
@@ -278,7 +279,7 @@ func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 	sharedUserData := sharedUserDataFromContext(r.Context())
 	userData, err := sharedUserData.Get(userDataKey)
 	if err != nil {
-		log.Println(err)
+		log.Error().Msgf("error retrieving internal data for PDF: %s", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -286,7 +287,7 @@ func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = pdfGenerator.Template.Execute(w, userData)
 	if err != nil {
-		log.Println(err)
+		log.Error().Msgf("error serving internal PDF template: %s", err)
 	}
 }
 
@@ -311,28 +312,38 @@ func main() {
 	devWebsiteProxyPort := flag.String("http-proxy", "", "a port to reverse-proxy the user-facing web HTTP requests (useful for developping front-end)")
 	flag.Parse()
 
+	// Global logging setup
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	// TODO: use a dev flag instead of this crutch
+	if *devWebsiteProxyPort != "" {
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+
+	// Flag checks
 	if *drDataFilePath == "" {
-		log.Fatalln("a file must be specified for doctor data")
+		log.Fatal().Msg("a file must be specified for doctor data")
 	}
 	if *pdfTemplateFilePath == "" {
-		log.Fatalln("an HTML file must be specified for PDF template")
+		log.Fatal().Msg("an HTML file must be specified for PDF template")
 	}
 	if *pdfGenBrowserDevToolsUrl == "" {
-		log.Fatalln("a URL must be specified for the browser devtools")
+		log.Fatal().Msg("a URL must be specified for the browser devtools")
 	}
 	if *pdfInternalTemplateWebHostname == "" {
-		log.Fatalln("a hostname must be specified for the internal template web host")
+		log.Fatal().Msg("a hostname must be specified for the internal template web host")
 	}
 
 	// Load time-zone for Paris.
 	parisLocation, err := time.LoadLocation("Europe/Paris")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msgf("could not load Paris time zone information %s", err)
 	}
 
 	err = SharedPdfGenControl.Init(*pdfTemplateFilePath, *pdfGenBrowserDevToolsUrl, PdfGeneratorInitializationTimeout)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msgf("could not initialize PDF sub-system %s", err)
 	}
 	defer SharedPdfGenControl.Shutdown()
 
@@ -370,11 +381,11 @@ func main() {
 		} else if *devWebsiteProxyPort != "" {
 			urlToProxyTo, err := url.Parse(fmt.Sprintf("http://localhost:%s/", *devWebsiteProxyPort))
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Msgf("could not use specified proxy URL: %s", err)
 			}
 			rootHandler = httputil.NewSingleHostReverseProxy(urlToProxyTo)
 		} else {
-			log.Fatalf("error: you must specify one of -http-data or -http-proxy flags\n")
+			log.Fatal().Msg("you must specify one of -http-data or -http-proxy flags")
 		}
 		publicServeMux.Handle("/", csp.WithSecurityHeaders(rootHandler))
 
@@ -409,7 +420,7 @@ func main() {
 		}
 	}()
 
-	fmt.Printf("Auto-contract HTTP service starting on port %s\n", *publicFacingWebsitePort)
+	log.Info().Msgf("autocontract HTTP service starting on port %s", *publicFacingWebsitePort)
 	err = <-errChan
-	log.Fatal(err)
+	log.Fatal().Msgf("issue with an HTTP server: %s", err)
 }

@@ -2,7 +2,6 @@ package form
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	"autocontract/internal/datamap"
 	"autocontract/internal/validation"
 
+	"github.com/rs/zerolog/log"
 	"github.com/vincent-petithory/dataurl"
 )
 
@@ -165,8 +165,7 @@ func Process(r *http.Request, manner FormProcessingManner) (datamap.SafeUserData
 		}
 
 		if index >= len(periodEndsStr) {
-			// TODO: log this better
-			log.Printf("invalid periods (%d starts, %d ends)\n", len(periodStartsStr), len(periodEndsStr))
+			log.Trace().Msgf("invalid periods (%d starts, %d ends)", len(periodStartsStr), len(periodEndsStr))
 			validationIssues.Set("period-start", validation.TooMany)
 			break
 		}
@@ -174,7 +173,6 @@ func Process(r *http.Request, manner FormProcessingManner) (datamap.SafeUserData
 		periodEndStr := periodEndsStr[index]
 		periodEnd, err := time.Parse(manner.TimeLayout, periodEndStr)
 		if err != nil {
-			log.Printf("invalid period end '%s'\n", periodEndStr)
 			validationIssues.Set("period-end", validation.ParseError)
 			break
 		}
@@ -228,7 +226,6 @@ func Process(r *http.Request, manner FormProcessingManner) (datamap.SafeUserData
 	})
 	retrocessionPerc, err := strconv.Atoi(retrocessionPercStr)
 	if err != nil {
-		log.Printf("invalid retrocession value '%s'\n", retrocessionPercStr)
 		validationIssues.Set("financials-retrocession", validation.ParseError)
 	}
 
@@ -237,7 +234,6 @@ func Process(r *http.Request, manner FormProcessingManner) (datamap.SafeUserData
 	if nightShiftRetrocessionPercStr != "" {
 		nightShiftRetrocessionPerc, err = strconv.Atoi(nightShiftRetrocessionPercStr)
 		if err != nil {
-			log.Println(err)
 			validationIssues.Set("financials-nightShiftRetrocession", validation.ParseError)
 		}
 	}

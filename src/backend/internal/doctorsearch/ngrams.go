@@ -5,12 +5,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/rs/zerolog/log"
 )
 
 type ReadSeekerCloser interface {
@@ -54,35 +55,38 @@ func newNGramsIndex(r ReadSeekerCloser, nGramSize int) (*nGramsIndex, error) {
 	// Store the used RPPS among query results as the file contains duplicates
 	usedRPPSMap := make(map[string]bool)
 
-	hasReadHeader := false
-	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		if hasReadHeader == false {
-			advanceHeader, _, errHeader := bufio.ScanLines(data, atEOF)
-			if errHeader != nil {
-				return advanceHeader, nil, errHeader
-			}
-			hasReadHeader = true
-			lastAdvance = int64(advanceHeader)
-			offset += lastAdvance
-			return advanceHeader, nil, nil
-		}
+	split := func() bufio.SplitFunc {
+		hasReadHeader := false
 
-		advance, token, err = bufio.ScanLines(data, atEOF)
-		if err == nil && token != nil {
-			_, err = parseRecordFromLine(string(token))
+		return func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+			if hasReadHeader == false {
+				advanceHeader, _, errHeader := bufio.ScanLines(data, atEOF)
+				if errHeader != nil {
+					return advanceHeader, nil, errHeader
+				}
+				hasReadHeader = true
+				lastAdvance = int64(advanceHeader)
+				offset += lastAdvance
+				return advanceHeader, nil, nil
+			}
+
+			advance, token, err = bufio.ScanLines(data, atEOF)
+			if err == nil && token != nil {
+				_, err = parseRecordFromLine(string(token))
+			}
+			lastAdvance = int64(advance)
+			offset += lastAdvance
+			return
 		}
-		lastAdvance = int64(advance)
-		offset += lastAdvance
-		return
-	}
+	}()
 	// Set the split function for the scanning operation.
 	scanner.Split(split)
+
 	for scanner.Scan() {
 		line := scanner.Text()
 
 		record, err := parseRecordFromLine(line)
 		if err != nil {
-			log.Printf("error parsing %v\n", err)
 			return nil, err
 		}
 		if record.shouldBeIndexed() == false {
@@ -96,7 +100,6 @@ func newNGramsIndex(r ReadSeekerCloser, nGramSize int) (*nGramsIndex, error) {
 		usedRPPSMap[rpps] = true
 
 		ngrams := record.computeAllNGrams(nGramSize)
-		// log.Printf("DEBUG OFFSET: %d | ngrams: %d\n", offset-lastAdvance, len(ngrams))
 		for _, ngram := range ngrams {
 			existingOffsets, ok := index[ngram]
 			if !ok {
@@ -177,7 +180,7 @@ func (ngi *nGramsIndex) query(ctx context.Context, query string, maxNumberResult
 	}
 	sort.Sort(byHitCount(results))
 
-	log.Printf("Results are in: %v\n", len(results))
+	log.Trace().Msgf("query results: %v", len(results))
 
 	// Check after our in-memory computation phase that we're still ok to continue.
 	if err := ctx.Err(); err != nil {
@@ -255,7 +258,7 @@ func (ngi *nGramsIndex) readServiceWorker() {
 					com.readRecordsErrChan <- err
 					break
 				}
-				// log.Printf("DEBUG Record (count %d) is: %v\n", readWish.Count, record)
+
 				com.readRecordsChan <- record
 			}
 		}
