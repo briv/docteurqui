@@ -23,9 +23,14 @@ go run -tags devmode autocontract.go -http-proxy 1234
         - 2 named volumes ? (data + configuration)
         - read https://www.breakds.org/post/declarative-docker-in-nixos/#fnref:1 for help ?
 - must haves
-    - "hash" (argon2) the RPPS to make it a little more painful to access them.
+    - robots.txt
+    - rewrite data protection to link to GDPR and say we don't keep anything
 
 - nice to haves
+    - sitemap.xml ? see christine.website source code
+    - canonicalization of contract periods (plus would help with counting number of unique contracts)
+    - remove build tag "devhttps" and use "-dev" flag instead
+    - checkout "github.com/justinas/alice" for easier golang http.Handler chaining
     - investigate requestAnimationFrame (and 'fastdom' lib) for batching DOM measurements/mutations, especially when submitting form and clearing / adding errors.
     - allow keyboard use to select autocomplete entries
     - add date of rempla to generated PDF (i.e. "Contrat remplacement - 2 Avril 2020.pdf")

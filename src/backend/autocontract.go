@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -15,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"autocontract/internal/censor"
 	"autocontract/internal/csp"
 	"autocontract/internal/datamap"
 	"autocontract/internal/doctorsearch"
@@ -183,11 +186,10 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 		log.Warn().Msgf("writing PDF data failed: %s", err)
 	}
 
-	userData := safeUserData.GetUserData()
+	encodedCensoredContractID := base64.URLEncoding.EncodeToString(censor.Censor(safeUserData.Identifier()))
 	log.Info().
 		Dur("pdf_gen_duration", time.Since(start)).
-		Str("regular_rpps", userData.Regular.NumberRPPS).
-		Str("substitute_rpps", userData.Substituting.NumberRPPS).
+		Str("pseudo_anon_contract_id", encodedCensoredContractID).
 		Msg("created a contract")
 }
 
@@ -308,15 +310,17 @@ func main() {
 	pdfGenBrowserDevToolsUrl := flag.String("pdf-browser-devtools-url", PdfGeneratorBrowserDevToolsUrl, "the URL of the browser devtools server to target and control for PDF generation")
 	pdfInternalTemplateWebHostname := flag.String("pdf-internal-web-hostname", "", "the hostname that external services should use to access the internal contract template web server")
 
+	suppliedCensorKey := flag.String("censor-key", "", "key for HMAC-sha256 used to hash personally identifiable data")
+
 	// Flags useful when developping.
+	devMode := flag.Bool("dev", false, "enables dev mode which tailors logging output")
 	devWebsiteProxyPort := flag.String("http-proxy", "", "a port to reverse-proxy the user-facing web HTTP requests (useful for developping front-end)")
 	flag.Parse()
 
 	// Global logging setup
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	// TODO: use a dev flag instead of this crutch
-	if *devWebsiteProxyPort != "" {
+	if *devMode {
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
@@ -333,6 +337,19 @@ func main() {
 	}
 	if *pdfInternalTemplateWebHostname == "" {
 		log.Fatal().Msg("a hostname must be specified for the internal template web host")
+	}
+
+	var censorSecretKey []byte
+	if *devMode {
+		censorSecretKey = make([]byte, censor.MinKeySize)
+		if _, err := rand.Read(censorSecretKey); err != nil {
+			log.Fatal().Msgf("could not read random data for secret key: %s", err)
+		}
+	} else {
+		censorSecretKey = []byte(*suppliedCensorKey)
+	}
+	if err := censor.Init(censorSecretKey); err != nil {
+		log.Fatal().Msgf("could not initialize censor package: %s", err)
 	}
 
 	// Load time-zone for Paris.

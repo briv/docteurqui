@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -281,12 +282,17 @@ func (u *UserData) FormattedPeriods() string {
 
 // TODO: test this
 func (u *UserData) FormattedDateContractEstablished() string {
-	const timeLayout = "02/01/2006"
-	return u.DateContractEstablished.Format(timeLayout)
+	const frenchDateLayout = "02/01/2006"
+	return u.DateContractEstablished.Format(frenchDateLayout)
 }
 
 type SafeUserData interface {
 	GetUserData() UserData
+	// Identifier returns an string with personally identifiable information
+	//  that can be used to check if contracts are essentially the same.
+	//
+	// Currently, this string is just the concatenation: regular RPPS | substitute RPPS | contract dates.
+	Identifier() string
 }
 
 type safeUserData struct {
@@ -295,6 +301,24 @@ type safeUserData struct {
 
 func (s *safeUserData) GetUserData() UserData {
 	return s.userData
+}
+
+func (s *safeUserData) Identifier() string {
+	const timeAsDateLayout = "2006-01-02"
+	const seperator = '|'
+
+	u := s.userData
+	var sb strings.Builder
+	sb.WriteString(u.Regular.NumberRPPS)
+	sb.WriteRune(seperator)
+	sb.WriteString(u.Substituting.NumberRPPS)
+	for _, p := range u.Periods {
+		sb.WriteRune(seperator)
+		sb.WriteString(p.Start.Format(timeAsDateLayout))
+		sb.WriteRune(seperator)
+		sb.WriteString(p.End.Format(timeAsDateLayout))
+	}
+	return sb.String()
 }
 
 func MarkSafe(u UserData) SafeUserData {
