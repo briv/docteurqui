@@ -65,7 +65,12 @@ func New(rawDataFilePath string, nGramSize int, maxUserQueryLength int, maxConcu
 
 func (ds drSearcher) Query(ctx context.Context, unsafeUserQuery string, maxNumberResults int) ([]DoctorRecord, error) {
 	start := time.Now()
-	defer func() { log.Trace().Msgf("doctor query took %s", time.Since(start)) }()
+	defer func() {
+		log.Trace().
+			Str("query", unsafeUserQuery).
+			Dur("duration", time.Since(start)).
+			Msg("doctor query")
+	}()
 
 	if len(unsafeUserQuery) > ds.maxUserQueryLength {
 		return nil, fmt.Errorf("%w, query length %d exceeds limit %d", InvalidUserQuery, len(unsafeUserQuery), ds.maxUserQueryLength)
@@ -135,7 +140,8 @@ func (ds *drSearcher) tryToRecreateIndex() {
 	}
 	log.Info().
 		Dur("create_duration", time.Since(start)).
-		Int("entries", len(index.underlyingIndex)).
+		Int("records", index.numRecords).
+		Int("index_entries", len(index.underlyingIndex)).
 		Msg("created doctor search index")
 
 	previousIndexInterface := ds.index.Load()

@@ -42,6 +42,7 @@ type nGramsIndex struct {
 	recordsData      ReadSeekerCloser
 	submitReadsQueue chan readRecordsCom
 	done             chan struct{} //
+	numRecords       int
 }
 
 func newNGramsIndex(r ReadSeekerCloser, nGramSize int) (*nGramsIndex, error) {
@@ -82,6 +83,7 @@ func newNGramsIndex(r ReadSeekerCloser, nGramSize int) (*nGramsIndex, error) {
 	// Set the split function for the scanning operation.
 	scanner.Split(split)
 
+	var numRecords int
 	for scanner.Scan() {
 		line := scanner.Text()
 
@@ -114,6 +116,7 @@ func newNGramsIndex(r ReadSeekerCloser, nGramSize int) (*nGramsIndex, error) {
 				Length:      uint32(len(line)),
 			}, existingOffsets)
 		}
+		numRecords += 1
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -126,6 +129,7 @@ func newNGramsIndex(r ReadSeekerCloser, nGramSize int) (*nGramsIndex, error) {
 		recordsData:      r,
 		submitReadsQueue: make(chan readRecordsCom),
 		done:             make(chan struct{}, 1),
+		numRecords:       numRecords,
 	}
 	go newGramsIndex.readServiceWorker()
 	return newGramsIndex, nil
@@ -159,7 +163,7 @@ func (ngi *nGramsIndex) query(ctx context.Context, query string, maxNumberResult
 	// 2. for each above ngram, get possible record offsets
 	resultsCount := make(map[int64]int)
 	resultsValues := make(map[int64]DatabaseFileOffsetsRecord)
-	for queryNgram, _ := range queryNgrams {
+	for queryNgram := range queryNgrams {
 		offsets := ngi.underlyingIndex[queryNgram]
 
 		for _, offset := range offsets {
@@ -180,7 +184,7 @@ func (ngi *nGramsIndex) query(ctx context.Context, query string, maxNumberResult
 	}
 	sort.Sort(byHitCount(results))
 
-	log.Trace().Msgf("query results: %v", len(results))
+	log.Trace().Int("number", len(results)).Msg("query results")
 
 	// Check after our in-memory computation phase that we're still ok to continue.
 	if err := ctx.Err(); err != nil {
