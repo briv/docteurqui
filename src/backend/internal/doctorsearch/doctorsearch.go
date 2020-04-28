@@ -133,7 +133,10 @@ func (ds *drSearcher) tryToRecreateIndex() {
 		log.Fatal().Msgf("error creating index %s", err)
 		return
 	}
-	log.Info().Msgf("index creation (%d entries) took %s", len(index.underlyingIndex), time.Since(start))
+	log.Info().
+		Dur("create_duration", time.Since(start)).
+		Int("entries", len(index.underlyingIndex)).
+		Msg("created doctor search index")
 
 	previousIndexInterface := ds.index.Load()
 	if previousIndexInterface != nil {

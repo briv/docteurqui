@@ -184,11 +184,11 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userData := safeUserData.GetUserData()
-	log.Info().Msgf("successful contract PDF generation: regular=%s substitute=%s (took %s)",
-		userData.Regular.NumberRPPS,
-		userData.Substituting.NumberRPPS,
-		time.Since(start),
-	)
+	log.Info().
+		Dur("pdf_gen_duration", time.Since(start)).
+		Str("regular_rpps", userData.Regular.NumberRPPS).
+		Str("substitute_rpps", userData.Substituting.NumberRPPS).
+		Msg("created a contract")
 }
 
 func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
@@ -420,7 +420,9 @@ func main() {
 		}
 	}()
 
-	log.Info().Msgf("autocontract HTTP service starting on port %s", *publicFacingWebsitePort)
+	log.Info().
+		Str("port", *publicFacingWebsitePort).
+		Msgf("autocontract HTTP service starting on port %s", *publicFacingWebsitePort)
 	err = <-errChan
 	log.Fatal().Msgf("issue with an HTTP server: %s", err)
 }
