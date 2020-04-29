@@ -20,11 +20,12 @@ go run -tags devmode autocontract.go -http-proxy 1234
 # TODOs
 - docker
     - 1 image with caddy
+        - robots.txt
         - 2 named volumes ? (data + configuration)
         - read https://www.breakds.org/post/declarative-docker-in-nixos/#fnref:1 for help ?
+- docteurqui.com home page
 - must haves
-    - robots.txt
-    - rewrite data protection to link to GDPR and say we don't keep anything
+    - check how the form interacts with CORS and Origin/Referrer headers
 
 - nice to haves
     - sitemap.xml ? see christine.website source code
