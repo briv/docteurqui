@@ -188,6 +188,7 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 
 	encodedCensoredContractID := base64.URLEncoding.EncodeToString(censor.Censor(safeUserData.Identifier()))
 	log.Info().
+		Str("request_origin", r.Header.Get("Origin")).
 		Dur("pdf_gen_duration", time.Since(start)).
 		Str("pseudo_anon_contract_id", encodedCensoredContractID).
 		Msg("created a contract")

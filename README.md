@@ -18,16 +18,17 @@ go run -tags devmode autocontract.go -http-proxy 1234
 ```
 
 # TODOs
-- docker
-    - 1 image with caddy
-        - robots.txt
-        - 2 named volumes ? (data + configuration)
-        - read https://www.breakds.org/post/declarative-docker-in-nixos/#fnref:1 for help ?
-- docteurqui.com home page
-- must haves
-    - check how the form interacts with CORS and Origin/Referrer headers
+- must-have for launch
+    - docker
+        - 1 image with caddy
+            - robots.txt
+            - 2 named volumes ? (data + configuration)
+            - read https://www.breakds.org/post/declarative-docker-in-nixos/#fnref:1 for help ?
+    - docteurqui.com home page
 
 - nice to haves
+    - check how the form interacts with CORS and Origin/Referrer headers
+    - hide doctor search suggestions when we get a 422 because of query length (> 40 characters)
     - sitemap.xml ? see christine.website source code
     - canonicalization of contract periods (plus would help with counting number of unique contracts)
     - remove build tag "devhttps" and use "-dev" flag instead
