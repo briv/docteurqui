@@ -6,9 +6,6 @@
 ## specific to our go code
 .go-cache/
 
-# Examples
-contract-models/
-
 # IDEs
 .vscode/
 
