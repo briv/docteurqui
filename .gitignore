@@ -10,4 +10,4 @@
 .vscode/
 
 # Temporary
-src/test-search/
+tmp/
