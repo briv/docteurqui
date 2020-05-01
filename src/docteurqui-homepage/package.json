@@ -1,0 +1,20 @@
+{
+    "name": "docteurqui-homepage",
+    "description": "docteurqui homepage",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "parcel serve index.html",
+        "build": "parcel build --no-cache index.html"
+    },
+    "license": "UNLICENSED",
+    "devDependencies": {
+        "@parcel/transformer-css": "^2.0.0-alpha.3",
+        "@parcel/transformer-postcss": "^2.0.0-alpha.3",
+        "autoprefixer": "^9.3.1",
+        "parcel": "^2.0.0-nightly.207",
+        "sass": "^1.26.5"
+    },
+    "dependencies": {
+        "normalize.css": "^8.0.1"
+    }
+}

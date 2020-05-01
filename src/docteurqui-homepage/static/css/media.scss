@@ -1,0 +1,29 @@
+$min-width-for-desktop: 700px;
+@media (min-width: $min-width-for-desktop) {
+    .content {
+        flex-direction: row;
+    }
+
+    .main {
+        max-width: 48rem;
+    }
+
+    .navigation {
+        min-width: 10rem;
+
+        $_mw: 20rem;
+        max-width: $_mw;
+        flex: 1 1 $_mw;
+    }
+
+    .footer {
+        justify-content: center;
+        $_pad: 3rem;
+        padding-left: $_pad;
+        padding-right: $_pad;
+
+        .footer-section {
+            max-width: 40rem;
+        }
+    }
+}

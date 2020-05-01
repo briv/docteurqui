@@ -1,0 +1,32 @@
+@mixin mix-font-display {
+    font-display: swap;
+};
+
+@font-face {
+    font-family: 'Source Serif Pro';
+    src: local('Source Serif Pro Regular'), local('SourceSerifPro-Regular'),
+        local('Source Serif Pro'),  local('SourceSerifPro'),
+        url('../fonts/Source_Serif_Pro/SourceSerifPro-Regular.woff2') format('woff2'),
+        url('../fonts/Source_Serif_Pro/SourceSerifPro-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    @include mix-font-display;
+}
+
+// @font-face {
+//     font-family: 'Source Serif Pro';
+//     src: local('Source Serif Pro Semibold Regular'), local('SourceSerifPro-Semibold'),
+//         url('SourceSerifPro-Semibold.woff2') format('woff2'),
+//         url('SourceSerifPro-Semibold.woff') format('woff');
+//     font-weight: 600;
+//     font-style: normal;
+// }
+
+// @font-face {
+//     font-family: 'Source Serif Pro';
+//     src: local('Source Serif Pro Bold'), local('SourceSerifPro-Bold'),
+//         url('SourceSerifPro-Bold.woff2') format('woff2'),
+//         url('SourceSerifPro-Bold.woff') format('woff');
+//     font-weight: bold;
+//     font-style: normal;
+// }

@@ -1,0 +1,155 @@
+@use "sass:color";
+
+// TODO: use nicer @imports instead of hard-coded paths.
+// e.g. @import "~normalize.css/normalize.css";
+@import '../../node_modules/normalize.css/normalize.css';
+
+// Colors
+@import 'vars.scss';
+// END Colors
+
+// Fonts
+@import 'fonts.scss';
+// END Fonts
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    color: $body-color;
+    font-family: ui-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: "Source Serif Pro", serif;
+    font-size: $font-size-default;
+    line-height: $line-height;
+}
+
+a {
+    &:link, &:visited, &:any-link {
+        color: $link-color;
+        text-decoration: none;
+    }
+
+    &:hover {
+        color: color.scale($link-color, $saturation: -30%, $lightness: -10%);
+        text-decoration: underline;
+    }
+}
+
+.header {
+    margin-top: 1rem;
+
+    .logo {
+        display: inline-block;
+        font-size: 2.5rem;
+        font-family: "Source Serif Pro", serif;
+
+        background-color: $logo-bg-color;
+        color: $logo-color;
+        text-align: center;
+        padding: 0.2rem 1rem;
+        margin: 0;
+
+        $_radius: 0.8rem;
+        border-bottom-right-radius: $_radius;
+        border-top-right-radius: $_radius;
+    }
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2rem;
+}
+
+.navigation {
+    display: flex;
+
+    margin: 1rem 2rem;
+
+    ul {
+        list-style: disc;
+        margin: 0;
+        padding: 0;
+    }
+
+    a {
+        display: flex;
+        flex-direction: column;
+        border-bottom: thin solid #aaa;
+        padding: 1rem 0.2rem;
+
+        &:hover {
+            background-color: color.scale($link-color, $saturation: +100%, $lightness: +90%);
+
+            &.selective-underline {
+                text-decoration: none;
+
+                .link-title {
+                    text-decoration: underline;
+                }
+            }
+        }
+
+        .link-details {
+            color: $body-color;
+            font-size: 0.8rem;
+            text-indent: 0.2rem;
+            text-decoration: none;
+        }
+    }
+}
+
+.main {
+    line-height: $line-height-long-text;
+    margin: 0 0.4rem;
+
+    article {
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+
+        ul {
+            list-style: disc;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+    }
+
+    article header {
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        .date {
+            font-style: italic;
+            margin-top: 0.4rem;
+            margin-left: 1rem;
+        }
+    }
+
+    article p {
+        text-indent: 0.4rem;
+    }
+}
+
+.footer {
+    line-height: $line-height-long-text;
+    background-color: $footer-bg-color;
+    display: flex;
+    margin: 0;
+    padding: 1rem 0.4rem;
+
+    // Use a shadow to prolong the footer to the bottom of the page in case
+    // the content above it doesn't do it.
+    box-shadow: 0 50vh 0 50vh $footer-bg-color;
+}
+
+// For larger displays such as desktop.
+@import 'media.scss';
