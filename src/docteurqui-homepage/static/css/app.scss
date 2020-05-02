@@ -1,15 +1,10 @@
 @use "sass:color";
+@use 'vars.scss';
 
-// TODO: use nicer @imports instead of hard-coded paths.
-// e.g. @import "~normalize.css/normalize.css";
-@import '../../node_modules/normalize.css/normalize.css';
-
-// Colors
-@import 'vars.scss';
-// END Colors
+@import 'normalize.css/normalize.css';
 
 // Fonts
-@import 'fonts.scss';
+@import '@docteurqui/fonts/index.css';
 // END Fonts
 
 * {
@@ -22,21 +17,20 @@ html, body {
 }
 
 body {
-    color: $body-color;
-    font-family: ui-system, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: vars.$body-color;
     font-family: "Source Serif Pro", serif;
-    font-size: $font-size-default;
-    line-height: $line-height;
+    font-size: vars.$font-size-default;
+    line-height: vars.$line-height;
 }
 
 a {
     &:link, &:visited, &:any-link {
-        color: $link-color;
+        color: vars.$link-color;
         text-decoration: none;
     }
 
     &:hover {
-        color: color.scale($link-color, $saturation: -30%, $lightness: -10%);
+        color: color.scale(vars.$link-color, $saturation: -30%, $lightness: -10%);
         text-decoration: underline;
     }
 }
@@ -47,10 +41,9 @@ a {
     .logo {
         display: inline-block;
         font-size: 2.5rem;
-        font-family: "Source Serif Pro", serif;
 
-        background-color: $logo-bg-color;
-        color: $logo-color;
+        background-color: vars.$logo-bg-color;
+        color: vars.$logo-color;
         text-align: center;
         padding: 0.2rem 1rem;
         margin: 0;
@@ -85,7 +78,7 @@ a {
         padding: 1rem 0.2rem;
 
         &:hover {
-            background-color: color.scale($link-color, $saturation: +100%, $lightness: +90%);
+            background-color: color.scale(vars.$link-color, $saturation: +100%, $lightness: +90%);
 
             &.selective-underline {
                 text-decoration: none;
@@ -97,7 +90,7 @@ a {
         }
 
         .link-details {
-            color: $body-color;
+            color: vars.$body-color;
             font-size: 0.8rem;
             text-indent: 0.2rem;
             text-decoration: none;
@@ -106,7 +99,7 @@ a {
 }
 
 .main {
-    line-height: $line-height-long-text;
+    line-height: vars.$line-height-long-text;
     margin: 0 0.4rem;
 
     article {
@@ -140,15 +133,15 @@ a {
 }
 
 .footer {
-    line-height: $line-height-long-text;
-    background-color: $footer-bg-color;
+    line-height: vars.$line-height-long-text;
+    background-color: vars.$footer-bg-color;
     display: flex;
     margin: 0;
     padding: 1rem 0.4rem;
 
     // Use a shadow to prolong the footer to the bottom of the page in case
     // the content above it doesn't do it.
-    box-shadow: 0 50vh 0 50vh $footer-bg-color;
+    box-shadow: 0 50vh 0 50vh vars.$footer-bg-color;
 }
 
 // For larger displays such as desktop.

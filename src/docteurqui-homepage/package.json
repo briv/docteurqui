@@ -3,8 +3,8 @@
     "description": "docteurqui homepage",
     "version": "0.0.1",
     "scripts": {
-        "dev": "parcel serve index.html",
-        "build": "parcel build --no-cache index.html"
+        "dev": "parcel serve --public-url \"/content-addressable/\" index.html",
+        "build": "parcel build --no-cache --public-url \"/content-addressable/\" index.html"
     },
     "license": "UNLICENSED",
     "devDependencies": {
@@ -15,6 +15,7 @@
         "sass": "^1.26.5"
     },
     "dependencies": {
+        "@docteurqui/fonts": "file:./../packages-@docteurqui/fonts",
         "normalize.css": "^8.0.1"
     }
 }

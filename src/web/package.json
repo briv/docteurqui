@@ -3,8 +3,8 @@
     "description": "A website for generating substituting contracts for médecins géneralistes",
     "version": "0.0.1",
     "scripts": {
-        "dev": "parcel serve index.html",
-        "build": "parcel build index.html"
+        "dev": "parcel serve --public-url \"/content-addressable/\" index.html",
+        "build": "parcel build --no-cache --public-url \"/content-addressable/\" index.html"
     },
     "license": "UNLICENSED",
     "devDependencies": {
@@ -14,10 +14,11 @@
         "@babel/preset-modules": "^0.1.3",
         "autoprefixer": "^9.3.1",
         "parcel": "^2.0.0-nightly.207",
-        "sass": "^1.15.2",
+        "sass": "^1.26.5",
         "uuid": "^7.0.2"
     },
     "dependencies": {
+        "@docteurqui/fonts": "file:./../packages-@docteurqui/fonts",
         "normalize.css": "^8.0.1",
         "signature_pad": "^3.0.0-beta.3",
         "smoothscroll-polyfill": "^0.4.4",
