@@ -24,8 +24,6 @@ github.com/hashicorp/hcl v0.0.0-20170914154624-68e816d1c783/go.mod h1:oZtUIOe8dh
 github.com/inconshreveable/log15 v0.0.0-20170622235902-74a0988b5f80/go.mod h1:cOaXtrgN4ScfRrD9Bre7U1thNq5RtJ8ZoP4iXVGRj6o=
 github.com/kr/pretty v0.2.0/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
-github.com/kr/secureheader v0.2.0 h1:Fe/BS3McH8EGMSc+HzaZkkRnrCyx2gq9kSVgLbyBNrA=
-github.com/kr/secureheader v0.2.0/go.mod h1:PfvbGMMfqBg6z+vxKGKbSJRcmASZc4klL5DiW9V5iLI=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/mafredri/cdp v0.28.0 h1:v/LWC3GpactA1EaS737bl+eNUhvOaDh+FzvyoDxNM5o=
 github.com/mafredri/cdp v0.28.0/go.mod h1:11586MgpyJuQR4qiXQ/7HBame2FtGIBzymaUHZcQ0PY=

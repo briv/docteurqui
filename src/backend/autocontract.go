@@ -275,7 +275,7 @@ func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 	// As an extra paranoid step, use a CSP header for internal web-server used for PDF generation.
 	// Go's html/template package is used for escaping user content so injections shouldn't be an issue,
 	// but defense in depth can't hurt.
-	w.Header().Set(csp.CSPHeader, csp.PdfCSPHeader)
+	w.Header().Set(csp.HeaderCSP, csp.InternalPdfServerCSPHeader)
 
 	userDataKey := r.URL.Query().Get(InternalHttpServerPdfTemplateRequestUserQueryKey)
 
@@ -405,7 +405,9 @@ func main() {
 		} else {
 			log.Fatal().Msg("you must specify one of -http-data or -http-proxy flags")
 		}
-		publicServeMux.Handle("/", csp.WithSecurityHeaders(rootHandler))
+		publicServeMux.Handle("/", csp.New(csp.SecHeadersConfig{
+			InsecureMode: *devMode,
+		}).WithSecurityHeaders(rootHandler))
 
 		publicServeMux.HandleFunc("/b/generate-contract",
 			withContext(

@@ -67,7 +67,7 @@ let
 
     # Use GOFLAGS in preBuild as multiple tags with the 'buildFlags' attribute did not work out.
     preBuild = ''
-      export GOFLAGS="-tags=netgo,devmode"
+      export GOFLAGS="-tags=netgo"
     '';
 
     buildFlagsArray = [

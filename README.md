@@ -14,7 +14,7 @@ yarn dev
 - Launch go backend:
 ```bash
 cd src/backend
-go run -tags devmode autocontract.go -http-proxy 1234
+go run autocontract.go -http-proxy 1234
 ```
 
 # TODOs
@@ -31,7 +31,6 @@ go run -tags devmode autocontract.go -http-proxy 1234
     - hide doctor search suggestions when we get a 422 because of query length (> 40 characters)
     - sitemap.xml ? see christine.website source code
     - canonicalization of contract periods (plus would help with counting number of unique contracts)
-    - remove build tag "devhttps" and use "-dev" flag instead
     - checkout "github.com/justinas/alice" for easier golang http.Handler chaining
     - investigate requestAnimationFrame (and 'fastdom' lib) for batching DOM measurements/mutations, especially when submitting form and clearing / adding errors.
     - allow keyboard use to select autocomplete entries
