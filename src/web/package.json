@@ -3,8 +3,8 @@
     "description": "A website for generating substituting contracts for médecins géneralistes",
     "version": "0.0.1",
     "scripts": {
-        "dev": "parcel serve --public-url \"/content-addressable/\" index.html",
-        "build": "parcel build --no-cache --public-url \"/content-addressable/\" index.html"
+        "dev": "parcel serve index.html",
+        "build": "parcel build --no-cache --public-url \"static/\" index.html"
     },
     "license": "UNLICENSED",
     "devDependencies": {

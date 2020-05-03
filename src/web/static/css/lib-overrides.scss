@@ -1,6 +1,6 @@
-@import 'vars.scss';
+@use 'vars.scss';
 
-$button-darker-color: darken($button-bg-color, 20%);
+$button-darker-color: darken(vars.$button-bg-color, 20%);
 
 // Override the "normalize.css" rule that changed these elements.
 // The issue is that tiny-date has a parent match rule and not a direct element rule.
@@ -9,6 +9,8 @@ $button-darker-color: darken($button-bg-color, 20%);
 }
 
 .dp-modal > .dp {
+    font-family: vars.$font-sans;
+
     &:before {
         background: $button-darker-color;
     }
