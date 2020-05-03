@@ -294,6 +294,17 @@ func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type sourceMapHidingFileSystem struct {
+	rootPath string
+}
+
+func (fs *sourceMapHidingFileSystem) Open(name string) (http.File, error) {
+	if strings.HasSuffix(name, ".map") {
+		return nil, os.ErrPermission
+	}
+	return http.Dir(fs.rootPath).Open(name)
+}
+
 // This go program hosts 3 actors:
 // - The public-facing "website" & API HTTP server, which serves web assets (HTML, CSS etc..) and
 //   also responds to requests for PDF generation.
@@ -395,7 +406,10 @@ func main() {
 
 		var rootHandler http.Handler
 		if *publicFacingWebsitePathRoot != "" {
-			rootHandler = http.FileServer(http.Dir(*publicFacingWebsitePathRoot))
+			fs := &sourceMapHidingFileSystem{
+				rootPath: *publicFacingWebsitePathRoot,
+			}
+			rootHandler = http.FileServer(fs)
 		} else if *devWebsiteProxyPort != "" {
 			urlToProxyTo, err := url.Parse(fmt.Sprintf("http://localhost:%s/", *devWebsiteProxyPort))
 			if err != nil {

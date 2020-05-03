@@ -47,7 +47,7 @@
             }
         }
 
-        var url = window.location.origin + '/b/log-error';
+        var url = window.location + 'b/log-error';
         var req = new XMLHttpRequest();
         req.open('POST', url);
         req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');

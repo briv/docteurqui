@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "scripts": {
         "dev": "parcel serve index.html",
-        "build": "parcel build --no-cache --public-url \"static/\" index.html"
+        "build": "parcel build --no-cache --public-url \".\" index.html"
     },
     "license": "UNLICENSED",
     "devDependencies": {

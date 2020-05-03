@@ -1,7 +1,7 @@
 import { makeElement } from "./utils";
 import { fillFormField } from "./form-fill";
 
-const AutoCompleteURLPath = '/b/search-doctor';
+const AutoCompleteURLPath = 'b/search-doctor';
 const MinQueryLength = 3;
 
 const MsDurationToHideOldResultsIfWaitIsTooLong = 1000;
