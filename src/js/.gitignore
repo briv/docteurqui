@@ -1,0 +1,4 @@
+# JS build stuff
+node_modules/
+.parcel-cache/
+

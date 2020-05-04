@@ -1,0 +1,4 @@
+{
+  "private": true,
+  "workspaces": ["@docteurqui-fonts", "docteurqui-homepage", "web"]
+}

@@ -15,7 +15,7 @@
         "sass": "^1.26.5"
     },
     "dependencies": {
-        "@docteurqui/fonts": "file:./../packages-@docteurqui/fonts",
+        "@docteurqui/fonts": "0.0.1",
         "normalize.css": "^8.0.1"
     }
 }
