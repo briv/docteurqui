@@ -24,4 +24,5 @@ CMD ./bin/autocontract \
     -dr-data-file=/docker-vols/doctor-data/data.txt \
     -pdf-template-file=./data/contract-template.html \
     -pdf-browser-devtools-url="$PDF_GEN_URL" \
-    -pdf-internal-web-hostname="$PDF_INTERNAL_WEB_HOSTNAME"
+    -pdf-internal-web-hostname="$PDF_INTERNAL_WEB_HOSTNAME" \
+    -censor-key="$SECRET_CENSOR_KEY"

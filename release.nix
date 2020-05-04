@@ -8,7 +8,7 @@ let
   };
   inherit (pkgs) lib;
 
-  buildYarn = { name, src }:
+  buildYarn = { isWorkspacePackage ? false, src, name }:
     let
       lockfileToNpmDeps = lockfile: (
         pkgs.runCommandNoCC "yarn.lock.nix" {} ''
@@ -24,7 +24,7 @@ let
         # "--ignore-scripts"
         "--non-interactive"
       ];
-    in pkgs.stdenv.mkDerivation {
+    in pkgs.stdenv.mkDerivation ({
       inherit name;
       src = pkgs.nix-gitignore.gitignoreSource [] src;
 
@@ -57,7 +57,11 @@ let
       installPhase = ''
         cp -r dist/ $out
       '';
-    };
+    } // lib.attrsets.optionalAttrs isWorkspacePackage {
+      preBuild = ''
+        cd ${name}
+      '';
+    });
 
   autocontract_backend = pkgs.buildGoModule {
     pname = "autocontract";
@@ -74,8 +78,9 @@ let
       "-ldflags=-extldflags \"-static\""
     ];
 
-    # see also null value in documentation of buildGoModule
-    modSha256 = "1pxj86gzj4h756gsfz031yzaswwd3h80lff6rhipmfrczh64q5ig";
+    # Don't forget to update this when the underlying dependencies change.
+    # Using nixpkg's lib.fakeSha256 is an easy way to see what the new hash is.
+    modSha256 = "0im0wn3avrb0nb85dfw0cxbkqgrcl0m553368ns498942saih3gq";
   };
 
   pdf_gen_chromium = pkgs.stdenv.mkDerivation {
@@ -87,10 +92,20 @@ let
       cp -r ./ $out/
     '';
   };
+
+  caddy_proxy = pkgs.stdenv.mkDerivation {
+    name = "caddy-proxy";
+    src = ./src/caddy-proxy;
+    installPhase = ''
+      cp Caddyfile $out
+    '';
+  };
 in
 {
   inherit autocontract_backend;
   inherit pdf_gen_chromium;
-  autocontract_front_end = buildYarn { src = ./src/web; name = "autocontract_front_end"; };
+  inherit caddy_proxy;
+  autocontract_front_end = buildYarn { isWorkspacePackage = true; src = ./src/js; name = "web"; };
   autocontract_template = buildYarn { src = ./src/contract-templates; name = "autocontract_template"; };
+  docteurqui_homepage = buildYarn { isWorkspacePackage = true; src = ./src/js; name = "docteurqui-homepage"; };
 }

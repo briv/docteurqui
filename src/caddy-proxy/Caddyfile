@@ -1,0 +1,104 @@
+# Global options block
+{
+    # local_certs
+    debug
+}
+
+# Snippets
+
+(security-headers) {
+	header {
+        # enable HSTS for 1 year
+        Strict-Transport-Security max-age=2;
+
+        # Be strict with our referral policy.
+        # see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+        Referrer-Policy strict-origin-when-cross-origin
+
+        # Disable clients from sniffing the media type
+        # X-Content-Type-Options nosniff
+    }
+}
+
+(security-headers-legacy) {
+	header {
+        # clickjacking protection, CSP supersedes this.
+        X-Frame-Options DENY
+
+        # CSP supersedes this.
+        X-XSS-Protection "1; mode=block"
+        defer
+    }
+}
+(cache-immutable-content-addressable) {
+    header {
+        # 30 days of caching
+        Cache-Control "max-age=2592000, immutable"
+        defer
+    }
+}
+# END Snippets
+
+:80 {
+    root * ./www-root
+
+    # Redirect HTTP to HTTPS and set important security headers
+	@match-all-http {
+        protocol http
+    }
+    # redir @match-all-http https://{host}{uri} 308
+
+    import security-headers-legacy
+    import security-headers
+
+    # Explicitly remove Server header.
+    header * {
+        -Server
+        defer
+    }
+
+    # Get some compression.
+	encode zstd gzip
+
+    handle /static/* {
+        uri strip_prefix /static
+        file_server * {
+            root {http.vars.root}/static
+            # hide our sourcemaps
+            hide *.map
+            index []
+        }
+        import cache-immutable-content-addressable
+    }
+
+    # autocontract app
+    handle /outils/editeur-contrat-remplacement {
+        respond * "" 404
+    }
+    @autocontract-app {
+        path /outils/editeur-contrat-remplacement/*
+    }
+    handle @autocontract-app {
+        uri strip_prefix /outils/editeur-contrat-remplacement
+        reverse_proxy {$AUTOCONTRACT_HOSTNAME}:18080
+
+        import security-headers-legacy
+        import security-headers
+    }
+
+    handle_errors {
+        respond * "" {http.error.status_code}
+        header -Server
+    }
+
+    # Used just for the "/" path
+    handle /index.html {
+        respond "" 404
+    }
+    handle /* {
+        file_server * {
+            root {http.vars.root}
+            index index.html
+        }
+    }
+}
