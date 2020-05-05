@@ -2,6 +2,10 @@
 {
     # local_certs
     debug
+
+    # ACME certificate related options
+    acme_ca https://acme-v02.api.letsencrypt.org/directory
+    email isnuff@gmail.com
 }
 
 # Snippets
@@ -9,7 +13,7 @@
 (security-headers) {
 	header {
         # enable HSTS for 1 year
-        Strict-Transport-Security max-age=2;
+        # Strict-Transport-Security max-age=60;
 
         # Be strict with our referral policy.
         # see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
@@ -40,13 +44,15 @@
 # END Snippets
 
 :80 {
-    root * ./www-root
-
     # Redirect HTTP to HTTPS and set important security headers
 	@match-all-http {
         protocol http
     }
-    # redir @match-all-http https://{host}{uri} 308
+    redir @match-all-http https://{host}{uri} 308
+}
+
+https://docteurqui.com {
+    root * ./www-root
 
     import security-headers-legacy
     import security-headers
