@@ -42,7 +42,7 @@ make_autocontract_pdf_gen_chromium_image () {
     mkdir fonts
     cp -r pdf_gen_chromium/ fonts
     cp "$THIS_DIR/docker/pdf-gen-chromium/Dockerfile" Dockerfile
-    docker build --tag "autocontract/pdf-gen" ./
+    make_and_save_docker_image "autocontract/pdf-gen:latest" autocontract-pdf-gen_latest.tar.gz
 }
 
 make_autocontract_app_docker_image () {
@@ -82,7 +82,7 @@ make_autocontract_app_docker_image () {
 
     # build docker image
     cp "$THIS_DIR/docker/autocontract-app/Dockerfile" Dockerfile
-    docker build --tag "autocontract/app" ./
+    make_and_save_docker_image "autocontract/app:latest" autocontract-app_latest.tar.gz
 }
 
 make_autocontract_caddy_image () {
@@ -107,10 +107,13 @@ make_autocontract_caddy_image () {
     make_and_save_docker_image "autocontract/caddy:latest" caddy_latest.tar.gz
 }
 
-# make_autocontract_app_docker_image
-# make_autocontract_pdf_gen_chromium_image
+make_autocontract_app_docker_image
+make_autocontract_pdf_gen_chromium_image
 make_autocontract_caddy_image
 
 cd "$TMP_DIR"
-# something like this rsync command updates all our docker images:
-# rsync *.tar.gz briv@vultr:/var/lib/docteurqui/docker-images/
+# TODO: maybe something nicer than "|| true" as rsync still clutters our output when no tar files are present.
+rsync --progress *.tar.gz briv@vultr:/var/lib/docteurqui/docker-images/ || true
+scp "$THIS_DIR/deploying/censor.secret" vultr://var/lib/docteurqui/
+scp "$THIS_DIR/deploying/chrome_seccomp.json" vultr://var/lib/docteurqui/
+scp "$THIS_DIR/deploying/docker-services-config.nix" vultr://home/briv/

@@ -21,6 +21,9 @@
   # Define on which hard drive you want to install Grub.
   boot.loader.grub.device = "/dev/vda"; # or "nodev" for efi only
 
+  # For memory allocation issues on a low memory instance, see https://github.com/NixOS/nix/issues/421
+  boot.kernel.sysctl."vm.overcommit_memory" = "1";
+
   boot.cleanTmpDir = true;
 
   networking.hostName = "vultr-paris-1"; # Define your hostname.
@@ -60,14 +63,14 @@
 
   # Enable the OpenSSH daemon.
   services.openssh = {
-      enable = true;
-      passwordAuthentication = false;
+    enable = true;
+    passwordAuthentication = false;
   };
 
   # Open ports in the firewall.
   networking.firewall = {
-      enable = true;
-      allowedTCPPorts = [ 80 443 ];
+    enable = true;
+    allowedTCPPorts = [ 80 443 ];
   };
 
   # networking.firewall.allowedUDPPorts = [ ... ];

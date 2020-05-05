@@ -1,32 +1,45 @@
 { config, pkgs, ... }:
 let
+  paths = {
+    dockerImagesFolder = /var/lib/docteurqui/docker-images;
+    secretKeyFile = /var/lib/docteurqui/censor.secret;
+    chromeSeccomp = /var/lib/docteurqui/chrome_seccomp.json;
+  };
   dockerNetworks = {
+    principal = "principal-net";
     internalPdf = "pdf-net";
   };
-  dockerImagesFolder = /var/lib/docteurqui/docker-images;
   dockerVolumes = {
     caddyConfig = "caddy-config";
     caddyData = "caddy-data";
+    doctorData = "doctor-data";
   };
 in
 {
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    logDriver = "journald";
+  };
 
   systemd.services = {
     init-docker-related-stuff = {
       description =
         "Creates directories, docker networks and docker volumes for the setup to work.";
-      after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
+
+      after = [ "docker.service" "docker.socket" ];
+      requires = [ "docker.service" "docker.socket" ];
+
+      before = [];
 
       serviceConfig.Type = "oneshot";
       script =
         let
           dockercli = "${config.virtualisation.docker.package}/bin/docker";
         in ''
-          mkdir -p "${builtins.toString dockerImagesFolder}"
-
-          ${dockercli} load --input "${builtins.toString (dockerImagesFolder + /caddy_latest.tar.gz)}"
+          ${dockercli} load --input "${builtins.toString (paths.dockerImagesFolder + /caddy_latest.tar.gz)}"
+          ${dockercli} load --input "${builtins.toString (paths.dockerImagesFolder + /autocontract-app_latest.tar.gz)}"
+          ${dockercli} load --input "${builtins.toString (paths.dockerImagesFolder + /autocontract-pdf-gen_latest.tar.gz)}"
 
           # Put a true at the end to prevent getting non-zero return code, which will
           # crash the whole service.
@@ -35,6 +48,13 @@ in
             ${dockercli} network create --internal ${dockerNetworks.internalPdf}
           else
             echo "'${dockerNetworks.internalPdf}' network already exists in docker"
+          fi
+
+          check=$(${dockercli} network ls | grep "${dockerNetworks.principal}" || true)
+          if [ -z "$check" ]; then
+            ${dockercli} network create ${dockerNetworks.principal}
+          else
+            echo "'${dockerNetworks.principal}' network already exists in docker"
           fi
 
           check=$(${dockercli} volume ls | grep "${dockerVolumes.caddyConfig}" || true)
@@ -50,6 +70,13 @@ in
           else
             echo "'${dockerVolumes.caddyData}' volume already exists in docker"
           fi
+
+          check=$(${dockercli} volume ls | grep "${dockerVolumes.doctorData}" || true)
+          if [ -z "$check" ]; then
+            ${dockercli} volume create ${dockerVolumes.doctorData}
+          else
+            echo "'${dockerVolumes.doctorData}' volume already exists in docker"
+          fi
         '';
     };
   };
@@ -58,11 +85,11 @@ in
     image = "autocontract/caddy:latest";
     # not yet supported on our NixOS version
     # imageFile = builtins.path {
-    #   path = (dockerImagesFolder + /caddy_latest.tar.gz);
+    #   path = (paths.dockerImagesFolder + /caddy_latest.tar.gz);
     # };
     environment = {
-      # IMPORTANT: this
-      "AUTOCONTRACT_HOSTNAME" = "docker-filerun-mariadb.services";
+      # TODO: this is not great
+      "AUTOCONTRACT_HOSTNAME" = "docker-autocontract-app.service";
     };
     ports = [
       "80:80"
@@ -72,41 +99,39 @@ in
       "${dockerVolumes.caddyData}:/data"
       "${dockerVolumes.caddyConfig}:/config"
     ];
-    # extraDockerOptions = [ "--network=${dockerNetworks.internalPdf}" ];
+    extraDockerOptions = [
+      "--network=${dockerNetworks.principal}"
+    ];
+  };
+
+  # TODO: Hacky attempt (uses sleep) to connect a container to a user network.
+  # The issue is our systemd services wrapping docker are of Type=simple so
+  # they are considered started and ready before even systemd calls.
+  # Checkout out sdnotify-proxy or systemd-docker for some more readying on the subject.
+  systemd.services."docker-autocontract-app".postStart =
+    let
+      dockercli = "${config.virtualisation.docker.package}/bin/docker";
+    in "sleep 5 && ${dockercli} network connect ${dockerNetworks.internalPdf} docker-autocontract-app.service";
+
+  docker-containers."autocontract-app" = {
+    image = "autocontract/app:latest";
+    environment = {
+      "PDF_GEN_URL" = "http://docker-autocontract-pdf-gen.service:9222";
+      "PDF_INTERNAL_WEB_HOSTNAME" = "docker-autocontract-app.service";
+      "SECRET_CENSOR_KEY" = (builtins.readFile paths.secretKeyFile);
+    };
+    extraDockerOptions = [
+      "--network=${dockerNetworks.principal}"
+      "--mount=source=${dockerVolumes.doctorData},target=/docker-vols/doctor-data,readonly"
+    ];
+  };
+
+  docker-containers."autocontract-pdf-gen" = {
+    image = "autocontract/pdf-gen:latest";
+    extraDockerOptions = [
+      "--network=${dockerNetworks.internalPdf}"
+      "--security-opt=no-new-privileges"
+      "--security-opt=seccomp=${paths.chromeSeccomp}"
+    ];
   };
 }
-
-#   docker-containers."filerun" = {
-#     image = "afian/filerun";
-#     environment = {
-#       "FR_DB_HOST" = "docker-filerun-mariadb.services"; # !! IMPORTANT
-#       "FR_DB_PORT" = "3306";
-#       "FR_DB_NAME" = "filerundb";
-#       "FR_DB_USER" = "filerun";
-#       "FR_DB_PASS" = "randompasswd";
-#       "APACHE_RUN_USER" = "delegator";
-#       "APACHE_RUN_USER_ID" = "600";
-#       "APACHE_RUN_GROUP" = "delegator";
-#       "APACHE_RUN_GROUP_ID" = "600";
-#     };
-#     ports = [ "6000:80" ];
-#     volumes = [
-#       "/home/delegator/filerun/web:/var/www/html"
-#       "/home/delegator/filerun/user-files:/user-files"
-#     ];
-#     extraDockerOptions = [ "--network=filerun-br" ];
-#   };
-
-#   docker-containers."filerun-mariadb" = {
-#     image = "mariadb:10.1";
-#     environment = {
-#       "MYSQL_ROOT_PASSWORD" = "randompasswd";
-#       "MYSQL_USER" = "filerun";
-#       "MYSQL_PASSWORD" = "randompasswd";
-#       "MYSQL_DATABASE" = "filerundb";
-#     };
-#     volumes = [ "/home/delegator/filerun/db:/var/lib/mysql" ];
-#     extraDockerOptions = [ "--network=filerun-br" ];
-#   };
-#   };
-# }
