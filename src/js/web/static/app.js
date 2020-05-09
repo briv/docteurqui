@@ -423,7 +423,7 @@ const unhandledErrorEventHandler = (event) => {
         });
         const p2 = makeElement('p', el => {
             const email = makeElement('a', el => {
-                el.href = 'mailto:b@docteurqui.com';
+                el.href = 'mailto:br@docteurqui.com';
                 el.textContent = 'un email';
             });
             el.append(`Désolé pour ce contre-temps ! À priori, nous allons être notifié et essayer de régler le problème mais n'hésitez pas à nous envoyer `, email, ' si le souci persiste.');
