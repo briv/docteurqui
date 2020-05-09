@@ -24,44 +24,46 @@ let
         # "--ignore-scripts"
         "--non-interactive"
       ];
-    in pkgs.stdenv.mkDerivation ({
-      inherit name;
-      src = pkgs.nix-gitignore.gitignoreSource [] src;
+    in pkgs.stdenv.mkDerivation (
+      {
+        inherit name;
+        src = pkgs.nix-gitignore.gitignoreSource [] src;
 
-      buildInputs = [
-        pkgs.nodejs-12_x
-        pkgs.yarn
-      ];
+        buildInputs = [
+          pkgs.nodejs-12_x
+          pkgs.yarn
+        ];
 
-      configurePhase = ''
-        # Yarn writes cache directories etc to $HOME.
-        export HOME=$NIX_BUILD_TOP/yarn_home
+        configurePhase = ''
+          # Yarn writes cache directories etc to $HOME.
+          export HOME=$NIX_BUILD_TOP/yarn_home
 
-        # Make yarn install packages from our offline cache, not the registry
-        yarn config --offline set yarn-offline-mirror ${myNpmDeps.offline_cache}
+          # Make yarn install packages from our offline cache, not the registry
+          yarn config --offline set yarn-offline-mirror ${myNpmDeps.offline_cache}
 
-        # Fixup "resolved"-entries in yarn.lock to match our offline cache
-        ${pkgs.fixup_yarn_lock}/bin/fixup_yarn_lock yarn.lock
+          # Fixup "resolved"-entries in yarn.lock to match our offline cache
+          ${pkgs.fixup_yarn_lock}/bin/fixup_yarn_lock yarn.lock
 
-        yarn install ${lib.escapeShellArgs yarnFlags}
-      '';
+          yarn install ${lib.escapeShellArgs yarnFlags}
+        '';
 
-      buildPhase = ''
-        runHook preBuild
+        buildPhase = ''
+          runHook preBuild
 
-        yarn ${lib.escapeShellArgs yarnFlags} build
+          yarn ${lib.escapeShellArgs yarnFlags} build
 
-        runHook postBuild
-      '';
+          runHook postBuild
+        '';
 
-      installPhase = ''
-        cp -R dist/ $out/
-      '';
-    } // lib.attrsets.optionalAttrs isWorkspacePackage {
-      preBuild = ''
-        cd ${name}
-      '';
-    });
+        installPhase = ''
+          cp -R dist/ $out/
+        '';
+      } // lib.attrsets.optionalAttrs isWorkspacePackage {
+        preBuild = ''
+          cd ${name}
+        '';
+      }
+    );
 
   autocontract_backend = pkgs.buildGoModule {
     pname = "autocontract";
@@ -93,40 +95,43 @@ let
     '';
   };
 
-  caddy_proxy = pkgs.stdenv.mkDerivation {
-    name = "caddy-proxy";
-    src = ./src/caddy-proxy;
+  caddy_proxy = let
+    gitVersion = builtins.readFile (
+      pkgs.runCommand "get-git-version" {
+        nativeBuildInputs = [ pkgs.git ];
+        # This next "dummy" attribute is impure so nix will get a different derivation every time,
+        # to be sure the git version is checked every time.
+        # However, given the same version, the outer derivation will be the same, meaning nix will be able
+        # to use the store cache.
+        dummy = builtins.currentTime;
+        preferLocalBuild = true;
+      } ''
+        cd ${builtins.toString ./src}
 
-    postPatch = let gitVersion = builtins.readFile (pkgs.runCommand "get-git-version" {
-      nativeBuildInputs = [ pkgs.git ];
-      # This next "dummy" attribute is impure so nix will get a different derivation every time,
-      # to be sure the git version is checked every time.
-      # However, given the same version, the outer derivation will be the same, meaning nix will be able
-      # to use the store cache.
-      dummy = builtins.currentTime;
-      preferLocalBuild = true;
-    } ''
-      cd ${builtins.toString ./src}
+        # remove trailing newline
+        version="$(git rev-parse "$(git write-tree)" | tr -d '\n')"
+        if [ -z "$(git status --porcelain)" ]; then
+          # Working directory clean
+          echo -n "$version" > $out
+        else
+          # Uncommitted changes
+          echo -n "$version-dirty" > $out
+        fi
+      ''
+    ); in
+    pkgs.stdenv.mkDerivation {
+      name = "caddy-proxy";
+      src = ./src/caddy-proxy;
 
-      # remove trailing newline
-      version="$(git rev-parse "$(git write-tree)" | tr -d '\n')"
-      if [ -z "$(git status --porcelain)" ]; then
-        # Working directory clean
-        echo -n "$version" > $out
-      else
-        # Uncommitted changes
-        echo -n "$version-dirty" > $out
-      fi
-    ''); in
-    ''
-      substituteInPlace Caddyfile --subst-var-by VERSION "${gitVersion}"
-    '';
+      postPatch = ''
+        substituteInPlace Caddyfile --subst-var-by VERSION "${gitVersion}"
+      '';
 
-    installPhase = ''
-      mkdir -p $out
-      cp {Caddyfile,robots.txt} $out/
-    '';
-  };
+      installPhase = ''
+        mkdir -p $out
+        cp {Caddyfile,robots.txt} $out/
+      '';
+    };
 in
 {
   inherit autocontract_backend;
