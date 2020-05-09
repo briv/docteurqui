@@ -8,6 +8,7 @@ TMP_DIR=$(mktemp -d)
 echo "$TMP_DIR"
 cleanup_on_exit() {
     rm -rf "$TMP_DIR"
+    docker rmi $(docker images --filter "dangling=true" --no-trunc -q) 2>/dev/null || true
 }
 trap cleanup_on_exit EXIT INT TERM
 
@@ -23,9 +24,15 @@ make_and_save_docker_image () {
 
     docker build --tag "$IMAGE_TAG" ./
     docker save "$IMAGE_TAG" | gzip > "$TAR_FILE"
+    get_sha256 "$TAR_FILE" > "$TAR_FILE.sum"
     mv "$TAR_FILE" "../$TAR_FILE"
+    mv "$TAR_FILE.sum" "../$TAR_FILE.sum"
 }
 
+get_sha256 () {
+    local FILE="$1"
+    shasum --algorithm 256 --binary "$FILE" | awk '{print $1}' | tr -d '\n'
+}
 
 make_autocontract_pdf_gen_chromium_image () {
     setup_for_docker_image "pdf-gen-chromium"
@@ -112,6 +119,7 @@ make_autocontract_app_docker_image
 cd "$TMP_DIR"
 # TODO: maybe something nicer than "|| true" as rsync still clutters our output when no tar files are present.
 rsync --progress *.tar.gz briv@vultr:/var/lib/docteurqui/docker-images/ || true
+rsync --progress *.tar.gz.sum briv@vultr:/var/lib/docteurqui/docker-images/ || true
 scp "$THIS_DIR/deploying/censor.secret" vultr://var/lib/docteurqui/
 scp "$THIS_DIR/deploying/chrome_seccomp.json" vultr://var/lib/docteurqui/
 scp "$THIS_DIR/deploying/docker-services-config.nix" vultr://home/briv/

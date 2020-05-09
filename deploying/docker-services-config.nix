@@ -14,6 +14,11 @@ let
     caddyData = "caddy-data";
     doctorData = "doctor-data";
   };
+  mkImageFile = { path }: builtins.path rec {
+    inherit path;
+    sha256 = builtins.readFile (path + ".sum");
+    recursive = false;
+  };
 in
 {
   virtualisation.docker = {
@@ -79,7 +84,9 @@ in
 
   docker-containers."caddy" = {
     image = "autocontract/caddy:latest";
-    imageFile = "${paths.dockerImagesFolder + /caddy_latest.tar.gz}";
+    imageFile = mkImageFile {
+      path = paths.dockerImagesFolder + /caddy_latest.tar.gz;
+    };
     environment = {
       # TODO: this is not great
       "AUTOCONTRACT_HOSTNAME" = "autocontract-app";
@@ -108,7 +115,9 @@ in
 
   docker-containers."autocontract-app" = {
     image = "autocontract/app:latest";
-    imageFile = "${paths.dockerImagesFolder + /autocontract-app_latest.tar.gz}";
+    imageFile = mkImageFile {
+      path = paths.dockerImagesFolder + /autocontract-app_latest.tar.gz;
+    };
     environment = {
       "PDF_GEN_URL" = "http://autocontract-pdf-gen:9222";
       "PDF_INTERNAL_WEB_HOSTNAME" = "autocontract-app";
