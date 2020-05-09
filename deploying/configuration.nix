@@ -73,13 +73,18 @@
     allowedTCPPorts = [ 80 443 ];
   };
 
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  security.sudo.extraConfig =
+    ''
+      # Remember sudo privileges for a while.
+      Defaults timestamp_timeout=1800
+    '';
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.briv = {
     uid = 1000;
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" ] ++ [ "docker" ];
     openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKH3f2uux5Vnd5BV2n9YCx1NKhxzhhYHa8ObL3P7BpUX blaiserivet@blaiseMac" ];
     # shell = pkgs.zsh;
   };
@@ -88,6 +93,6 @@
   # compatible, in order to avoid breaking some software such as database
   # servers. You should change this only after NixOS release notes say you
   # should.
-  system.stateVersion = "19.09"; # Did you read the comment?
+  system.stateVersion = "20.03"; # Did you read the comment?
 
 }
