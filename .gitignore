@@ -1,3 +1,6 @@
+# macOS files
+.DS_Store
+
 # Related to use of direnv as well as Nix integration with direnv
 .envrc
 .direnv/
