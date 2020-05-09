@@ -27,9 +27,9 @@ chromium-browser --headless --disable-gpu --remote-debugging-address=0.0.0.0 --r
 ```
 
 # TODOs
-- robots.txt
 - meta "description" for better SEO
 - get emails from those who use the contract generation !! (optional box ?)
+- MX records !
 
 - check how the form interacts with CORS and Origin/Referrer headers
 - hide doctor search suggestions when we get a 422 because of query length (> 40 characters)

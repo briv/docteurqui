@@ -55,7 +55,7 @@ let
       '';
 
       installPhase = ''
-        cp -r dist/ $out
+        cp -R dist/ $out/
       '';
     } // lib.attrsets.optionalAttrs isWorkspacePackage {
       preBuild = ''
@@ -89,15 +89,42 @@ let
     src = pkgs.nix-gitignore.gitignoreSource [] ./src/contract-templates/fonts;
 
     installPhase = ''
-      cp -r ./ $out/
+      cp -R ./ $out/
     '';
   };
 
   caddy_proxy = pkgs.stdenv.mkDerivation {
     name = "caddy-proxy";
     src = ./src/caddy-proxy;
+
+    postPatch = let gitVersion = builtins.readFile (pkgs.runCommand "get-git-version" {
+      nativeBuildInputs = [ pkgs.git ];
+      # This next "dummy" attribute is impure so nix will get a different derivation every time,
+      # to be sure the git version is checked every time.
+      # However, given the same version, the outer derivation will be the same, meaning nix will be able
+      # to use the store cache.
+      dummy = builtins.currentTime;
+      preferLocalBuild = true;
+    } ''
+      cd ${builtins.toString ./src}
+
+      # remove trailing newline
+      version="$(git rev-parse "$(git write-tree)" | tr -d '\n')"
+      if [ -z "$(git status --porcelain)" ]; then
+        # Working directory clean
+        echo -n "$version" > $out
+      else
+        # Uncommitted changes
+        echo -n "$version-dirty" > $out
+      fi
+    ''); in
+    ''
+      substituteInPlace Caddyfile --subst-var-by VERSION "${gitVersion}"
+    '';
+
     installPhase = ''
-      cp Caddyfile $out
+      mkdir -p $out
+      cp {Caddyfile,robots.txt} $out/
     '';
   };
 in
