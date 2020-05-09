@@ -37,10 +37,6 @@ in
         let
           dockercli = "${config.virtualisation.docker.package}/bin/docker";
         in ''
-          ${dockercli} load --input "${builtins.toString (paths.dockerImagesFolder + /caddy_latest.tar.gz)}"
-          ${dockercli} load --input "${builtins.toString (paths.dockerImagesFolder + /autocontract-app_latest.tar.gz)}"
-          ${dockercli} load --input "${builtins.toString (paths.dockerImagesFolder + /autocontract-pdf-gen_latest.tar.gz)}"
-
           # Put a true at the end to prevent getting non-zero return code, which will
           # crash the whole service.
           check=$(${dockercli} network ls | grep "${dockerNetworks.internalPdf}" || true)
@@ -83,13 +79,10 @@ in
 
   docker-containers."caddy" = {
     image = "autocontract/caddy:latest";
-    # not yet supported on our NixOS version
-    # imageFile = builtins.path {
-    #   path = (paths.dockerImagesFolder + /caddy_latest.tar.gz);
-    # };
+    imageFile = "${paths.dockerImagesFolder + /caddy_latest.tar.gz}";
     environment = {
       # TODO: this is not great
-      "AUTOCONTRACT_HOSTNAME" = "docker-autocontract-app.service";
+      "AUTOCONTRACT_HOSTNAME" = "autocontract-app";
     };
     ports = [
       "80:80"
@@ -111,16 +104,18 @@ in
   systemd.services."docker-autocontract-app".postStart =
     let
       dockercli = "${config.virtualisation.docker.package}/bin/docker";
-    in "sleep 5 && ${dockercli} network connect ${dockerNetworks.internalPdf} docker-autocontract-app.service";
+    in "sleep 5 && ${dockercli} network connect ${dockerNetworks.internalPdf} autocontract-app";
 
   docker-containers."autocontract-app" = {
     image = "autocontract/app:latest";
+    imageFile = "${paths.dockerImagesFolder + /autocontract-app_latest.tar.gz}";
     environment = {
-      "PDF_GEN_URL" = "http://docker-autocontract-pdf-gen.service:9222";
-      "PDF_INTERNAL_WEB_HOSTNAME" = "docker-autocontract-app.service";
+      "PDF_GEN_URL" = "http://autocontract-pdf-gen:9222";
+      "PDF_INTERNAL_WEB_HOSTNAME" = "autocontract-app";
       "SECRET_CENSOR_KEY" = (builtins.readFile paths.secretKeyFile);
     };
     extraDockerOptions = [
+      "--init"
       "--network=${dockerNetworks.principal}"
       "--mount=source=${dockerVolumes.doctorData},target=/docker-vols/doctor-data,readonly"
     ];
@@ -128,7 +123,9 @@ in
 
   docker-containers."autocontract-pdf-gen" = {
     image = "autocontract/pdf-gen:latest";
+    imageFile = "${paths.dockerImagesFolder + /autocontract-pdf-gen_latest.tar.gz}";
     extraDockerOptions = [
+      "--init"
       "--network=${dockerNetworks.internalPdf}"
       "--security-opt=no-new-privileges"
       "--security-opt=seccomp=${paths.chromeSeccomp}"
