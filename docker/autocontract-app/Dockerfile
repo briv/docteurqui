@@ -4,7 +4,7 @@ FROM debian:10-slim
 VOLUME /docker-vols/doctor-data
 
 ARG this_user=autcontract-app-user
-RUN useradd -ms /bin/bash "$this_user"
+RUN useradd -u 2000 -g 2000 "$this_user"
 WORKDIR /home/"$this_user"
 
 # Our executable.
