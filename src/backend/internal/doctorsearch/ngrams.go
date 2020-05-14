@@ -371,14 +371,15 @@ func insertOffset(offset DatabaseFileOffsetsRecord, sortedOffsets []DatabaseFile
 }
 
 type rawPersonActivityRecord struct {
-	PPIdType                     uint8  // 0
-	PPId                         string // 1
+	PPIdType                     uint8  // 0 e.g. "8" for an RPPS ID
+	PPId                         string // 1 e.g. "10101236759"
 	Nom                          string // 7
 	Prenom                       string // 8
 	CodeProfession               string // 9  e.g. "10" for a doctor
 	LibelleProfession            string // 10 e.g. "Medecin"
-	CodeCategorieProfessionnelle string // 11 e.g. "M" for "Militaire"
-	CodeModeExercice             string // 17 e.g. "L" for "Liberal"
+	CodeCategorieProfessionnelle string // 11 e.g. "M" for "Militaire" or "C" for "Civil"
+	CodeSavoirFaire              string // 15
+	CodeModeExercice             string // 17 e.g. "L" for "Liberal" or "S" for "Salarié"
 	NumeroVoie                   string // 28 e.g. "68"
 	IndiceRepetitionVoie         string // 29 e.g. "bis"
 	LibelleTypeDeVoie            string // 31 e.g. "rue" or "avenue"
@@ -391,6 +392,14 @@ func (rec *rawPersonActivityRecord) shouldBeIndexed() bool {
 	// Check that our ID is of type "RPPS" (i.e 8), that the profession is "Doctor" (i.e 10)
 	// and that the "exercise mode" is "Libéral" (i.e "L")
 	if rec.PPIdType == 8 && rec.CodeProfession == "10" && rec.CodeModeExercice == "L" {
+
+		// // see https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000028339198
+		// // see https://mos.esante.gouv.fr/NOS/PDF/TRE_R38-SpecialiteOrdinale.tabs.pdf
+		// // see https://esante.gouv.fr/sites/default/files/media_entity/documents/TableauReglesEnregistrementPS_RPPS_0.pdf
+		// if rec.CodeSavoirFaire != "SM26" && rec.CodeSavoirFaire != "SM53" && rec.CodeSavoirFaire != "SM54" {
+		// 	return false
+		// }
+
 		// We're quite trusting on the other fields, but check that at least the name is valid utf-8.
 		if utf8.ValidString(rec.Nom) && utf8.ValidString(rec.Prenom) {
 			return true
@@ -477,6 +486,7 @@ func parseRecordFromLine(line string) (*rawPersonActivityRecord, error) {
 		CodeProfession:               cols[9],
 		LibelleProfession:            cols[10],
 		CodeCategorieProfessionnelle: cols[11],
+		CodeSavoirFaire:              cols[15],
 		CodeModeExercice:             cols[17],
 		NumeroVoie:                   cols[28],
 		IndiceRepetitionVoie:         cols[29],
