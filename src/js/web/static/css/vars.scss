@@ -5,15 +5,9 @@ $--error-color: #c92c17;
 $--form-main-bg-color: #f3f3f3;
 
 // Colors
-$body-color: #10121c;
-$header-bg-color: #10121c;
 $header-color: #ffffff;
 
-$footer-bg-color: #f6e8e0;
-
-$link-color: #134ff3;
-
-$call-to-action-bg-color: $footer-bg-color;
+$call-to-action-bg-color: #f6e8e0;
 $error-call-to-action-bg-color: color.scale($--error-color, $lightness: 80%);
 $form-legend-bg-color: color.scale($--form-main-bg-color, $lightness: -8%);
 $form-part-bg-color: $--form-main-bg-color;
@@ -47,7 +41,6 @@ $highlight-autocomplete-bg-color: color.scale($autocomplete-bg-color, $lightness
 $custom-input-bg-color: white;
 
 // Fonts
-$font-size-body: 16px;
 $font-default: 'Source Serif Pro', 'Times New Roman', serif;
 $font-sans: 'Source Sans Pro', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', Helvetica, sans-serif;
 

@@ -1,12 +1,13 @@
 $min-width-for-desktop: 840px;
 @media (min-width: $min-width-for-desktop) {
-    .main {
+    .main, .header h1 {
         max-width: $min-width-for-desktop;
         margin-left: auto;
         margin-right: auto;
     }
 
     .footer {
+        margin-top: 2rem;
         .footer-section {
             flex: 0 0 33%;
         }
