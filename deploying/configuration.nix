@@ -65,6 +65,7 @@
   services.openssh = {
     enable = true;
     passwordAuthentication = false;
+    ports = [ 44022 ];
   };
 
   # Open ports in the firewall.
