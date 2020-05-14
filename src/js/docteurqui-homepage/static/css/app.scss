@@ -1,5 +1,6 @@
 @use "sass:color";
-@use 'vars.scss';
+
+@use '@docteurqui/common/index.scss' as dq-common;
 
 @import 'normalize.css/normalize.css';
 
@@ -17,41 +18,14 @@ html, body {
 }
 
 body {
-    color: vars.$body-color;
+    @include dq-common.default-text;
     font-family: "Source Serif Pro", serif;
-    font-size: vars.$font-size-default;
-    line-height: vars.$line-height;
 }
 
-a {
-    &:link, &:visited, &:any-link {
-        color: vars.$link-color;
-        text-decoration: none;
-    }
-
-    &:hover {
-        color: color.scale(vars.$link-color, $saturation: -30%, $lightness: -10%);
-        text-decoration: underline;
-    }
-}
+@include dq-common.links;
 
 .header {
-    margin-top: 1rem;
-
-    .logo {
-        display: inline-block;
-        font-size: 2.5rem;
-
-        background-color: vars.$logo-bg-color;
-        color: vars.$logo-color;
-        text-align: center;
-        padding: 0.2rem 1rem;
-        margin: 0;
-
-        $_radius: 0.8rem;
-        border-bottom-right-radius: $_radius;
-        border-top-right-radius: $_radius;
-    }
+    @include dq-common.header-with-logo;
 }
 
 .content {
@@ -78,7 +52,7 @@ a {
         padding: 1rem 0.2rem;
 
         &:hover {
-            background-color: color.scale(vars.$link-color, $saturation: +100%, $lightness: +90%);
+            background-color: color.scale(dq-common.$link-color, $saturation: +100%, $lightness: +90%);
 
             &.selective-underline {
                 text-decoration: none;
@@ -90,7 +64,7 @@ a {
         }
 
         .link-details {
-            color: vars.$body-color;
+            color: dq-common.$body-color;
             font-size: 0.8rem;
             text-indent: 0.2rem;
             text-decoration: none;
@@ -99,7 +73,7 @@ a {
 }
 
 .main {
-    line-height: vars.$line-height-long-text;
+    line-height: dq-common.$line-height-long-text;
     margin: 0 0.4rem;
 
     article {
@@ -133,15 +107,15 @@ a {
 }
 
 .footer {
-    line-height: vars.$line-height-long-text;
-    background-color: vars.$footer-bg-color;
+    line-height: dq-common.$line-height-long-text;
+    background-color: dq-common.$footer-bg-color;
     display: flex;
     margin: 0;
     padding: 1rem 0.4rem;
 
     // Use a shadow to prolong the footer to the bottom of the page in case
     // the content above it doesn't do it.
-    box-shadow: 0 50vh 0 50vh vars.$footer-bg-color;
+    box-shadow: 0 50vh 0 50vh dq-common.$footer-bg-color;
 }
 
 // For larger displays such as desktop.
