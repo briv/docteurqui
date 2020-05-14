@@ -1,0 +1,66 @@
+@use "sass:color";
+
+// Colors
+$body-color: #10121c;
+$footer-bg-color: #f6e8e0;
+$link-color: #134ff3;
+
+// Text
+$font-size-default: 16px;
+$line-height: 1.2;
+$line-height-long-text: 1.4;
+
+//
+// PRIVATE
+//
+$_logo-bg-color: #10121c;
+$_logo-color: #f6e8e0;
+
+@mixin default-text {
+    color: $body-color;
+    font-size: $font-size-default;
+    line-height: $line-height;
+}
+
+@mixin links {
+    a {
+        &:link, &:visited, &:any-link {
+            color: $link-color;
+            text-decoration: none;
+
+            &:not(.no-dec) {
+                text-decoration: underline;
+                text-decoration-color: color.change($link-color, $alpha: 0.3);
+            }
+        }
+
+        &:hover {
+            $_col: color.scale($link-color, $saturation: -30%, $lightness: -10%);
+            color: $_col;
+            text-decoration: underline;
+
+            &:not(.no-dec) {
+                text-decoration-color: $_col;
+            }
+        }
+    }
+}
+
+@mixin header-with-logo {
+    margin-top: 1rem;
+
+    .logo {
+        display: inline-block;
+        font-size: 2.2rem;
+
+        background-color: $_logo-bg-color;
+        color: $_logo-color;
+        text-align: center;
+        padding: 0.2rem 1rem;
+        margin: 0;
+
+        $_radius: 0.8rem;
+        border-bottom-right-radius: $_radius;
+        border-top-right-radius: $_radius;
+    }
+}

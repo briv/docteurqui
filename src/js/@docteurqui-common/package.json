@@ -1,0 +1,7 @@
+{
+  "name": "@docteurqui/common",
+  "version": "0.0.1",
+  "description": "DocteurQui common/base styles",
+  "main": "index.scss",
+  "license": "UNLICENSED"
+}
