@@ -1,6 +1,6 @@
 $min-width-for-desktop: 840px;
 @media (min-width: $min-width-for-desktop) {
-    .main, .header h1 {
+    .main {
         max-width: $min-width-for-desktop;
         margin-left: auto;
         margin-right: auto;
@@ -13,7 +13,7 @@ $min-width-for-desktop: 840px;
         }
     }
 
-    form.contract {
+    .contract-form {
         max-width: $min-width-for-desktop;
 
         .signature-pad-container {

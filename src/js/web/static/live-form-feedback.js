@@ -70,7 +70,7 @@ const createContentForError = (errorHandler, root, error) => {
             continue;
         }
 
-        compensateScrollDuring(() => {
+        compensateScrollDuring(errorHandler.form, () => {
             errorHandler.notifyError(feedBackDescription, value);
         });
 
@@ -112,8 +112,8 @@ const getCorrespondingFeedbackDescription = (errorHandler, name) => {
 };
 
 // This function tries to keep the form submit button at the same top-relative position compared to the current scroll position.
-const compensateScrollDuring = (f) => {
-    const submitButton = document.querySelector('button[type="submit"]');
+const compensateScrollDuring = (form, f) => {
+    const submitButton = form.querySelector('button[type="submit"]');
 
     const topOffsetOfButtonRelativeToScroll = () => {
         return submitButton.offsetTop - document.scrollingElement.scrollTop;
@@ -137,7 +137,7 @@ const clearFormErrorRecap = (errorHandler) => {
 
     // Reset all error elements within form.
     errorHandler.feedbackDescriptions.forEach(f => {
-        compensateScrollDuring(() => {
+        compensateScrollDuring(errorHandler.form, () => {
             errorHandler.clearError(f);
         });
     });

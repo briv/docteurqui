@@ -18,7 +18,6 @@
 <body>
     <header class="header">
         <a class="logo no-dec" href="/">DocteurQui</a>
-        <h1>Contrat de remplacement</h1>
     </header>
 
     <main class="main">
@@ -29,12 +28,25 @@
             </div>
         </noscript>
 
-        <section class="main-explanation">
+        <section class="generic-content">
             <p>Pour savoir si vous pouvez nous faire confiance, vous pouvez en lire <a href="#about-us">un peu plus sur nous</a> ou bien sur <a href="#data-use">la protection de vos données</a>.</p>
         </section>
 
+        <section class="generic-content call-to-action">
+            <form action="b/subscribe-to-potential-news" enctype="application/x-www-form-urlencoded" method="post" class="email-form d-flex flex-column">
+                <span class="long-text">Si vous voulez être au courant de nouveaux outils créés par DocteurQui, renseignez <label for="future-news-email">votre email:</label></span>
+                <div class="email-container">
+                    <input type="email" id="future-news-email" name="future-news-email" placeholder="dr@mon-email.com">
+                    <button type="submit" aria-label="Tenez moi au courant">Tenez moi au courant</button>
+                </div>
+                <aside><span class="text-bold">Qu'allons nous faire de votre email ?</span> Nous prendrons soin de votre adresse email comme si c'était la nôtre. Nous enverrons 2 ou 3, peut-être même zéro mails. Dans tous les cas, votre email sera supprimé après maximum 3 ans. En vous ajoutant à cette liste d'emails, vous nous motivez à poursuivre d'autres projets.</aside>
+            </form>
+        </section>
+
+        <h1 id="contract-form-header">Contrat de remplacement</h1>
+
         <section>
-            <form action="b/generate-contract" enctype="multipart/form-data" method="post" class="contract d-flex flex-column">
+            <form action="b/generate-contract" id="contract-form" enctype="multipart/form-data" method="post" class="contract-form d-flex flex-column">
 
                 <fieldset class="d-flex flex-column" data-enhanced-form-part="regular" id="regular-fieldset">
                     <legend>Docteur remplacé</legend>
@@ -159,7 +171,8 @@
 
         <section id="data-use" class="footer-section">
             <h3 class="title">Protection des données</h3>
-            <p>Soyons clair, nous ne gardons aucune de vos données, et c'est très bien ainsi. Nous essayons ainsi de respecter la lettre mais surtout l'esprit du <a href="https://www.cnil.fr/comprendre-le-rgpd">RGPD</a>.</p>
+            <p>Dans le cas votre email, nous le sauvegardons de manière sécurisée, et il sera utilisé dans le seul but de vous envoyer quelques emails annonçant des outils créés par DocteurQui. Après maximum 3 ans, il sera supprimé. À tout moment, vous pouvez nous écrire <a href="mailto:br@docteurqui.com?subject=RGPD">par email</a> pour demander la suppression, l'accès, ou une modification de vos données.</p>
+            <p>Dans le cas du formulaire de remplacement, soyons clairs, nous ne conservons aucune de vos données. Nous essayons ainsi de respecter la lettre mais surtout l'esprit du <a href="https://www.cnil.fr/comprendre-le-rgpd">RGPD</a>.</p>
             <p>Certes, ce formulaire n'accueille pas de données très sensibles (ni très intéressantes financièrement peut-être), donc on ne va pas trop se féliciter.</p>
             <p>Si vous voulez tout savoir, nous estimons seulement le nombre de personnes qui créent des contrats pour savoir si ce site est utile à quelqu'un ! Nos statistiques sont sûrement un peu moins fiables que si l'on vous bombardait de cookies et de traceurs, mais ça nous convient.</p>
         </section>

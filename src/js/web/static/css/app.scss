@@ -99,7 +99,15 @@ body {
 
 .header {
     @include dq-common.header-with-logo;
+}
 
+$text-side-padding: 0.8rem;
+.generic-content {
+    padding: 0 $text-side-padding;
+    line-height: dq-common.$line-height-long-text;
+}
+
+.main {
     h1 {
         margin-top: 1.5rem;
         background-color: dq-common.$body-color;
@@ -108,11 +116,6 @@ body {
         text-align: center;
         padding: 0.4em 0;
     }
-}
-
-.main-explanation {
-    margin: 0 0.2em;
-    line-height: dq-common.$line-height-long-text;
 }
 
 .footer {
@@ -125,7 +128,7 @@ body {
 
     .footer-section {
         flex: 0 0 100%;
-        padding: 0 1em;
+        padding: 0 $text-side-padding;
         margin-bottom: 2em;
 
         .title {
@@ -174,9 +177,69 @@ h3 {
     margin: 1em 0 0.5em 0;
 }
 
-form.contract {
+form {
     font-family: $font-sans;
 
+    input[type=text], input[type=number], input[type=date], input[type=email] {
+        @include input-like;
+    }
+
+    input {
+        &:focus {
+            @include focused;
+        }
+
+        &.invalid:focus {
+            @include focused-invalid;
+        }
+    }
+
+    button {
+        @include button-like;
+
+        &.small {
+            padding: 0.4em;
+        }
+    }
+}
+
+.email-form {
+    .long-text {
+        font-family: $font-default;
+    }
+
+    .email-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        margin: 0.4rem 0;
+
+        input {
+            align-self: center;
+            margin-right: 0.4rem;
+
+            min-width: 10rem;
+        }
+
+        button {
+            $_col: #9DD1F1;
+            background-color: $_col;
+            &:hover {
+                background-color: color.scale($_col, $lightness: -25%);
+            }
+
+            padding: 0.2rem 0.4rem;
+        }
+    }
+
+    aside {
+        font-style: italic;
+        font-size: 0.8rem;
+    }
+}
+
+.contract-form {
     > fieldset {
         margin: 0;
         margin: {
@@ -211,28 +274,6 @@ form.contract {
     label {
         & + input, & + .input-wrapper {
             margin-top: $margin-between-label-field;
-        }
-    }
-
-    input[type=text], input[type=number], input[type=date] {
-        @include input-like;
-    }
-
-    input {
-        &:focus {
-            @include focused;
-        }
-
-        &.invalid:focus {
-            @include focused-invalid;
-        }
-    }
-
-    button {
-        @include button-like;
-
-        &.small {
-            padding: 0.4em;
         }
     }
 

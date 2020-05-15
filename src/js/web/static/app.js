@@ -387,7 +387,7 @@ const setupUIWithin = (form) => {
 const onDOMContentLoaded = () => {
     polyfill();
 
-    const form = document.querySelector('form');
+    const form = document.querySelector('form#contract-form');
     const formErrorHandler = setupUIWithin(form);
     setupFormIntercept(form, formErrorHandler);
 };
