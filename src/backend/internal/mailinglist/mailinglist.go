@@ -2,6 +2,7 @@ package mailinglist
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	cryptorand "crypto/rand"
 	"encoding/base64"
@@ -12,6 +13,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/curve25519"
 	"golang.org/x/crypto/nacl/box"
@@ -22,6 +24,8 @@ import (
 
 var (
 	InvalidEmail = errors.New("invalid email")
+
+	MaxEmailByteLength = 300
 )
 
 // GenerateKeyFiles creates two key files, one for the public key, one for the private key.
@@ -118,8 +122,13 @@ func New(mailingListFilePath string, publicKeyPath string) (MailingLister, error
 	return m, nil
 }
 
-func (m *mailingLister) Add(ctx context.Context, email string) error {
-	if (strings.ContainsRune(email, '@') && strings.ContainsRune(email, '.')) == false {
+func (m *mailingLister) Add(ctx context.Context, rawEmail string) error {
+	if len(rawEmail) > MaxEmailByteLength {
+		return InvalidEmail
+	}
+	email := strings.TrimSpace(rawEmail)
+
+	if !strings.ContainsRune(email, '@') || !strings.ContainsRune(email, '.') || strings.ContainsRune(email, '\t') {
 		return InvalidEmail
 	}
 
@@ -129,8 +138,9 @@ func (m *mailingLister) Add(ctx context.Context, email string) error {
 	}
 	defer m.mutex.Unlock()
 
-	message := []byte(email)
-	box, err := box.SealAnonymous(nil, message, m.pubKey, nil)
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "%s\t%s", time.Now().UTC().Format(time.RFC3339), email)
+	box, err := box.SealAnonymous(nil, buf.Bytes(), m.pubKey, nil)
 	if err != nil {
 		return err
 	}

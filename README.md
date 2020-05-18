@@ -27,8 +27,6 @@ chromium-browser --headless --disable-gpu --remote-debugging-address=0.0.0.0 --r
 ```
 
 # TODOs
-- <meta> description for better SEO + back link on contract page and tweaks
-- get emails from those who use the contract generation !! (optional box ?)
 - fix secrets ending up within the systemd Unit file
 
 - check how the form interacts with CORS and Origin/Referrer headers

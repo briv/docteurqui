@@ -33,11 +33,13 @@
         </section>
 
         <section class="generic-content call-to-action">
-            <form action="b/subscribe-to-potential-news" enctype="application/x-www-form-urlencoded" method="post" class="email-form d-flex flex-column">
+            <form action="b/subscribe-to-potential-news" id="email-form" enctype="application/x-www-form-urlencoded" method="post" class="email-form d-flex flex-column">
                 <span class="long-text">Si vous voulez être au courant de nouveaux outils créés par DocteurQui, renseignez <label for="future-news-email">votre email:</label></span>
                 <div class="email-container">
                     <input type="email" id="future-news-email" name="future-news-email" placeholder="dr@mon-email.com">
-                    <button type="submit" aria-label="Tenez moi au courant">Tenez moi au courant</button>
+                    <button type="submit" aria-label="Tenez moi au courant">
+                        Tenez moi au courant
+                    </button>
                 </div>
                 <aside><span class="text-bold">Qu'allons nous faire de votre email ?</span> Nous prendrons soin de votre adresse email comme si c'était la nôtre. Nous enverrons 2 ou 3, peut-être même zéro mails. Dans tous les cas, votre email sera supprimé après maximum 3 ans. En vous ajoutant à cette liste d'emails, vous nous motivez à poursuivre d'autres projets.</aside>
             </form>
@@ -156,7 +158,7 @@
                 </fieldset>
 
                 <button type="submit" aria-label="Créer le contrat" class="d-flex flex-row form-submit">
-                    <div>Créer le contrat</div>
+                    <span>Créer le contrat</span>
                 </button>
             </form>
         </section>

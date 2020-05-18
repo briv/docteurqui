@@ -1,5 +1,4 @@
 import { makeElement } from './utils';
-import { GenericUserError } from './errors';
 
 const StorageFormDataVersion = '1';
 const StorageFormDataKey = `savedFormData-${StorageFormDataVersion}`;

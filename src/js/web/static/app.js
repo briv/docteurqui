@@ -1,13 +1,12 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import { makeElement } from './utils';
-import { GenericUserError, FormValidationError, remoteLogError } from './errors';
+import { GenericUserError, FormValidationError } from './errors';
 import { createSignatureInput, getSignatureImage } from './signature';
 import { saveFilledFormData, createPersistedDataQuickFillUI } from './form-fill';
 import { Validators, FormErrorHandler, FormValidationIssues } from './live-form-feedback';
 import { createSinglePeriodInput, parseFormattedFRDate } from './periods-input';
 import { polyfill } from './polyfills';
 import { InputAutocompleter } from './autocomplete';
+import { Handlers as EmailFormHandlers } from './mailinglist';
 
 const ElementQueries = {
     SubstituteSignatureParent: 'fieldset#substitute-fieldset',
@@ -46,7 +45,7 @@ const createDefaultPeriodInputUI = (form) => {
     });
 };
 
-const setupFormIntercept = (form, formErrorHandler) => {
+const setupFormInterceptOld = (form, formErrorHandler) => {
     form.addEventListener('submit', (e) => {
         if (e.preventDefault) {
             e.preventDefault();
@@ -60,7 +59,7 @@ const setupFormIntercept = (form, formErrorHandler) => {
         // Disable form submission.
         const submitButton = form.querySelector('[type="submit"]');
         submitButton.setAttribute('disabled', '');
-        const spinner = makeElement('div', el => {
+        const spinner = makeElement('span', el => {
             el.classList.add('spinner');
         });
         submitButton.appendChild(spinner);
@@ -147,6 +146,55 @@ const setupFormIntercept = (form, formErrorHandler) => {
     })
 };
 
+const setupFormIntercept = (form, { processFormData, handleResponse, handleError } = handlers) => {
+    form.addEventListener('submit', (e) => {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+
+        // Blur any currently focused input.
+        if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+            document.activeElement.blur();
+        }
+
+        const url = form.action;
+        const data = processFormData(form);
+        if (!data) {
+            return;
+        }
+
+        // Disable form submission.
+        const submitButton = form.querySelector('[type="submit"]');
+        submitButton.setAttribute('disabled', '');
+
+        const reenableFormSubmission = () => {
+            submitButton.removeAttribute('disabled');
+        };
+
+        const submission = submitFormData(data, url)
+            .then((response) => {
+                return handleResponse(form, response);
+            });
+
+        submission.catch((err) => {
+            return handleError(form, err);
+        }).then(() => {
+            reenableFormSubmission();
+        }).catch(() => {
+            // Catch any issues with our handler.
+        });
+
+        submission.then(() => {
+            // Re-enable form on success.
+            reenableFormSubmission();
+        }).catch(() => {
+            // Catch any issues with our handler.
+        });
+
+        return false;
+    });
+};
+
 const processFormData = (data) => {
     // Special processing for dates (corresponding to "period-start" and "period-end" inputs).
     const processDates = (key) => data.getAll(key)
@@ -193,14 +241,8 @@ const processFormData = (data) => {
 };
 
 const submitFormData = (data, url) => {
-    // Generate UUID per request for debugging purposes.
-    const headers = new Headers();
-    const uuid = uuidv4();
-    headers.set('x-request-id', uuid);
-
     return fetch(url, {
         method: 'POST',
-        headers,
         cache: 'no-cache',
         credentials: 'omit',
         redirect: 'follow',
@@ -389,7 +431,10 @@ const onDOMContentLoaded = () => {
 
     const form = document.querySelector('form#contract-form');
     const formErrorHandler = setupUIWithin(form);
-    setupFormIntercept(form, formErrorHandler);
+    setupFormInterceptOld(form, formErrorHandler);
+
+    const emailForm = document.querySelector('form#email-form');
+    setupFormIntercept(emailForm, EmailFormHandlers);
 };
 
 const onDOMReady = (callback) => {

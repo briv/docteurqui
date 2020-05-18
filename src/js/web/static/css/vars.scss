@@ -21,7 +21,7 @@ $button-border-color: color.scale($button-bg-color, $lightness: -50%);
 // - the submit button
 $submit-button-bg-color: #8ed081;
 $hover-submit-button-bg-color: color.scale($submit-button-bg-color, $lightness: -25%);
-$submit-button-spinner-color: color.scale($submit-button-bg-color, $lightness: 35%);
+$submit-button-spinner-color: color.change(white, $alpha: 0.5);
 // - the split buttons
 $split-button-bg-color: $button-bg-color;
 $hover-split-button-bg-color: $hover-button-bg-color;

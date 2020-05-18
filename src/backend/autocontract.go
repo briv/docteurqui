@@ -310,16 +310,11 @@ func emailForMailingListHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := strings.TrimSpace(r.PostFormValue("future-news-email"))
-
-	if email == "" {
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-		return
-	}
-
 	mailingLister := fromContextMailingLister(r.Context())
 	ctx, cancel := context.WithTimeout(r.Context(), TimeoutAddEmailToMailingList)
 	defer cancel()
+
+	email := r.PostFormValue("future-news-email")
 	err := mailingLister.Add(ctx, email)
 	if err != nil {
 		log.Trace().Err(err).Msg("failed to add email to mailing list")

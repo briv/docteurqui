@@ -14,8 +14,7 @@
         "@babel/preset-modules": "^0.1.3",
         "autoprefixer": "^9.3.1",
         "parcel": "^2.0.0-nightly.207",
-        "sass": "^1.26.5",
-        "uuid": "^7.0.2"
+        "sass": "^1.26.5"
     },
     "dependencies": {
         "@docteurqui/common": "0.0.1",
