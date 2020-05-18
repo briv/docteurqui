@@ -8,6 +8,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -23,6 +24,7 @@ import (
 	"autocontract/internal/doctorsearch"
 	"autocontract/internal/form"
 	"autocontract/internal/httperror"
+	"autocontract/internal/mailinglist"
 	"autocontract/internal/pdfgen"
 
 	"github.com/rs/zerolog"
@@ -40,6 +42,7 @@ const (
 	PdfGeneratorInitializationTimeout = 3 * time.Second
 	PdfGeneratorBrowserDevToolsUrl    = "http://localhost:9222"
 	PdfGenerationTimeout              = 10 * time.Second
+	TimeoutAddEmailToMailingList      = 6 * time.Second
 
 	DoctorSearchNGramSize            = 3
 	DoctorSearchQueryTimeout         = 5 * time.Second
@@ -56,12 +59,14 @@ const (
 	ContextPdfGenControlKey
 	ContextTimeZoneLocationKey
 	ContextInternalTemplateWebHostKey
+	ContextKeyMailingLister
 )
 
 var (
 	SharedUserData       = datamap.NewDataMap()
 	SharedDoctorSearcher doctorsearch.DoctorSearcher
 	SharedPdfGenControl  = &pdfgen.Control{}
+	SharedMailingLister  mailinglist.MailingLister
 )
 
 func sharedUserDataFromContext(ctx context.Context) datamap.DataMap {
@@ -88,12 +93,17 @@ func internalTemplateWebHostnameFromContext(ctx context.Context) string {
 	return ctx.Value(ContextInternalTemplateWebHostKey).(string)
 }
 
+func fromContextMailingLister(ctx context.Context) mailinglist.MailingLister {
+	return ctx.Value(ContextKeyMailingLister).(mailinglist.MailingLister)
+}
+
 func withContext(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var ctx context.Context
 		ctx = context.WithValue(req.Context(), ContextUserDataMapKey, SharedUserData)
 		ctx = context.WithValue(ctx, ContextDoctorSearchKey, SharedDoctorSearcher)
 		ctx = context.WithValue(ctx, ContextPdfGenControlKey, SharedPdfGenControl)
+		ctx = context.WithValue(ctx, ContextKeyMailingLister, SharedMailingLister)
 		h(w, req.WithContext(ctx))
 	}
 }
@@ -294,6 +304,40 @@ func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func emailForMailingListHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	email := strings.TrimSpace(r.PostFormValue("future-news-email"))
+
+	if email == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	mailingLister := fromContextMailingLister(r.Context())
+	ctx, cancel := context.WithTimeout(r.Context(), TimeoutAddEmailToMailingList)
+	defer cancel()
+	err := mailingLister.Add(ctx, email)
+	if err != nil {
+		log.Trace().Err(err).Msg("failed to add email to mailing list")
+		status := http.StatusInternalServerError
+		if errors.Is(err, context.Canceled) {
+			status = http.StatusServiceUnavailable
+		} else if errors.Is(err, mailinglist.InvalidEmail) {
+			status = http.StatusUnprocessableEntity
+		}
+		http.Error(w, http.StatusText(status), status)
+		return
+	}
+
+	// If we added the email successfully, say so.
+	fmt.Fprintf(w, "%s", "Merci !")
+	log.Info().Msg("new email for mailing list")
+}
+
 type sourceMapHidingFileSystem struct {
 	rootPath string
 }
@@ -323,6 +367,9 @@ func main() {
 	pdfInternalTemplateWebHostname := flag.String("pdf-internal-web-hostname", "", "the hostname that external services should use to access the internal contract template web server")
 
 	suppliedCensorKey := flag.String("censor-key", "", "key for HMAC-sha256 used to hash personally identifiable data")
+
+	envMailingListPath := flag.String("mailinglist-file", "", "the file to which emails from users will be appended to")
+	envMailingListPubKeyFile := flag.String("mailinglist-pubkey-file", "", "a file containing the Base-64 encoded public key to encrypt mailing list entries with")
 
 	// Flags useful when developping.
 	devMode := flag.Bool("dev", false, "enables dev mode which tailors logging output")
@@ -372,12 +419,50 @@ func main() {
 
 	err = SharedPdfGenControl.Init(*pdfTemplateFilePath, *pdfGenBrowserDevToolsUrl, PdfGeneratorInitializationTimeout)
 	if err != nil {
-		log.Fatal().Msgf("could not initialize PDF sub-system %s", err)
+		log.Fatal().Err(err).Msgf("could not initialize PDF sub-system")
 	}
 	defer SharedPdfGenControl.Shutdown()
 
 	// Setup doctor search structure.
 	SharedDoctorSearcher = doctorsearch.New(*drDataFilePath, DoctorSearchNGramSize, MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
+
+	// Setup mailing list structure
+	var mailingListPath string
+	var mailingListPubKeyFile string
+	if *devMode {
+		if *envMailingListPath == "" {
+			mailingListFile, err := ioutil.TempFile("", "mailinglist")
+			if err != nil {
+				log.Fatal().Msgf("could not create temporary mailing list file: %s", err)
+			}
+			mailingListPath = mailingListFile.Name()
+		} else {
+			mailingListPath = *envMailingListPath
+		}
+
+		if *envMailingListPubKeyFile == "" {
+			publicKeyPath, pivateKeyPath, err := mailinglist.GenerateKeyFiles("")
+			if err != nil {
+				log.Fatal().Err(err).Msg("could not create temporary mailing list keys")
+			}
+			mailingListPubKeyFile = publicKeyPath
+
+			log.Warn().
+				Str("mailing_list", mailingListPath).
+				Str("pub_key_file", mailingListPubKeyFile).
+				Str("priv_key_file", pivateKeyPath).
+				Msg("generated mailing list keys (INSECURE)")
+		} else {
+			mailingListPubKeyFile = *envMailingListPubKeyFile
+		}
+	} else {
+		mailingListPath = *envMailingListPath
+		mailingListPubKeyFile = *envMailingListPubKeyFile
+	}
+	SharedMailingLister, err = mailinglist.New(mailingListPath, mailingListPubKeyFile)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("could not initialize mailinglist sub-system")
+	}
 
 	// Internal HTTP server for use with headless Web browser instance to convert web pages to PDF.
 	errChan := make(chan error)
@@ -436,17 +521,21 @@ func main() {
 					doctorSearchHandler)))
 
 		publicServeMux.HandleFunc("/b/log-error",
+			forMethod(http.MethodPost,
+				frontendErrorLogHandler))
+
+		publicServeMux.HandleFunc("/b/subscribe-to-potential-news",
 			withContext(
 				forMethod(http.MethodPost,
-					frontendErrorLogHandler)))
+					emailForMailingListHandler)))
 
 		s := &http.Server{
 			Addr:              fmt.Sprintf(":%s", *publicFacingWebsitePort),
 			Handler:           publicServeMux,
 			ReadHeaderTimeout: 10 * time.Second,
-			ReadTimeout:       10 * time.Second,
-			WriteTimeout:      PdfGenerationTimeout,
-			MaxHeaderBytes:    1 << 20,
+			ReadTimeout:       30 * time.Second,
+			WriteTimeout:      20 * time.Second,
+			MaxHeaderBytes:    1 * (1 << 20), // 1 MiB
 		}
 		err := s.ListenAndServe()
 		if err != nil {
