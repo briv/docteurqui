@@ -21,147 +21,161 @@
     </header>
 
     <main class="main">
-        <noscript>
-            <div class="call-to-action">
-                <p>Il semble que le JavaScript est désactivé. Nous vous encourageons, si possible, à l'activer.</p>
-                <p>Cette page utilise le JavaScript avec parcimonie et à bon escient pour vous faire gagner du temps.</p>
-            </div>
-        </noscript>
-
-        <section class="generic-content">
-            <p>Pour savoir si vous pouvez nous faire confiance, vous pouvez en lire <a href="#about-us">un peu plus sur nous</a> ou bien sur <a href="#data-use">la protection de vos données</a>.</p>
-        </section>
-
-        <section class="generic-content call-to-action">
-            <form action="b/subscribe-to-potential-news" id="email-form" enctype="application/x-www-form-urlencoded" method="post" class="email-form d-flex flex-column">
-                <span class="long-text">Si vous voulez être au courant de nouveaux outils créés par DocteurQui, renseignez <label for="future-news-email">votre email:</label></span>
-                <div class="email-container">
-                    <input type="email" id="future-news-email" name="future-news-email" placeholder="dr@mon-email.com">
-                    <button type="submit" aria-label="Tenez moi au courant">
-                        Tenez moi au courant
-                    </button>
+        <div>
+            <noscript>
+                <div class="call-to-action">
+                    <p>Il semble que le JavaScript est désactivé. Nous vous encourageons, si possible, à l'activer.</p>
+                    <p>Cette page utilise le JavaScript avec parcimonie et à bon escient pour vous faire gagner du temps.</p>
                 </div>
-                <aside><span class="text-bold">Qu'allons nous faire de votre email ?</span> Nous prendrons soin de votre adresse email comme si c'était la nôtre. Nous enverrons 2 ou 3, peut-être même zéro mails. Dans tous les cas, votre email sera supprimé après maximum 3 ans. En vous ajoutant à cette liste d'emails, vous nous motivez à poursuivre d'autres projets.</aside>
-            </form>
-        </section>
+            </noscript>
 
-        <h1 id="contract-form-header">Contrat de remplacement</h1>
+            <section class="generic-content">
+                <p>Pour savoir si vous pouvez nous faire confiance, vous pouvez en lire <a href="#about-us">un peu plus sur nous</a> ou bien sur <a href="#data-use">la protection de vos données</a>.</p>
+            </section>
 
-        <section>
-            <form action="b/generate-contract" id="contract-form" enctype="multipart/form-data" method="post" class="contract-form d-flex flex-column">
+            <section class="generic-content call-to-action only-mobile">
+                <span class="long-text">Si vous voulez être au courant de nouveaux outils créés par DocteurQui, <a href="#email-form">renseignez votre email ci-dessous.</a></span>
+            </section>
 
-                <fieldset class="d-flex flex-column" data-enhanced-form-part="regular" id="regular-fieldset">
-                    <legend>Docteur remplacé</legend>
+            <h1 id="contract-form-header">Contrat de remplacement</h1>
 
-                    <div class="single-form-input-group">
-                        <label for="regular-name">Nom complet:</label>
-                        <div class="autocomplete-parent input-wrapper">
-                            <div class="d-flex input-prefix">
-                                <span>Dr.</span>
-                                <input type="text" id="regular-name" name="regular-name" placeholder="Anne-Cécile PIERRE" autocomplete="off">
+            <section>
+                <form action="b/generate-contract" id="contract-form" enctype="multipart/form-data" method="post" class="contract-form d-flex flex-column">
+
+                    <fieldset class="d-flex flex-column" data-enhanced-form-part="regular" id="regular-fieldset">
+                        <legend>Docteur remplacé</legend>
+
+                        <div class="single-form-input-group">
+                            <label for="regular-name">Nom complet:</label>
+                            <div class="autocomplete-parent input-wrapper">
+                                <div class="d-flex input-prefix">
+                                    <span>Dr.</span>
+                                    <input type="text" id="regular-name" name="regular-name" placeholder="Anne-Cécile PIERRE" autocomplete="off">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="single-form-input-group">
-                        <label for="regular-rpps">Numéro RPPS:</label>
-                        <input type="text" id="regular-rpps" name="regular-rpps" inputmode="numeric" autocomplete="off" placeholder="10010165716">
-                    </div>
-
-                    <div class="single-form-input-group">
-                        <label for="regular-address">Adresse d'exercice:</label>
-                        <input type="text" id="regular-address" name="regular-address" placeholder="5 rue des Lilas, 75013 Paris">
-                    </div>
-                </fieldset>
-
-                <fieldset class="d-flex flex-column" data-enhanced-form-part="substitute" id="substitute-fieldset">
-                    <legend>Étudiant ou docteur remplaçant</legend>
-
-                    <div class="single-form-input-group">
-                        <fieldset class="nested">
-                            <legend>Titre</legend>
-
-                            <div class="radio-input-option">
-                                <input id="substitute-title-1" type="radio" name="substitute-title" value="Madame" autocomplete="off">
-                                <label for="substitute-title-1">Madame (non thèsée)</label>
-                            </div>
-
-                            <div class="radio-input-option">
-                                <input id="substitute-title-2" type="radio" name="substitute-title" value="Monsieur" autocomplete="off">
-                                <label for="substitute-title-2">Monsieur (non thésé)</label>
-                            </div>
-
-                            <div class="radio-input-option">
-                                <input id="substitute-title-3" type="radio" name="substitute-title" value="Docteur" autocomplete="off">
-                                <label for="substitute-title-3">Docteur (thèsé)</label>
-                            </div>
-                        </fieldset>
-                    </div>
-
-                    <div class="single-form-input-group">
-                        <label for="substitute-name">Nom complet:</label>
-                        <div class="autocomplete-parent input-wrapper">
-                            <input type="text" id="substitute-name" name="substitute-name" placeholder="Jean-Baptiste DRUET" autocomplete="off">
+                        <div class="single-form-input-group">
+                            <label for="regular-rpps">Numéro RPPS:</label>
+                            <input type="text" id="regular-rpps" name="regular-rpps" inputmode="numeric" autocomplete="off" placeholder="10010165716">
                         </div>
-                    </div>
 
-                    <div class="single-form-input-group">
-                        <label for="substitute-rpps">Numéro RPPS:</label>
-                        <input type="text" inputmode="numeric" id="substitute-rpps" name="substitute-rpps" autocomplete="off" placeholder="10010165716">
-                    </div>
-
-                    <div class="single-form-input-group">
-                        <label for="substitute-siret">Numéro SIRET (immatriculation URSSAF)</label>
-                        <input type="text" inputmode="numeric" id="substitute-siret" name="substitute-siret" autocomplete="off" placeholder="83044693400060">
-                    </div>
-
-                    <div class="single-form-input-group">
-                        <label for="substitute-substitutingID">Numéro de licence de remplacement ou d'inscription au tableau de l'ordre:</label>
-                        <input type="text" inputmode="numeric" id="substitute-substitutingID" name="substitute-substitutingID" autocomplete="off" placeholder="35 1781063">
-                    </div>
-
-                    <div class="single-form-input-group">
-                        <label for="substitute-address">Adresse:</label>
-                        <input type="text" id="substitute-address" name="substitute-address" placeholder="13 rue des Cordonniers, 75017 Paris">
-                    </div>
-                </fieldset>
-
-
-                <fieldset class="d-flex flex-column date-range-input">
-                    <legend>Dates du remplacement</legend>
-
-                    <noscript class="d-flex flex-column date-range-input">
-                        <label>Du:</label>
-                        <input type="date" name="period-start" placeholder="2019-02-24">
-                        <label>Au:</label>
-                        <input type="date" name="period-end" placeholder="2019-02-29">
-
-                        <div class="call-to-action">
-                            <p>Il semble que le JavaScript est désactivé.</p>
-                            <p>Pour créer un contrat avec plusieurs périodes de remplacement, le JavaScript est requis.</p>
+                        <div class="single-form-input-group">
+                            <label for="regular-address">Adresse d'exercice:</label>
+                            <input type="text" id="regular-address" name="regular-address" placeholder="5 rue des Lilas, 75013 Paris">
                         </div>
-                    </noscript>
-                </fieldset>
+                    </fieldset>
 
-                <fieldset class="d-flex flex-column">
-                    <legend>Conditions financières</legend>
+                    <fieldset class="d-flex flex-column" data-enhanced-form-part="substitute" id="substitute-fieldset">
+                        <legend>Étudiant ou docteur remplaçant</legend>
 
-                    <div class="single-form-input-group">
-                        <label for="financials-retrocession">Pourcentage de rétrocession:</label>
-                        <input type="number" inputmode="numeric" min="0" max="100" id="financials-retrocession" name="financials-retrocession" autocomplete="off">
+                        <div class="single-form-input-group">
+                            <fieldset class="nested">
+                                <legend>Titre</legend>
+
+                                <div class="radio-input-option">
+                                    <input id="substitute-title-1" type="radio" name="substitute-title" value="Madame" autocomplete="off">
+                                    <label for="substitute-title-1">Madame (non thèsée)</label>
+                                </div>
+
+                                <div class="radio-input-option">
+                                    <input id="substitute-title-2" type="radio" name="substitute-title" value="Monsieur" autocomplete="off">
+                                    <label for="substitute-title-2">Monsieur (non thésé)</label>
+                                </div>
+
+                                <div class="radio-input-option">
+                                    <input id="substitute-title-3" type="radio" name="substitute-title" value="Docteur" autocomplete="off">
+                                    <label for="substitute-title-3">Docteur (thèsé)</label>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <div class="single-form-input-group">
+                            <label for="substitute-name">Nom complet:</label>
+                            <div class="autocomplete-parent input-wrapper">
+                                <input type="text" id="substitute-name" name="substitute-name" placeholder="Jean-Baptiste DRUET" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="single-form-input-group">
+                            <label for="substitute-rpps">Numéro RPPS:</label>
+                            <input type="text" inputmode="numeric" id="substitute-rpps" name="substitute-rpps" autocomplete="off" placeholder="10010165716">
+                        </div>
+
+                        <div class="single-form-input-group">
+                            <label for="substitute-siret">Numéro SIRET (immatriculation URSSAF)</label>
+                            <input type="text" inputmode="numeric" id="substitute-siret" name="substitute-siret" autocomplete="off" placeholder="83044693400060">
+                        </div>
+
+                        <div class="single-form-input-group">
+                            <label for="substitute-substitutingID">Numéro de licence de remplacement ou d'inscription au tableau de l'ordre:</label>
+                            <input type="text" inputmode="numeric" id="substitute-substitutingID" name="substitute-substitutingID" autocomplete="off" placeholder="35 1781063">
+                        </div>
+
+                        <div class="single-form-input-group">
+                            <label for="substitute-address">Adresse:</label>
+                            <input type="text" id="substitute-address" name="substitute-address" placeholder="13 rue des Cordonniers, 75017 Paris">
+                        </div>
+                    </fieldset>
+
+
+                    <fieldset class="d-flex flex-column date-range-input">
+                        <legend>Dates du remplacement</legend>
+
+                        <noscript class="d-flex flex-column date-range-input">
+                            <label>Du:</label>
+                            <input type="date" name="period-start" placeholder="2019-02-24">
+                            <label>Au:</label>
+                            <input type="date" name="period-end" placeholder="2019-02-29">
+
+                            <div class="call-to-action">
+                                <p>Il semble que le JavaScript est désactivé.</p>
+                                <p>Pour créer un contrat avec plusieurs périodes de remplacement, le JavaScript est requis.</p>
+                            </div>
+                        </noscript>
+                    </fieldset>
+
+                    <fieldset class="d-flex flex-column">
+                        <legend>Conditions financières</legend>
+
+                        <div class="single-form-input-group">
+                            <label for="financials-retrocession">Pourcentage de rétrocession:</label>
+                            <input type="number" inputmode="numeric" min="0" max="100" id="financials-retrocession" name="financials-retrocession" autocomplete="off">
+                        </div>
+
+                        <div class="single-form-input-group">
+                            <label for="financials-nightShiftRetrocession">Pourcentage de rétrocession des gardes: <span class="text-bold">(Optionnel)</span></label>
+                            <input type="number" inputmode="numeric" min="0" max="100" id="financials-nightShiftRetrocession" name="financials-nightShiftRetrocession" placeholder="Si non applicable, laisser vide" autocomplete="off">
+                        </div>
+                    </fieldset>
+
+                    <button type="submit" aria-label="Créer le contrat" class="d-flex flex-row form-submit">
+                        <span>Créer le contrat</span>
+                    </button>
+                </form>
+            </section>
+            <hr class="only-mobile">
+        </div>
+
+        <div>
+            <section class="generic-content call-to-action">
+                <form action="b/subscribe-to-potential-news" id="email-form" enctype="application/x-www-form-urlencoded" method="post" class="email-form d-flex flex-column">
+                    <span class="long-text">Si vous voulez être au courant de nouveaux outils créés par DocteurQui, renseignez <label for="future-news-email">votre email:</label></span>
+                    <div class="email-container">
+                        <input type="email" id="future-news-email" name="future-news-email" placeholder="dr@mon-email.com">
+                        <button type="submit" aria-label="Tenez moi au courant">
+                            Tenez moi au courant
+                        </button>
                     </div>
-
-                    <div class="single-form-input-group">
-                        <label for="financials-nightShiftRetrocession">Pourcentage de rétrocession des gardes: <span class="text-bold">(Optionnel)</span></label>
-                        <input type="number" inputmode="numeric" min="0" max="100" id="financials-nightShiftRetrocession" name="financials-nightShiftRetrocession" placeholder="Si non applicable, laisser vide" autocomplete="off">
-                    </div>
-                </fieldset>
-
-                <button type="submit" aria-label="Créer le contrat" class="d-flex flex-row form-submit">
-                    <span>Créer le contrat</span>
-                </button>
-            </form>
-        </section>
+                    <aside>
+                        <h4>Qu'allons nous faire de votre email ?</h4>
+                        <p>Nous prendrons soin de votre adresse email comme si c'était la nôtre. Nous enverrons 2, 3, peut-être même zéro mails.</p>
+                        <p>Dans tous les cas, votre email sera supprimé après maximum 3 ans.</p>
+                        <p>En vous ajoutant à cette liste d'emails, vous nous motivez à poursuivre d'autres projets.</p>
+                    </aside>
+                </form>
+            </section>
+        </div>
     </main>
 
     <footer class="footer d-flex flex-row">

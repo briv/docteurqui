@@ -1,9 +1,32 @@
 $min-width-for-desktop: 840px;
 @media (min-width: $min-width-for-desktop) {
+    .only-mobile {
+        display: none;
+    }
+
     .main {
-        max-width: $min-width-for-desktop;
+        max-width: 1.25 * $min-width-for-desktop;
         margin-left: auto;
         margin-right: auto;
+
+        display: grid;
+        grid-template-columns: minmax(10rem, 75%) minmax(6rem, 25%);
+        grid-column-gap: 1.4rem;
+
+        .email-form .email-container {
+            flex-direction: column;
+            margin-bottom: 0.6rem;
+
+            input {
+                width: 100%;
+                align-self: unset;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 0.3rem;
+            }
+        }
     }
 
     .footer {
@@ -14,8 +37,6 @@ $min-width-for-desktop: 840px;
     }
 
     .contract-form {
-        max-width: $min-width-for-desktop;
-
         .signature-pad-container {
             .signature-pad {
                 max-width: 25em;
