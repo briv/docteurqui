@@ -111,7 +111,7 @@ let
         cd ${builtins.toString ./src}
 
         # remove trailing newline
-        version="$(git rev-parse "$(git write-tree)" | tr -d '\n')"
+        version="$(git rev-parse HEAD^{commit} | tr -d '\n')"
         if [ -z "$(git status --porcelain)" ]; then
           # Working directory clean
           echo -n "$version" > $out
