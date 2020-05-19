@@ -1,8 +1,5 @@
 # Global options block
 {
-    # local_certs
-    debug
-
     # ACME certificate related options
     acme_ca https://acme-v02.api.letsencrypt.org/directory
     email isnuff@gmail.com
@@ -12,8 +9,8 @@
 
 (security-headers) {
 	header {
-        # enable HSTS for 1 year
-        # Strict-Transport-Security max-age=60;
+        # enable HSTS for 30 days
+        Strict-Transport-Security max-age=2592000;
 
         # Be strict with our referral policy.
         # see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy

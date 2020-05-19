@@ -1,1 +1,2 @@
-censor.secret
+*.key
+*.secret

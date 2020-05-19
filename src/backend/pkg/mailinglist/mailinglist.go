@@ -112,7 +112,7 @@ func New(mailingListFilePath string, publicKeyPath string) (MailingLister, error
 	flag := os.O_WRONLY | os.O_APPEND | os.O_CREATE
 	mailingListFile, err := os.OpenFile(path.Clean(mailingListFilePath), flag, 0600)
 	if err != nil {
-		return nil, fmt.Errorf("issue with mailing list file")
+		return nil, fmt.Errorf("issue with mailing list file %w", err)
 	}
 
 	m := &mailingLister{
