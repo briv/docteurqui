@@ -71,6 +71,8 @@ let
 
     src = ./src/backend;
 
+    subPackages = [ "cmd/autocontract" ];
+
     # Use GOFLAGS in preBuild as multiple tags with the 'buildFlags' attribute did not work out.
     preBuild = ''
       export GOFLAGS="-tags=netgo"
@@ -82,7 +84,7 @@ let
 
     # Don't forget to update this when the underlying dependencies change.
     # Using nixpkg's lib.fakeSha256 is an easy way to see what the new hash is.
-    modSha256 = "0im0wn3avrb0nb85dfw0cxbkqgrcl0m553368ns498942saih3gq";
+    modSha256 = "1ajkf1fvd1zkg2n70dyy2my0w6c4zw6gnk93vp97l9banxaghykj";
   };
 
   pdf_gen_chromium = pkgs.stdenv.mkDerivation {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"autocontract/internal/validation"
+	"autocontract/pkg/validation"
 
 	"github.com/golang/gddo/httputil"
 )

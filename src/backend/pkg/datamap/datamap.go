@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"autocontract/internal/uuid"
+	"autocontract/pkg/uuid"
 )
 
 const (

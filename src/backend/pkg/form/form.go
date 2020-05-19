@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"autocontract/internal/datamap"
-	"autocontract/internal/validation"
+	"autocontract/pkg/datamap"
+	"autocontract/pkg/validation"
 
 	"github.com/rs/zerolog/log"
 	"github.com/vincent-petithory/dataurl"

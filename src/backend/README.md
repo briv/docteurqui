@@ -1,5 +1,5 @@
 To launch all tests at once with coverage information, use:
 
-```bash
+```sh
 go test -cover ./...
 ```

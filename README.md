@@ -9,7 +9,7 @@ yarn dev
 - Launch go backend:
 ```sh
 cd src/backend
-go run autocontract.go \
+go run cmd/autocontract/main.go \
   -dev \
   -http-proxy 1234 \
   -dr-data-file ../../tmp/PS_LibreAcces_Personne_activite_202005090902.txt \
@@ -27,6 +27,16 @@ docker run -it --rm --cap-add=SYS_ADMIN -p 9222:9222 -v /tmp:/usr/src/app --entr
 then the chromium process to launch within:
 ```sh
 chromium-browser --headless --disable-gpu --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222
+```
+
+- Read the mailing list
+```sh
+cd src/backend
+export MAILINGLIST="TODO"
+export MAILINGLIST_PRIV_KEY="TODO"
+go run cmd/dev-mailinglist/main.go \
+  -mailinglist-file="$MAILINGLIST" \
+  -mailinglist-private-key-file="$MAILINGLIST_PRIV_KEY"
 ```
 
 # TODOs
