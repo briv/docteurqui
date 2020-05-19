@@ -137,7 +137,7 @@ in
   inherit autocontract_backend;
   inherit pdf_gen_chromium;
   inherit caddy_proxy;
-  autocontract_front_end = buildYarn { isWorkspacePackage = true; src = ./src/js; name = "web"; };
+  autocontract_front_end = buildYarn { isWorkspacePackage = true; src = ./src/web; name = "contract-page"; };
   autocontract_template = buildYarn { src = ./src/contract-templates; name = "autocontract_template"; };
-  docteurqui_homepage = buildYarn { isWorkspacePackage = true; src = ./src/js; name = "docteurqui-homepage"; };
+  docteurqui_homepage = buildYarn { isWorkspacePackage = true; src = ./src/web; name = "docteurqui-homepage"; };
 }

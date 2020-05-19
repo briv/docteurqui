@@ -2,7 +2,7 @@
 
 - Launch front-end:
 ```sh
-cd src/js/web
+cd src/web/contract-page
 yarn dev
 ```
 
@@ -11,10 +11,13 @@ yarn dev
 cd src/backend
 go run autocontract.go \
   -dev \
-  -http-data ../web/dist \
-  -dr-data-file ../../tmp/PS_LibreAcces_Personne_activite_202003041023.txt \
+  -http-proxy 1234 \
+  -dr-data-file ../../tmp/PS_LibreAcces_Personne_activite_202005090902.txt \
   -pdf-template-file ../contract-templates/dist/index.html \
   -pdf-internal-web-hostname host.docker.internal
+
+# Can also add the following
+  -mailinglist-file="$HOME/Desktop/mailinglist"
 ```
 
 - Launch chrome back-end for PDF generation

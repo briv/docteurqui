@@ -3,6 +3,6 @@
   "workspaces": [
     "@docteurqui-common",
     "@docteurqui-fonts",
-    "docteurqui-homepage", "web"
+    "docteurqui-homepage", "contract-page"
   ]
 }
