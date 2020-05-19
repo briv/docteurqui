@@ -13,6 +13,11 @@ let
     caddyConfig = "caddy-config";
     caddyData = "caddy-data";
     doctorData = "doctor-data";
+
+    bindMounts = {
+      mailingList = /var/lib/docteurqui/autocontract/mailinglist;
+      autocontractSecrets = /var/lib/docteurqui/autocontract/secrets;
+    };
   };
   mkImageFile = { path }: builtins.path rec {
     inherit path;
@@ -127,6 +132,8 @@ in
       "--init"
       "--network=${dockerNetworks.principal}"
       "--mount=source=${dockerVolumes.doctorData},target=/docker-vols/doctor-data,readonly"
+      "--mount=type=bind,source=${builtins.toString dockerVolumes.bindMounts.autocontractSecrets},target=/docker-vols/secrets,readonly"
+      "--mount=type=bind,source=${builtins.toString dockerVolumes.bindMounts.mailingList},target=/docker-vols/mailinglist"
     ];
   };
 

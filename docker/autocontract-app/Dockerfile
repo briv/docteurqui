@@ -2,9 +2,15 @@ FROM debian:10-slim
 
 # Useful for now to update the Doctor contact data.
 VOLUME /docker-vols/doctor-data
+# Used to access key material
+# VOLUME /docker-vols/secrets
+# Used to access key material
+# VOLUME /docker-vols/mailinglist
 
 ARG this_user=autcontract-app-user
-RUN useradd -u 2000 -g 2000 "$this_user"
+# RUN groupadd --gid 2000 "$this_user" \
+    # && useradd --uid 2000 --gid 2000 "$this_user"
+RUN useradd -ms /bin/bash "$this_user"
 WORKDIR /home/"$this_user"
 
 # Our executable.
@@ -25,4 +31,6 @@ CMD ./bin/autocontract \
     -pdf-template-file=./data/contract-template.html \
     -pdf-browser-devtools-url="$PDF_GEN_URL" \
     -pdf-internal-web-hostname="$PDF_INTERNAL_WEB_HOSTNAME" \
-    -censor-key="$SECRET_CENSOR_KEY"
+    -censor-key="$SECRET_CENSOR_KEY" \
+    -mailinglist-file=/docker-vols/mailinglist/mailinglist \
+    -mailinglist-pubkey-file=/docker-vols/secrets/mailinglist.public.key

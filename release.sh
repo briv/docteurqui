@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-THIS_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 TMP_DIR=$(mktemp -d)
 echo "$TMP_DIR"
@@ -124,3 +124,8 @@ scp "$THIS_DIR/deploying/censor.secret" vultr://var/lib/docteurqui/
 scp "$THIS_DIR/deploying/chrome_seccomp.json" vultr://var/lib/docteurqui/
 scp "$THIS_DIR/deploying/docker-services-config.nix" vultr://home/briv/
 scp "$THIS_DIR/deploying/configuration.nix" vultr://etc/nixos/configuration.nix
+
+ssh vultr 'mkdir -p /var/lib/docteurqui/autocontract/secrets/'
+scp "$THIS_DIR/deploying/public.key" vultr://var/lib/docteurqui/autocontract/secrets/mailinglist.public.key
+
+ssh vultr 'mkdir -p /var/lib/docteurqui/autocontract/mailinglist'
