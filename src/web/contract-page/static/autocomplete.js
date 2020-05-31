@@ -23,14 +23,24 @@ const onUserSelectAutoCompleteItem = (state, result, input, formPart) => () => {
     removeAutoCompleteList(state, input);
 };
 
-const removeAutoCompleteList = (state, input) => {
-    state.canAutocompleteListDisplayThisInstant = false;
-    const parentNode = input.closest('.autocomplete-parent');
-    const list = parentNode.querySelector('.autocomplete-list');
-    if (list) {
-        list.remove();
+const removeAutoCompleteList = (() => {
+    // During the remove() call, a 'focusout' (or 'blur') handler can also result in the removal of this same node which can create issues.
+    // see https://stackoverflow.com/questions/21926083/failed-to-execute-removechild-on-node#22934552
+    let alreadyRemovingList = false;
+    return (state, input) => {
+        state.canAutocompleteListDisplayThisInstant = false;
+        if (alreadyRemovingList) {
+            return;
+        }
+        const parentNode = input.closest('.autocomplete-parent');
+        const list = parentNode.querySelector('.autocomplete-list');
+        if (list) {
+            alreadyRemovingList = true;
+            list.remove();
+            alreadyRemovingList = false;
+        }
     }
-};
+})();
 
 const createAutoCompleteList = (state, parentNode, input, formPart, results) => {
     const getListEl = (f) => {
