@@ -22,10 +22,12 @@ go run cmd/autocontract/main.go \
 
 - Launch chrome back-end for PDF generation
 ```sh
-docker run -it --rm --cap-add=SYS_ADMIN -p 9222:9222 -v /tmp:/usr/src/app --entrypoint "/bin/sh" testing
-```
-then the chromium process to launch within:
-```sh
+docker run -it --rm \
+  --cap-add=SYS_ADMIN \
+  -p 9222:9222 \
+   --entrypoint "/bin/sh" \
+   autocontract/pdf-gen
+# then the chromium process to launch within:
 chromium-browser --headless --disable-gpu --remote-debugging-address=0.0.0.0 --remote-debugging-port=9222
 ```
 
