@@ -8,25 +8,23 @@ const MsDurationToHideOldResultsIfWaitIsTooLong = 1000;
 
 const CustomEventPrefix = 'com.docteurqui.autocompletelist';
 
-const shouldAutoCompleteForValue = (value, previousRequestInfo) => {
+const shouldAutoCompleteForValue = (value) => {
     if (value.length < MinQueryLength) {
         return false;
     }
-    if (!previousRequestInfo.value || value !== previousRequestInfo.value) {
-        return true;
-    }
-    return false;
+    return true;
 };
 
-const onUserSelectAutoCompleteItem = (result, input, formPart) => () => {
+const onUserSelectAutoCompleteItem = (state, result, input, formPart) => () => {
     const form = input.form;
     Object.entries(result).forEach(([key, value]) => {
         fillFormField(form, `${formPart}-${key}`, value);
     });
-    removeAutoCompleteList(input);
+    removeAutoCompleteList(state, input);
 };
 
-const removeAutoCompleteList = (input) => {
+const removeAutoCompleteList = (state, input) => {
+    state.canAutocompleteListDisplayThisInstant = false;
     const parentNode = input.closest('.autocomplete-parent');
     const list = parentNode.querySelector('.autocomplete-list');
     if (list) {
@@ -34,7 +32,7 @@ const removeAutoCompleteList = (input) => {
     }
 };
 
-const createAutoCompleteList = (parentNode, input, formPart, results) => {
+const createAutoCompleteList = (state, parentNode, input, formPart, results) => {
     const getListEl = (f) => {
         const alreadyListEl = parentNode.querySelector('.autocomplete-list');
         if (alreadyListEl) {
@@ -59,7 +57,7 @@ const createAutoCompleteList = (parentNode, input, formPart, results) => {
                 itemEl.dataset.isAutoCompleteItem = 'true';
                 itemEl.textContent = resultItem.name;
 
-                itemEl.addEventListener('click', onUserSelectAutoCompleteItem(resultItem, input, formPart));
+                itemEl.addEventListener('click', onUserSelectAutoCompleteItem(state, resultItem, input, formPart));
                 el.appendChild(itemEl);
             });
         });
@@ -73,7 +71,7 @@ const createAutoCompleteList = (parentNode, input, formPart, results) => {
             const isAutoCompleteItem = e.relatedTarget && e.relatedTarget.dataset.isAutoCompleteItem;
             const focusIsRelatedToAutocomplete = isAutoCompleteItem || e.relatedTarget === input;
             if (focusIsRelatedToAutocomplete === false) {
-                removeAutoCompleteList(input);
+                removeAutoCompleteList(state, input);
             }
         });
 
@@ -154,35 +152,39 @@ export const InputAutocompleter = function (input) {
     }
     const formPart = fieldset.dataset.enhancedFormPart;
 
-    let previousRequestInfo = {};
-    const resetPreviousRequestInfo = () => { previousRequestInfo = {}; };
+    // Tracks whether an in flight autocomplete request arriving at any point should result in a
+    // fresh list being displayed to the user.
+    let STATE = {
+        canAutocompleteListDisplayThisInstant: false,
+    };
 
-    let isCurrentlyFocused = false;
     const handleBlur = (e) => {
-        isCurrentlyFocused = false;
-        resetPreviousRequestInfo();
-
         // Do not remove our autocomplete list on blur if the user just selected one of the items:
         // the 'click' handler won't fire otherwise !
         if (e.relatedTarget && e.relatedTarget.dataset.isAutoCompleteItem) {
             return;
         }
+
         const inputEl = e.currentTarget;
-        removeAutoCompleteList(inputEl);
+        removeAutoCompleteList(STATE, inputEl);
     };
 
+    // Used to cancel previous requests that are still in flight.
+    let previousRequestInfo = null;
     const handleInput = (e) => {
-        isCurrentlyFocused = true;
-        if (previousRequestInfo.abortController) {
+        // User input is the trigger to allow the display of an autocomplete list.
+        STATE.canAutocompleteListDisplayThisInstant = true;
+
+        if (previousRequestInfo && previousRequestInfo.abortController) {
             previousRequestInfo.abortController.abort();
+            previousRequestInfo = null;
         }
 
         const inputEl = e.currentTarget;
         const { value } = inputEl;
 
-        if (shouldAutoCompleteForValue(value, previousRequestInfo) === false) {
-            resetPreviousRequestInfo();
-            removeAutoCompleteList(inputEl);
+        if (shouldAutoCompleteForValue(value) === false) {
+            removeAutoCompleteList(STATE, inputEl);
             return;
         }
 
@@ -192,7 +194,6 @@ export const InputAutocompleter = function (input) {
         url.search = params.toString();
 
         const abortController = new AbortController();
-
         previousRequestInfo = {
             abortController,
             value,
@@ -200,7 +201,9 @@ export const InputAutocompleter = function (input) {
 
         // If the new request is taking too long, remove old autocomplete results.
         const hideOldResultsIfWaitIsTooLongTimerId = setTimeout(() => {
-            removeAutoCompleteList(inputEl);
+            // Use a dummy state here since we are temporarily hiding the list rather than removing
+            // it entirely.
+            removeAutoCompleteList({}, inputEl);
         }, MsDurationToHideOldResultsIfWaitIsTooLong);
 
         // If a request is aborted, we need to clear the timer otherwise it will fire for sure.
@@ -215,22 +218,29 @@ export const InputAutocompleter = function (input) {
             redirect: 'follow',
             signal: abortController.signal,
         }).then(async (response) => {
-            clearTimeout(hideOldResultsIfWaitIsTooLongTimerId);
             if (response.ok) {
                 try {
                     const results = await response.json();
+                    clearTimeout(hideOldResultsIfWaitIsTooLongTimerId);
                     const parentNode = inputEl.closest('.autocomplete-parent');
                     // Since the response is asynchronous, we might end up here after the user has
                     // changed focus to a different input field. We don't want autocomplete results
                     // popping up in that case.
-                    if (isCurrentlyFocused) {
-                        createAutoCompleteList(parentNode, inputEl, formPart, results.matches);
+                    if (STATE.canAutocompleteListDisplayThisInstant) {
+                        const { matches } = results;
+                        if (matches.length > 0) {
+                            createAutoCompleteList(STATE, parentNode, inputEl, formPart, matches);
+                        } else {
+                            // Hide the list in case new results are empty.
+                            removeAutoCompleteList({}, inputEl);
+                        }
                     }
                 } catch (err) {
                 }
             } else {
+                clearTimeout(hideOldResultsIfWaitIsTooLongTimerId);
                 // In case of a non 2xx status, hide the autocomplete list if it is there.
-                removeAutoCompleteList(inputEl);
+                removeAutoCompleteList(STATE, inputEl);
             }
         }).catch((err) => {
             // Do nothing in case a query fails (even if due to an abort()).
