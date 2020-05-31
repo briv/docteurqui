@@ -3,6 +3,7 @@ package doctorsearch
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -221,6 +222,8 @@ func (ngi *nGramsIndex) Close() {
 	})
 }
 
+var EmptyReadsError = errors.New("index worker recieved empty read request")
+
 func (ngi *nGramsIndex) readServiceWorker() {
 	defer ngi.recordsData.Close()
 
@@ -234,6 +237,10 @@ func (ngi *nGramsIndex) readServiceWorker() {
 			return
 		case com := <-ngi.submitReadsQueue:
 			// A new wish for reads has come in.
+			// First check if a programming mistake was made and the reads slice is actually empty !
+			if len(com.readWishes) == 0 {
+				com.readRecordsErrChan <- EmptyReadsError
+			}
 			// Loop over them and seek to the correct position to read out the data.
 			for _, readWish := range com.readWishes {
 				_, err := ngi.recordsData.Seek(readWish.Offset.StartOffset, io.SeekStart)
@@ -270,6 +277,9 @@ func (ngi *nGramsIndex) readServiceWorker() {
 }
 
 func (ngi *nGramsIndex) readRecords(ctx context.Context, readWishes []queryOrderableRecordReadWish) ([]rawPersonActivityRecord, error) {
+	if len(readWishes) == 0 {
+		return []rawPersonActivityRecord{}, nil
+	}
 	records := make([]rawPersonActivityRecord, len(readWishes))
 
 	// It's important for these channels to have sufficient buffering to avoid
