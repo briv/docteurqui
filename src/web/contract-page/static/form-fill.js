@@ -153,7 +153,8 @@ export const createPersistedDataQuickFillUI = (form, formPart, parentNode, sibli
             const wrapper = makeElement('div', el => {
                 el.classList.add('d-flex', 'flex-row', 'profile-wrapper');
 
-                const option = makeElement('div', el => {
+                const option = makeElement('button', el => {
+                    el.setAttribute('type', 'button');
                     el.classList.add('d-flex', 'flex-row', 'profile-option');
                     el.setAttribute('tabindex', '0');
 
@@ -173,7 +174,7 @@ export const createPersistedDataQuickFillUI = (form, formPart, parentNode, sibli
                 });
 
                 const deleteButton = makeElement('button', el => {
-                    el.classList.add('small');
+                    el.classList.add('small', 'remove-profile');
                     el.setAttribute('type', 'button');
                     el.textContent = '❌';
                 });

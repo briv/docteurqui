@@ -465,12 +465,9 @@ form {
             margin-top: 0.4em;
 
             .profile-option {
-                background-color: $split-button-bg-color;
-                border-radius: 8px;
-                border: 2px solid;
-                border-color: $button-border-color;
-                padding: 0 0 0 0.5em;
+                line-height: 1;
 
+                padding: 0 0 0 0.5em;
                 margin-right: 1rem;
 
                 &:hover {
@@ -480,13 +477,13 @@ form {
                 &:focus {
                     @include focused;
                 }
-                cursor: default;
-                flex: 1 1 85%;
+                flex: 1 1 90%;
 
                 align-items: center;
                 justify-content: space-around;
 
                 .profile-name {
+                    text-align: left;
                     min-width: 50%;
                 }
                 .profile-rpps {
@@ -495,7 +492,8 @@ form {
                 }
             }
 
-            button {
+            .remove-profile {
+                line-height: 1;
                 flex: 0 0 15%;
             }
         }
@@ -566,8 +564,11 @@ hr {
             margin: 0;
             padding: 0.4em 0.2em;
 
-            &:hover, &:active {
+            &:hover, &:active, &:focus {
                 background-color: $highlight-autocomplete-bg-color;
+            }
+            &:focus {
+                @include focused;
             }
         }
     }
