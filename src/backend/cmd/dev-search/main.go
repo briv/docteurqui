@@ -24,18 +24,18 @@ func main() {
 		MaxDoctorSearchQueryLength       = 300
 		MaxDoctorSearchConcurrentQueries = 200
 
-		MaxNumbeResults = 10
+		MaxNumberResults = 25
 	)
 	searcher := doctorsearch.New(*drDataFilePath, DoctorSearchNGramSize, MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
 
-	log.Debug().Msg("Ready !\n")
+	log.Debug().Msg("Starting...\n")
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		input := scanner.Text()
 		ctx := context.Background()
 
 		start := time.Now()
-		results, err := searcher.Query(ctx, input, MaxNumbeResults)
+		results, err := searcher.Query(ctx, input, MaxNumberResults)
 		queryDuration := time.Since(start)
 
 		if err != nil {
