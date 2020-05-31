@@ -144,7 +144,7 @@ export const createPersistedDataQuickFillUI = (form, formPart, parentNode, sibli
         el.classList.add('call-to-action');
     });
     const p = makeElement('p', el => {
-        el.textContent = 'Pour réutiliser des informations précédemment renseignées et éviter de les re-taper, sélectionnez parmi les personnes déjà enregistrées.';
+        el.textContent = 'Pour réutiliser des informations précédemment renseignées et éviter de les re-taper, sélectionnez parmi ces personnes déjà enregistrées.';
     });
     const profilesManagement = makeElement('div', el => {
         el.classList.add('d-flex', 'flex-column', 'existing-profiles');

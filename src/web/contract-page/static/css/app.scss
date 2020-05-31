@@ -461,21 +461,17 @@ form {
         justify-content: space-between;
 
         .profile-wrapper {
-            align-items: stretch;
             justify-content: space-between;
-            box-sizing: content-box;
-
             margin-top: 0.4em;
-
-            border: 2px solid;
-            border-radius: 10px;
-            border-color: $button-border-color;
 
             .profile-option {
                 background-color: $split-button-bg-color;
-                border-top-left-radius: 8px;
-                border-bottom-left-radius: 8px;
+                border-radius: 8px;
+                border: 2px solid;
+                border-color: $button-border-color;
                 padding: 0 0 0 0.5em;
+
+                margin-right: 1rem;
 
                 &:hover {
                     background-color: $hover-split-button-bg-color;
@@ -484,7 +480,7 @@ form {
                 &:focus {
                     @include focused;
                 }
-                cursor: pointer;
+                cursor: default;
                 flex: 1 1 85%;
 
                 align-items: center;
@@ -500,14 +496,7 @@ form {
             }
 
             button {
-                flex: 1 0 15%;
-                border: unset;
-                border-radius: unset;
-                line-height: 100%;
-                margin: unset;
-
-                border-top-right-radius: 8px;
-                border-bottom-right-radius: 8px;
+                flex: 0 0 15%;
             }
         }
     }
