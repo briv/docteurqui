@@ -6,6 +6,8 @@ const MinQueryLength = 3;
 
 const MsDurationToHideOldResultsIfWaitIsTooLong = 1000;
 
+const CustomEventPrefix = 'com.docteurqui.autocompletelist';
+
 const shouldAutoCompleteForValue = (value, previousRequestInfo) => {
     if (value.length < MinQueryLength) {
         return false;
@@ -18,7 +20,6 @@ const shouldAutoCompleteForValue = (value, previousRequestInfo) => {
 
 const onUserSelectAutoCompleteItem = (result, input, formPart) => () => {
     const form = input.form;
-    console.log("selected", result);
     Object.entries(result).forEach(([key, value]) => {
         fillFormField(form, `${formPart}-${key}`, value);
     });
@@ -63,10 +64,87 @@ const createAutoCompleteList = (parentNode, input, formPart, results) => {
             });
         });
 
+        // Allow the user to use "enter" to select item and arrow keys to cycle between autocomplete items.
+        ul.addEventListener('keydown', handleKeyShortcuts);
+
+        // Allow the user to "tab-out" of the autocomplete list.
+        ul.addEventListener('focusout', e => {
+            // To do this, we observe whether the focus has been moved to a target which is *NOT* the input or an autocomplete item.
+            const isAutoCompleteItem = e.relatedTarget && e.relatedTarget.dataset.isAutoCompleteItem;
+            const focusIsRelatedToAutocomplete = isAutoCompleteItem || e.relatedTarget === input;
+            if (focusIsRelatedToAutocomplete === false) {
+                removeAutoCompleteList(input);
+            }
+        });
+
         el.appendChild(ul);
     });
 
     parentNode.appendChild(list);
+};
+
+const handleKeyShortcuts = (e) => {
+    const { key } = e;
+    if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'Enter') {
+        const customEvent = new Event(`${CustomEventPrefix}.${key}`,
+        {
+            bubbles: true,
+            cancelable: true,
+        });
+        const handled = e.currentTarget.dispatchEvent(customEvent);
+        if (handled === true) {
+            e.preventDefault();
+        }
+    }
+};
+
+const listenKeyShortCuts = (input) => (e) => {
+    // Check if autocomplete list is displayed.
+    const root = e.currentTarget;
+    const list = root.querySelector('.autocomplete-list');
+    if (!list) {
+        // If list is not displayed, cancel event to use default actions for keys.
+        e.preventDefault();
+        return;
+    }
+
+    // At this point, we know the list is displayed.
+    const ul = list.firstChild;
+
+    // Handle the Enter key in a specific way.
+    if (e.type === `${CustomEventPrefix}.Enter`) {
+        if (e.target === input) {
+            // Don't handle the case when the input is focused.
+            e.preventDefault();
+        } else if (ul.contains(document.activeElement)) {
+            document.activeElement.click();
+        }
+        return;
+    }
+
+    const elementToFocus = (() => {
+        if (document.activeElement === input) {
+            if (e.type === `${CustomEventPrefix}.ArrowDown`) {
+                return ul.firstChild;
+            }
+        } else if (ul.contains(document.activeElement)) {
+            if (e.type === `${CustomEventPrefix}.ArrowDown`) {
+                return document.activeElement.nextElementSibling;
+            } else if (e.type === `${CustomEventPrefix}.ArrowUp`) {
+                return document.activeElement.previousElementSibling || input;
+            }
+        }
+        return null;
+    })();
+
+    if (!elementToFocus) {
+        if (e.type !== `${CustomEventPrefix}.ArrowDown`) {
+            e.preventDefault();
+        }
+        return;
+    }
+
+    elementToFocus.focus();
 };
 
 export const InputAutocompleter = function (input) {
@@ -76,9 +154,14 @@ export const InputAutocompleter = function (input) {
     }
     const formPart = fieldset.dataset.enhancedFormPart;
 
+    let previousRequestInfo = {};
+    const resetPreviousRequestInfo = () => { previousRequestInfo = {}; };
+
     let isCurrentlyFocused = false;
     const handleBlur = (e) => {
         isCurrentlyFocused = false;
+        resetPreviousRequestInfo();
+
         // Do not remove our autocomplete list on blur if the user just selected one of the items:
         // the 'click' handler won't fire otherwise !
         if (e.relatedTarget && e.relatedTarget.dataset.isAutoCompleteItem) {
@@ -88,7 +171,6 @@ export const InputAutocompleter = function (input) {
         removeAutoCompleteList(inputEl);
     };
 
-    let previousRequestInfo = {};
     const handleInput = (e) => {
         isCurrentlyFocused = true;
         if (previousRequestInfo.abortController) {
@@ -99,6 +181,7 @@ export const InputAutocompleter = function (input) {
         const { value } = inputEl;
 
         if (shouldAutoCompleteForValue(value, previousRequestInfo) === false) {
+            resetPreviousRequestInfo();
             removeAutoCompleteList(inputEl);
             return;
         }
@@ -111,7 +194,6 @@ export const InputAutocompleter = function (input) {
         const abortController = new AbortController();
 
         previousRequestInfo = {
-            ...previousRequestInfo,
             abortController,
             value,
         };
@@ -145,8 +227,10 @@ export const InputAutocompleter = function (input) {
                         createAutoCompleteList(parentNode, inputEl, formPart, results.matches);
                     }
                 } catch (err) {
-
                 }
+            } else {
+                // In case of a non 2xx status, hide the autocomplete list if it is there.
+                removeAutoCompleteList(inputEl);
             }
         }).catch((err) => {
             // Do nothing in case a query fails (even if due to an abort()).
@@ -157,11 +241,18 @@ export const InputAutocompleter = function (input) {
     // of calling one more times than the other.
     let isSetup = false;
 
+    const listenKeyShortCutsForInput = listenKeyShortCuts(input);
     this.setup = () => {
         if (isSetup === false) {
             isSetup = true;
             input.addEventListener('blur', handleBlur);
             input.addEventListener('input', handleInput);
+            input.addEventListener('keydown', handleKeyShortcuts);
+
+            const parentNode = input.closest('.autocomplete-parent');
+            ['ArrowUp', 'ArrowDown', 'Enter'].forEach(key => {
+                parentNode.addEventListener(`${CustomEventPrefix}.${key}`, listenKeyShortCutsForInput);
+            });
         }
     };
 
@@ -170,6 +261,12 @@ export const InputAutocompleter = function (input) {
             isSetup = false;
             input.removeEventListener('blur', handleBlur);
             input.removeEventListener('input', handleInput);
+            input.removeEventListener('keydown', handleKeyShortcuts);
+
+            const parentNode = input.closest('.autocomplete-parent');
+            ['ArrowUp', 'ArrowDown', 'Enter'].forEach(key => {
+                parentNode.removeEventListener(`${CustomEventPrefix}.${key}`, listenKeyShortCutsForInput);
+            });
         }
     };
 };
