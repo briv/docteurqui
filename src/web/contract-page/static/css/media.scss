@@ -1,4 +1,20 @@
 $min-width-for-desktop: 840px;
+
+@media(max-width: $min-width-for-desktop) {
+    // Use all available width and small margin to allow for long dates on mobile.
+    .contract-form .date-range-input .single-form-input-group {
+        margin-left: 0.1rem;
+        margin-right: 1rem;
+        width: unset;
+
+        .period input {
+            $sz: 0.2rem;
+            padding-left: $sz;
+            padding-right: $sz;
+        }
+    }
+}
+
 @media (min-width: $min-width-for-desktop) {
     .only-mobile {
         display: none;
@@ -12,6 +28,10 @@ $min-width-for-desktop: 840px;
         display: grid;
         grid-template-columns: minmax(10rem, 75%) minmax(6rem, 25%);
         grid-column-gap: 1.4rem;
+
+        .main-part-contract {
+            margin-left: 0.5rem;
+        }
 
         .email-form .email-container {
             flex-direction: column;
