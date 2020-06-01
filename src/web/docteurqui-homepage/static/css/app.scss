@@ -51,6 +51,8 @@ body {
         border-bottom: thin solid #aaa;
         padding: 1rem 0.2rem;
 
+        font-size: 1.2rem;
+
         &:hover {
             background-color: color.scale(dq-common.$link-color, $saturation: +100%, $lightness: +90%);
 

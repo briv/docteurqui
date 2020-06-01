@@ -9,11 +9,11 @@ $min-width-for-desktop: 700px;
     }
 
     .navigation {
-        min-width: 10rem;
+        min-width: 11rem;
 
-        $_mw: 20rem;
+        $_mw: 21rem;
         max-width: $_mw;
-        flex: 1 1 $_mw;
+        flex: 1 1 auto;
     }
 
     .footer {
