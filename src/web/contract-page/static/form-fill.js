@@ -174,9 +174,13 @@ export const createPersistedDataQuickFillUI = (form, formPart, parentNode, sibli
                 });
 
                 const deleteButton = makeElement('button', el => {
-                    el.classList.add('small', 'remove-profile');
+                    el.classList.add('small', 'remove-profile', 'icon-svg-parent');
                     el.setAttribute('type', 'button');
-                    el.textContent = '❌';
+                    el.setAttribute('title', 'Supprimer');
+
+                    el.appendChild(makeElement('span', el => {
+                        el.classList.add('icon-svg-trash');
+                    }));
                 });
 
                 el.appendChild(option);

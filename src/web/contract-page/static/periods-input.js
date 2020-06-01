@@ -98,9 +98,13 @@ export const createSinglePeriodInput = (container, beforeSibling) => {
         el.dataset.num = `${newPeriodInputNum}`;
     });
     const removeIcon = makeElement('button', el => {
-        el.classList.add('small', 'remove-period');
-        el.textContent = '❌';
+        el.classList.add('small', 'remove-period', 'icon-svg-parent');
         el.setAttribute('type', 'button');
+        el.setAttribute('title', 'Supprimer la pèriode');
+
+        el.appendChild(makeElement('span', el => {
+            el.classList.add('icon-svg-trash');
+        }));
 
         if (numberCurrentPeriodInputs == 0) {
             el.setAttribute('disabled', true);
