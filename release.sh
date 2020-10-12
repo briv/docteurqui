@@ -123,6 +123,8 @@ rsync --progress *.tar.gz.sum briv@vultr:/var/lib/docteurqui/docker-images/ || t
 scp "$THIS_DIR/deploying/censor.secret" vultr://var/lib/docteurqui/
 scp "$THIS_DIR/deploying/chrome_seccomp.json" vultr://var/lib/docteurqui/
 scp "$THIS_DIR/deploying/docker-services-config.nix" vultr://home/briv/
+scp "$THIS_DIR/deploying/wireguard.nix" vultr://home/briv/
+scp "$THIS_DIR/deploying/wireguard-peers.nix" vultr://home/briv/
 scp "$THIS_DIR/deploying/configuration.nix" vultr://etc/nixos/configuration.nix
 
 ssh vultr 'mkdir -p /var/lib/docteurqui/autocontract/secrets/'

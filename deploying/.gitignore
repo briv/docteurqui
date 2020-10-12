@@ -1,2 +1,5 @@
 *.key
 *.secret
+
+# Keep our peers secret for now.
+wireguard-peers.nix

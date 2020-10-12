@@ -10,6 +10,7 @@
       # Include the results of the hardware scan.
       ./hardware-configuration.nix
       /home/briv/docker-services-config.nix
+      /home/briv/wireguard.nix
     ];
 
   # Use the GRUB 2 boot loader.
@@ -50,9 +51,9 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  # environment.systemPackages = with pkgs; [
-  #   wget vim
-  # ];
+  environment.systemPackages = with pkgs; [
+    wireguard
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -65,13 +66,14 @@
   services.openssh = {
     enable = true;
     passwordAuthentication = false;
-    ports = [ 44022 ];
+    listenAddresses = [ { addr = "10.9.8.1"; port = 44022; } ];
   };
 
   # Open ports in the firewall.
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 80 443 ];
+    allowedUDPPorts = [ 60991 ];
   };
 
   security.sudo.extraConfig =
