@@ -1,3 +1,6 @@
+/** @license SIL Open Font License 1.1
+    @license see https://github.com/adobe-fonts/source-serif-pro
+ */
 @font-face {
     font-family: 'Source Serif Pro';
     font-style: normal;
@@ -8,6 +11,9 @@
         url('./fonts/Source_Serif_Pro/SourceSerifPro-Regular.woff') format('woff');
 }
 
+/** @license SIL Open Font License 1.1
+    @license see https://github.com/adobe-fonts/source-sans-pro
+ */
 @font-face {
     font-family: 'Source Sans Pro';
     font-style: normal;
