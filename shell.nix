@@ -6,7 +6,7 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.nodejs-12_x
     pkgs.yarn
-    pkgs.go_1_14
+    pkgs.go_1_15
   ];
 
   # TODO: figure this out, maybe using buildGoModule is the way to go here instead ??
