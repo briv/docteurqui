@@ -49,7 +49,7 @@ const (
 	DoctorSearchMaxNumberResults     = 5
 	MaxDoctorSearchQueryLength       = 40
 	MaxDoctorSearchConcurrentQueries = 100
-	DoctorDataUpdatePeriod           = 6 * 24 * time.Hour
+	DoctorDataUpdatePeriod           = 3 * 24 * time.Hour
 	DoctorDataUpdateMinPeriod        = 2 * time.Hour
 	DoctorDataUpdatePeriodJitter     = 0.03
 
