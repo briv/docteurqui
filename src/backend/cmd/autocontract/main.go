@@ -39,20 +39,23 @@ const (
 )
 
 const (
-	PdfGeneratorInitializationTimeout = 3 * time.Second
-	PdfGeneratorBrowserDevToolsUrl    = "http://localhost:9222"
+	PDFGeneratorInitializationTimeout = 3 * time.Second
+	PDFGeneratorBrowserDevToolsURL    = "http://localhost:9222"
 	PdfGenerationTimeout              = 10 * time.Second
 	TimeoutAddEmailToMailingList      = 6 * time.Second
 
 	DoctorSearchNGramSize            = 3
-	DoctorSearchQueryTimeout         = 5 * time.Second
+	MaxDoctorSearchQueryDuration     = 5 * time.Second
 	DoctorSearchMaxNumberResults     = 5
 	MaxDoctorSearchQueryLength       = 40
 	MaxDoctorSearchConcurrentQueries = 100
+	DoctorDataUpdatePeriod           = 6 * 24 * time.Hour
+	DoctorDataUpdateMinPeriod        = 2 * time.Hour
+	DoctorDataUpdatePeriodJitter     = 0.03
 
-	InternalHttpServerPdfTemplatePath                = "/pdf"
-	InternalHttpServerPdfTemplatePort                = "18081"
-	InternalHttpServerPdfTemplateRequestUserQueryKey = "userDataId"
+	InternalHTTPServerPDFTemplatePath                = "/pdf"
+	InternalHTTPServerPDFTemplatePort                = "18081"
+	InternalHTTPServerPDFTemplateRequestUserQueryKey = "userDataId"
 
 	ContextUserDataMapKey = iota
 	ContextDoctorSearchKey
@@ -170,13 +173,13 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 	defer sharedUserData.Clear(userDataKey)
 
 	q := url.Values{}
-	q.Set(InternalHttpServerPdfTemplateRequestUserQueryKey, userDataKey)
+	q.Set(InternalHTTPServerPDFTemplateRequestUserQueryKey, userDataKey)
 	internalTemplateWebHostname := internalTemplateWebHostnameFromContext(r.Context())
-	host := fmt.Sprintf("%s:%s", internalTemplateWebHostname, InternalHttpServerPdfTemplatePort)
+	host := fmt.Sprintf("%s:%s", internalTemplateWebHostname, InternalHTTPServerPDFTemplatePort)
 	pdfUrl := &url.URL{
 		Scheme:   "http",
 		Host:     host,
-		Path:     InternalHttpServerPdfTemplatePath,
+		Path:     InternalHTTPServerPDFTemplatePath,
 		RawQuery: q.Encode(),
 	}
 
@@ -205,18 +208,18 @@ func genContractHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func doctorSearchHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(r.Context(), DoctorSearchQueryTimeout)
-	defer cancel()
-
+	ctx := r.Context()
 	sharedDoctorSearcher := sharedDoctorSearcherFromContext(ctx)
+	ctx, cancel := context.WithTimeout(ctx, sharedDoctorSearcher.QueryTimeout())
+	defer cancel()
 
 	userQuery := strings.TrimSpace(r.URL.Query().Get("query"))
 	potentialDoctorMatches, err := sharedDoctorSearcher.Query(ctx, userQuery, DoctorSearchMaxNumberResults)
 
 	if err != nil {
-		if errors.Is(err, doctorsearch.TemporarilyUnavailable) {
+		if errors.Is(err, doctorsearch.ErrTemporarilyUnavailable) {
 			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
-		} else if errors.Is(err, doctorsearch.InvalidUserQuery) {
+		} else if errors.Is(err, doctorsearch.ErrInvalidUserQuery) {
 			log.Debug().Msgf("invalid doctor search query: %s", err)
 			http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
 		} else {
@@ -287,7 +290,7 @@ func pdfTemplateHandler(w http.ResponseWriter, r *http.Request) {
 	// but defense in depth can't hurt.
 	w.Header().Set(csp.HeaderCSP, csp.InternalPdfServerCSPHeader)
 
-	userDataKey := r.URL.Query().Get(InternalHttpServerPdfTemplateRequestUserQueryKey)
+	userDataKey := r.URL.Query().Get(InternalHTTPServerPDFTemplateRequestUserQueryKey)
 
 	sharedUserData := sharedUserDataFromContext(r.Context())
 	userData, err := sharedUserData.Get(userDataKey)
@@ -358,7 +361,7 @@ func main() {
 	drDataFilePath := flag.String("dr-data-file", "", "the file containing the doctor contact data. This should be an extraction from https://annuaire.sante.fr/web/site-pro/extractions-publiques")
 
 	pdfTemplateFilePath := flag.String("pdf-template-file", "", "the HTML file used as a template for contract PDFs")
-	pdfGenBrowserDevToolsUrl := flag.String("pdf-browser-devtools-url", PdfGeneratorBrowserDevToolsUrl, "the URL of the browser devtools server to target and control for PDF generation")
+	pdfGenBrowserDevToolsUrl := flag.String("pdf-browser-devtools-url", PDFGeneratorBrowserDevToolsURL, "the URL of the browser devtools server to target and control for PDF generation")
 	pdfInternalTemplateWebHostname := flag.String("pdf-internal-web-hostname", "", "the hostname that external services should use to access the internal contract template web server")
 
 	suppliedCensorKey := flag.String("censor-key", "", "key for HMAC-sha256 used to hash personally identifiable data")
@@ -412,14 +415,14 @@ func main() {
 		log.Fatal().Msgf("could not load Paris time zone information %s", err)
 	}
 
-	err = SharedPdfGenControl.Init(*pdfTemplateFilePath, *pdfGenBrowserDevToolsUrl, PdfGeneratorInitializationTimeout)
+	err = SharedPdfGenControl.Init(*pdfTemplateFilePath, *pdfGenBrowserDevToolsUrl, PDFGeneratorInitializationTimeout)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("could not initialize PDF sub-system")
 	}
 	defer SharedPdfGenControl.Shutdown()
 
 	// Setup doctor search structure.
-	SharedDoctorSearcher = doctorsearch.New(*drDataFilePath, DoctorSearchNGramSize, MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries)
+	SharedDoctorSearcher = doctorsearch.New(*drDataFilePath, DoctorSearchNGramSize, MaxDoctorSearchQueryLength, MaxDoctorSearchConcurrentQueries, MaxDoctorSearchQueryDuration, DoctorDataUpdatePeriod, DoctorDataUpdateMinPeriod, DoctorDataUpdatePeriodJitter)
 
 	// Setup mailing list structure
 	var mailingListPath string
@@ -463,11 +466,11 @@ func main() {
 	errChan := make(chan error)
 	go func() {
 		pdfServeMux := http.NewServeMux()
-		pdfServeMux.HandleFunc(InternalHttpServerPdfTemplatePath, withContext(forMethod(http.MethodGet, pdfTemplateHandler)))
+		pdfServeMux.HandleFunc(InternalHTTPServerPDFTemplatePath, withContext(forMethod(http.MethodGet, pdfTemplateHandler)))
 
 		pdfServer := &http.Server{
 			// TODO: when not running within a container, we'd ideally want this to be bound to localhost and not to all interfaces.
-			Addr:              fmt.Sprintf(":%s", InternalHttpServerPdfTemplatePort),
+			Addr:              fmt.Sprintf(":%s", InternalHTTPServerPDFTemplatePort),
 			Handler:           pdfServeMux,
 			ReadHeaderTimeout: 10 * time.Second,
 			ReadTimeout:       10 * time.Second,
