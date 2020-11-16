@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/rs/zerolog/log"
@@ -213,13 +212,7 @@ func (ngi *nGramsIndex) query(ctx context.Context, query string, maxNumberResult
 }
 
 func (ngi *nGramsIndex) Close() {
-	// Give a certain amount of time for any currently in flight reads to be serviced.
-	gracefulTimePeriod := 30 * time.Second
-	// This is more than enough as each query should have its own deadline which
-	// ensures it won't be running for this long.
-	time.AfterFunc(gracefulTimePeriod, func() {
-		ngi.done <- struct{}{}
-	})
+	ngi.done <- struct{}{}
 }
 
 var EmptyReadsError = errors.New("index worker recieved empty read request")
@@ -400,17 +393,20 @@ type rawPersonActivityRecord struct {
 
 func (rec *rawPersonActivityRecord) shouldBeIndexed() bool {
 	// Check that our ID is of type "RPPS" (i.e 8), that the profession is "Doctor" (i.e 10)
-	// and that the "exercise mode" is "Libéral" (i.e "L")
-	if rec.PPIdType == 8 && rec.CodeProfession == "10" && rec.CodeModeExercice == "L" {
+	if rec.PPIdType == 8 && rec.CodeProfession == "10" {
+		// Eliminate military.
+		if rec.CodeCategorieProfessionnelle == "M" {
+			return false
+		}
 
 		// // see https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000028339198
-		// // see https://mos.esante.gouv.fr/NOS/PDF/TRE_R38-SpecialiteOrdinale.tabs.pdf
+		// // see https://mos.esante.gouv.fr/NOS/TRE_R38-SpecialiteOrdinale/TRE_R38-SpecialiteOrdinale.pdf
 		// // see https://esante.gouv.fr/sites/default/files/media_entity/documents/TableauReglesEnregistrementPS_RPPS_0.pdf
-		// if rec.CodeSavoirFaire != "SM26" && rec.CodeSavoirFaire != "SM53" && rec.CodeSavoirFaire != "SM54" {
-		// 	return false
-		// }
+		if rec.CodeSavoirFaire != "SM26" && rec.CodeSavoirFaire != "SM53" && rec.CodeSavoirFaire != "SM54" {
+			return false
+		}
 
-		// We're quite trusting on the other fields, but check that at least the name is valid utf-8.
+		// We're quite trusting on the other fields, but check that at least the name is valid UTF-8.
 		if utf8.ValidString(rec.Nom) && utf8.ValidString(rec.Prenom) {
 			return true
 		}
