@@ -76,11 +76,14 @@ body {
 
 .main {
     line-height: dq-common.$line-height-long-text;
-    margin: 0 0.4rem;
+    margin: 0 1.2rem;
 
     article {
-        margin-top: 1rem;
-        margin-bottom: 2rem;
+        margin-top: 1.2rem;
+
+        & + article {
+            margin-top: 4rem;
+        }
 
         ul {
             list-style: disc;
@@ -113,7 +116,7 @@ body {
     background-color: dq-common.$footer-bg-color;
     display: flex;
     margin: 0;
-    padding: 1rem 0.4rem;
+    padding: 1rem 0.8rem;
 
     // Use a shadow to prolong the footer to the bottom of the page in case
     // the content above it doesn't do it.
